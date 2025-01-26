@@ -58,3 +58,50 @@ barz/
     └── testcase.cpp
 
 ```
+
+## Building and Running the Project with CMake
+
+Follow these steps to build and run the `Driver` executable using CMake:
+
+1. **Create a build directory**:
+   Open a terminal and navigate to your project directory. Then create a build directory.
+
+   ```sh
+   mkdir build
+   cd build
+
+
+
+## Building and Running the Project with CMake
+
+Follow these steps to build and run the `Driver` executable using CMake:
+
+1. **Create a build directory**:
+   Open a terminal and navigate to your project directory. Then create a build directory.
+
+   ```sh
+   mkdir build
+   cd build
+   ```
+
+2. **Generate the build files**:
+   Run the `cmake` command to generate the build files.
+
+   ```sh
+   cmake ..
+   ```
+
+3. **Build the project**:
+   Use the `cmake --build` command to build the project.
+
+   ```sh
+   cmake --build .
+   ```
+
+4. **Run the executable**:
+   After the build is complete, you can run the executable.
+
+   ```sh
+   ./Driver
+   ```
+
