@@ -72,9 +72,8 @@ std::string Scanner::scanComment(int& endLine) {
             comment += currentChar;
             getNextChar();
         } while (!input.eof() && currentChar != '\n');
-        if (currentChar == '\n') {
-            comment.pop_back(); // Remove the newline character
-        }
+        std::cout << int(comment[comment.size()-1]);
+        if (comment[comment.size()-1]=='\n' || comment[comment.size()-1]==13) comment.pop_back(); // Remove the newline character
         currentLine--;
         endLine = currentLine;
         return comment;
