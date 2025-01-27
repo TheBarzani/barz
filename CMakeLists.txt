@@ -8,7 +8,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
 # Define executable
 add_executable(lexdriver
-    src/Scanner/Scanner.cpp    # Scanner implementation
+    src/Scanner.cpp    # Scanner implementation
     src/LexDriver.cpp          # Driver code
 )
 
@@ -17,8 +17,3 @@ target_include_directories(lexdriver PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-
-message(STATUS "Build configured. Source structure:")
-message(STATUS "  - Headers: include/Scanner/Scanner.h")
-message(STATUS "  - Sources: src/scanner/Scanner.cpp")
-message(STATUS "  - Driver:  src/LexDriver.cpp")

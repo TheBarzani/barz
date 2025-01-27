@@ -26,7 +26,4 @@ add_executable(TestScanner
 target_include_directories(TestScanner PRIVATE ${CMAKE_SOURCE_DIR}/../src)
 add_test(NAME test_scanner COMMAND TestScanner)
 
-# Optional: Add other tests here
-# ------------------------------------------------
-
 # Run tests with `ctest` after building

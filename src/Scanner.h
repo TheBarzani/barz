@@ -1,62 +1,68 @@
 #ifndef SCANNER_H
 #define SCANNER_H
 
-#include <fstream>
 #include <string>
+#include <fstream>
+#include <vector>
 #include <unordered_map>
-#include <unordered_set>
 
-enum TokenType {
-    // Keywords
-    TOK_INT, TOK_FLOAT, TOK_VOID, TOK_CLASS, TOK_WHILE, TOK_IF,
-    TOK_THEN, TOK_ELSE, TOK_RETURN, TOK_READ, TOK_WRITE, TOK_PUBLIC,
-    TOK_PRIVATE, TOK_LOCAL, TOK_CONSTRUCTOR, TOK_ATTRIBUTE, TOK_FUNCTION,
-    TOK_ISA, TOK_IMPLEMENTATION, TOK_SELF,
-
-    // Operators/Punctuation
-    TOK_EQ, TOK_PLUS, TOK_OR, TOK_OPENPAR, TOK_SEMI,
-    TOK_NOTEQ, TOK_MINUS, TOK_AND, TOK_CLOSEPAR, TOK_COMMA,
-    TOK_LT, TOK_MULT, TOK_NOT, TOK_OPENCUBR, TOK_DOT,
-    TOK_GT, TOK_DIV, TOK_CLOSECUBR, TOK_COLON, TOK_LEQ,
-    TOK_ASSIGN, TOK_OPENSQBR, TOK_ARROW, TOK_GEQ, TOK_CLOSESQBR,
-
-    // Literals/Identifiers
-    TOK_INTNUM, TOK_FLOATNUM, TOK_ID,
-
-    // Comments
-    TOK_INLINE_CMT, TOK_BLOCK_CMT,
-
-    // Errors
-    TOK_ERR_INVALID_NUM, TOK_ERR_INVALID_ID, TOK_ERR_UNKNOWN_CHAR
+// Token types enum
+enum class TokenType {
+    ID,
+    INTNUM,
+    FLOATNUM,
+    OPERATOR,
+    PUNCTUATION,
+    RESERVED_WORD,
+    INLINE_COMMENT,
+    BLOCK_COMMENT,
+    ERROR,
+    END_OF_FILE
 };
 
+// Token structure
 struct Token {
-    TokenType type;
-    std::string lexeme;
-    int line;
+    std::string type;    // The token type as a string (e.g., "id", "intnum")
+    std::string lexeme;  // The actual text
+    int line;           // Line number
+    int endLine;        // End line number (for block comments)
 };
 
 class Scanner {
 public:
-    Scanner(std::ifstream& input);
+    Scanner(const std::string& filename);
+    ~Scanner();
+    
     Token getNextToken();
+    void processFile();
 
 private:
-    std::ifstream& input;
-    int line = 1;
-    char currentChar = ' ';
+    std::ifstream input;
+    std::string filename;
+    int currentLine;
+    int currentColumn;
+    char currentChar;
+    std::ofstream tokenOutput;
+    std::ofstream errorOutput;
+    std::string currentLineText;
     
-    std::unordered_map<std::string, TokenType> keywords;
-    std::unordered_set<std::string> multiCharOps = {
-        "==", "<>", "<=", ">=", ":=", "=>", "/*", "//", "[]"
-    };
-
-    void advance();
+    void getNextChar();
     void skipWhitespace();
-    Token parseIdentifierOrKeyword();
-    Token parseNumber();
-    Token parseOperatorOrPunctuation();
-    Token handleComment(bool isBlock);
+    std::string scanComment(int& endLine);
+    bool isLetter(char c) const;
+    bool isDigit(char c) const;
+    bool isNonZeroDigit(char c) const;
+    
+    Token scanIdentifierOrKeyword();
+    Token scanNumber();
+    Token scanOperatorOrPunctuation();
+    
+    static const std::unordered_map<std::string, std::string> reservedWords;
+    static const std::unordered_map<std::string, std::string> operators;
+    static const std::unordered_map<std::string, std::string> punctuation;
+    
+    void reportError(const std::string& message, const std::string& lexeme);
+    std::string getCurrentLine();
 };
 
-#endif
+#endif // SCANNER_H
