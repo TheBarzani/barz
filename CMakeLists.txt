@@ -1,7 +1,24 @@
-cmake_minimum_required(VERSION 3.10)
-project(barz)
+cmake_minimum_required(VERSION 3.12)
+project(Barz LANGUAGES CXX)
 
+# Set C++ standard and compiler flags
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
-add_subdirectory(src)
-add_subdirectory(tests)
+# Define executable
+add_executable(lexdriver
+    src/Scanner/Scanner.cpp    # Scanner implementation
+    src/LexDriver.cpp          # Driver code
+)
+
+# Include directories (headers in include/Scanner)
+target_include_directories(lexdriver PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+
+message(STATUS "Build configured. Source structure:")
+message(STATUS "  - Headers: include/Scanner/Scanner.h")
+message(STATUS "  - Sources: src/scanner/Scanner.cpp")
+message(STATUS "  - Driver:  src/LexDriver.cpp")
