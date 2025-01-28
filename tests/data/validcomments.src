@@ -1,0 +1,9 @@
+// Valid single-line comment
+/* Valid multi-line comment */
+/** Documentation-style comment **/
+/* Nested /* allowed in some languages (if supported) */
+// Empty single-line comment (valid)
+/* 
+  Multi-line
+  with special characters: !@#$%^&*() 
+*/

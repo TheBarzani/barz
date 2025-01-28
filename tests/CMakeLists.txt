@@ -1,41 +1,49 @@
 cmake_minimum_required(VERSION 3.10)
-project(CompilerTests)
+project(ScannerTests)
 
-# Set C++ standard and enable testing
+# Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
-enable_testing()
 
-# Include directories
-include_directories(
-    ${CMAKE_SOURCE_DIR}/../include
+# Download and unpack googletest at configure time
+configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+  RESULT_VARIABLE result
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/googletest-download )
+if(result)
+  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+endif()
+execute_process(COMMAND ${CMAKE_COMMAND} --build .
+  RESULT_VARIABLE result
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/googletest-download )
+if(result)
+  message(FATAL_ERROR "Build step for googletest failed: ${result}")
+endif()
+
+# Prevent GoogleTest from overriding our compiler/linker options
+# when building with Visual Studio
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+# Add googletest directly to our build. This defines
+# the gtest and gtest_main targets.
+add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
+                 ${CMAKE_BINARY_DIR}/googletest-build
+                 EXCLUDE_FROM_ALL)
+
+# Add the source directory
+include_directories(${CMAKE_SOURCE_DIR}/src)
+
+# Add the test executable and include the Scanner source files
+add_executable(TestScanner
+    TestScanner.cpp
+    ../src/Scanner.cpp  # Add the Scanner implementation file(s)
 )
 
-# Source files from the main project (adjust paths as needed)
-set(SRC_FILES
-    ${CMAKE_SOURCE_DIR}/../src/Scanner/NFA.cpp
-    ${CMAKE_SOURCE_DIR}/../src/Scanner/RegexParser.cpp
-)
+# Link the test executable against gtest_main
+target_link_libraries(TestScanner gtest_main)
 
-# Define test executables
-# ------------------------------------------------
+# Add a test to CTest
+add_test(NAME TestScanner COMMAND TestScanner)
 
-# Test 1: NFA construction and simulation
-add_executable(TestNFA
-    TestNFA.cpp
-    ${SRC_FILES}
-)
-target_include_directories(TestNFA PRIVATE ${CMAKE_SOURCE_DIR}/../include/Scanner)
-add_test(NAME test_nfa COMMAND TestNFA)
-
-# Test 2: RegexParser and NFA integration
-add_executable(TestRegexParser
-    TestRegexParser.cpp
-    ${SRC_FILES}
-)
-target_include_directories(TestRegexParser PRIVATE ${CMAKE_SOURCE_DIR}/../include/Scanner)
-add_test(NAME test_regexparser COMMAND TestRegexParser)
-
-# Optional: Add other tests here
-# ------------------------------------------------
-
-# Run tests with `ctest` after building
+# Disable maybe-uninitialized warning for Google Test
+set_target_properties(gtest PROPERTIES COMPILE_FLAGS "-Wno-maybe-uninitialized")
+set_target_properties(gtest_main PROPERTIES COMPILE_FLAGS "-Wno-maybe-uninitialized")

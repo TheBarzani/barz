@@ -1,0 +1,164 @@
+#ifndef SCANNER_H
+#define SCANNER_H
+
+#include <string>
+#include <fstream>
+#include <vector>
+#include <unordered_map>
+
+/**
+ * @enum TokenType
+ * @brief Enumeration of possible token types.
+ */
+enum class TokenType {
+    ID,                ///< Identifier
+    INTNUM,            ///< Integer number
+    FLOATNUM,          ///< Floating-point number
+    OPERATOR,          ///< Operator
+    PUNCTUATION,       ///< Punctuation
+    RESERVED_WORD,     ///< Reserved word
+    INLINE_COMMENT,    ///< Inline comment
+    BLOCK_COMMENT,     ///< Block comment
+    ERROR,             ///< Error
+    END_OF_FILE        ///< End of file
+};
+
+/**
+ * @struct Token
+ * @brief Structure representing a token.
+ */
+struct Token {
+    std::string type;    ///< The token type as a string (e.g., "id", "intnum")
+    std::string lexeme;  ///< The actual text of the token
+    int line;            ///< Line number where the token starts
+    int endLine;         ///< End line number (for block comments)
+};
+
+/**
+ * @class Scanner
+ * @brief A class to perform lexical analysis on an input file.
+ * 
+ * The Scanner class reads an input file and tokenizes its contents.
+ * It supports various token types such as identifiers, numbers, operators,
+ * punctuation, reserved words, and comments.
+ * 
+ * 
+ * @author @TheBarzani
+ * @date 2025-01-26
+ */
+class Scanner {
+public:
+    /**
+     * @brief Constructor that initializes the scanner with an input file.
+     * @param in The input file path.
+     */
+    Scanner(const std::string& in);
+
+    /**
+     * @brief Constructor that initializes the scanner with input and output files.
+     * @param in The input file path.
+     * @param out The output file path for tokens.
+     */
+    Scanner(const std::string& in, const std::string& out);
+
+    /**
+     * @brief Destructor for the Scanner class.
+     */
+    ~Scanner();
+    
+    /**
+     * @brief Retrieves the next token from the input file.
+     * @return The next token.
+     */
+    Token getNextToken();
+
+    /**
+     * @brief Processes the entire input file and generates tokens.
+     */
+    void processFile();
+
+private:
+    std::ifstream input;                ///< Input file stream
+    std::string filename;               ///< Name of the input file
+    int currentLine;                    ///< Current line number
+    int currentColumn;                  ///< Current column number
+    char currentChar;                   ///< Current character being processed
+    std::ofstream tokenOutput;          ///< Output file stream for tokens
+    std::ofstream errorOutput;          ///< Output file stream for errors
+    std::string currentLineText;        ///< Text of the current line being processed
+    
+    /**
+     * @brief Retrieves the next character from the input file.
+     */
+    void getNextChar();
+
+    /**
+     * @brief Skips whitespace characters in the input file.
+     */
+    void skipWhitespace();
+
+    /**
+     * @brief Scans a comment from the input file.
+     * @param endLine Reference to store the end line number of the comment.
+     * @return The comment text.
+     */
+    std::string scanComment(int& endLine);
+
+    /**
+     * @brief Checks if a character is a letter.
+     * @param c The character to check.
+     * @return True if the character is a letter, false otherwise.
+     */
+    bool isLetter(char c) const;
+
+    /**
+     * @brief Checks if a character is a digit.
+     * @param c The character to check.
+     * @return True if the character is a digit, false otherwise.
+     */
+    bool isDigit(char c) const;
+
+    /**
+     * @brief Checks if a character is a non-zero digit.
+     * @param c The character to check.
+     * @return True if the character is a non-zero digit, false otherwise.
+     */
+    bool isNonZeroDigit(char c) const;
+    
+    /**
+     * @brief Scans an identifier or keyword from the input file.
+     * @return The scanned token.
+     */
+    Token scanIdentifierOrKeyword();
+
+    /**
+     * @brief Scans a number from the input file.
+     * @return The scanned token.
+     */
+    Token scanNumber();
+
+    /**
+     * @brief Scans an operator or punctuation from the input file.
+     * @return The scanned token.
+     */
+    Token scanOperatorOrPunctuation();
+    
+    /**
+     * @brief Reports an error encountered during scanning.
+     * @param message The error message.
+     * @param lexeme The lexeme that caused the error.
+     */
+    void reportError(const std::string& message, const std::string& lexeme);
+
+    /**
+     * @brief Retrieves the current line of text being processed.
+     * @return The current line of text.
+     */
+    std::string getCurrentLine();
+
+    static const std::unordered_map<std::string, std::string> reservedWords; ///< Map of reserved words
+    static const std::unordered_map<std::string, std::string> operators;     ///< Map of operators
+    static const std::unordered_map<std::string, std::string> punctuation;   ///< Map of punctuation
+};
+
+#endif // SCANNER_H

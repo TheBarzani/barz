@@ -1,0 +1,10 @@
+/* Unclosed multi-line comment
+// Unclosed single-line comment with backslash at end: \
+/* Invalid nested comment /* (error if nesting not allowed) */
+/ * Missing star (invalid delimiter) */
+//* Invalid hybrid delimiter */
+*/ Stray closing delimiter (invalid) */
+/*// Mismatched delimiters inside comment */
+// Unclosed single-line comment with no newline at end
+/* Unclosed multi-line comment with no newline at end
+/* Nested multi-line comment without closing outer comment */
