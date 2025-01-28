@@ -14,65 +14,40 @@ Broken Automated Reliable Zipper (BARZ): A bare-bone compiler written in CPP.
 ```
 
 barz/
-├── CMakeLists.txt <-- configures dependencies, platform specifics and output paths
+├── CMakeLists.txt
+├── data
+│   ├── lexnegativegrading.alternative1.outlexerrors
+│   ├── lexnegativegrading.alternative1.outlextokens
+│   ├── lexnegativegrading.alternative2.outlexerrors
+│   ├── lexnegativegrading.alternative2.outlextokens
+│   ├── lexnegativegrading.outlexerrors
+│   ├── lexnegativegrading.outlextokens
+│   ├── lexnegativegrading.src
+│   ├── lexpositivegrading.outlexerrors
+│   ├── lexpositivegrading.outlextokens
+│   ├── lexpositivegrading.sample.outlextokens
+│   └── lexpositivegrading.src
+├── docs
+│   └── LexicalAnalyzerSpecifications.pdf
 ├── README.md
-├── .github
-├── build/ <-- Build files to go here (source-code excluded)
-│   ├── Executable-OutputA
-│   └── Library-OutputA
-├── cmake/ <--  To abstract away all my CMake helper scripts
-│   └── *.cmake
-├── data/ <-- If I use data, it goes here
-├── docs/ <-- I document my stuff here
-│   └── Doxyfile
-├── examples/ <-- example code goes here
-├── external/ <-- Third-party projects and libraries go here
-│   ├── External-ProjectA
-│   └── External-ProjectB
-├── include/ <-- Public headers go here
-│   ├── *.h
-│   ├── ExecutableA
-│   │   └── *.h
-│   └── ExecutableB
-│       └── *.h
-├── lib/ <-- Libraries that I could potentially create
-│   ├── LibraryA
-│   │   └── *source-code*
-│   └── LibraryB
-│       └── *source-code*
-├── src/ <-- source-code goes here 
-│   ├── CMakeLists.txt <-- configures the library you are going to build
-│   ├── *.cpp
-│   ├── ExecutableA
-│   │   ├── CMakeLists.txt
-│   │   ├── *.h
-│   │   └── *.cpp
-│   └── ExecutableB
-│       ├── CMakeLists.txt
-│       ├── *.h
-│       └── *.cpp
-└── tests/ <-- tests are performed here
-    ├── CMakeLists.txt <-- configures the Test executables and test-cases
+├── src
+│   ├── LexDriver.cpp
+│   ├── Scanner.cpp
+│   └── Scanner.h
+└── tests
+    ├── CMakeLists.txt
+    ├── CMakeLists.txt.in
     ├── data
-    │   └── testdata
-    └── testcase.cpp
+    │   ├── invalidnums.src
+    │   ├── invalidops.src
+    │   ├── morecomments.src
+    │   └── validcomments.src
+    └── TestScanner.cpp
 
 ```
 
-## Building and Running the Project with CMake
 
-Follow these steps to build and run the `Driver` executable using CMake:
-
-1. **Create a build directory**:
-   Open a terminal and navigate to your project directory. Then create a build directory.
-
-   ```sh
-   mkdir build
-   cd build
-
-
-
-## Building and Running the Project with CMake
+## Building and Running the Project with CMake (For the Scanner now)
 
 Follow these steps to build and run the `Driver` executable using CMake:
 
@@ -102,6 +77,11 @@ Follow these steps to build and run the `Driver` executable using CMake:
    After the build is complete, you can run the executable.
 
    ```sh
-   ./Driver
+   ./lexdriver <input_file> <output_filename>
    ```
+5. **Run the tests**:
+   After the build is complete, you can run the tests.
 
+   ```sh
+   tests/TestScanner
+   ```
