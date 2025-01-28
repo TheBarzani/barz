@@ -8,13 +8,13 @@ set(CMAKE_CXX_STANDARD 17)
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
   RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/googletest-download )
 if(result)
   message(FATAL_ERROR "CMake step for googletest failed: ${result}")
 endif()
 execute_process(COMMAND ${CMAKE_COMMAND} --build .
   RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/googletest-download )
 if(result)
   message(FATAL_ERROR "Build step for googletest failed: ${result}")
 endif()
@@ -30,7 +30,7 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
                  EXCLUDE_FROM_ALL)
 
 # Add the source directory
-include_directories(${CMAKE_SOURCE_DIR}/../src)
+include_directories(${CMAKE_SOURCE_DIR}/src)
 
 # Add the test executable and include the Scanner source files
 add_executable(TestScanner

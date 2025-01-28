@@ -1,0 +1,11 @@
+1.           // Invalid: ends with '.'
+1e           // Invalid: 'e' with no exponent
+123a         // Invalid: non-digit character 'a'
+00           // Invalid: leading zero followed by another digit
+0123         // Invalid: leading zero followed by digits
+1.0e         // Invalid: incomplete exponent
+1e2e3        // Invalid: multiple 'e' characters
+1.5e-    // Invalid: multiple signs in exponent
+123L         // Invalid: non-digit character 'L'
+0x1A         // Invalid: hexadecimal notation (not allowed)
+1_000        // Invalid: underscore in number

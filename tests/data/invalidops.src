@@ -1,0 +1,23 @@
+// Invalid operator: #
+a#5;
+
+// Invalid operator: =
+i = 5;
+
+// Invalid operator: @
+@5;
+
+// Invalid operator: %
+10.5 % 2.5;
+
+// Invalid operator: ^
+7 ^ 2;
+
+// Invalid operator: &
+4 & 1;
+
+// Invalid operator: |
+6 | 2;
+
+// Invalid operator: !
+!3;

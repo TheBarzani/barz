@@ -1,21 +1,43 @@
+
+
+/**
+ * @file Scanner.cpp
+ * @brief Implementation of the Scanner class for lexical analysis.
+ * 
+ * This file contains the implementation of the Scanner class, which is responsible for
+ * performing lexical analysis on the input source code. It identifies tokens such as
+ * operators, punctuation, reserved words, identifiers, numbers, and comments.
+ * 
+ * @date 2025-01-26
+ * @author @TheBarzani
+ */
+
 #include "Scanner.h"
 #include <iostream>
 #include <sstream>
 #include <cctype>
 
-// Initialize static members with proper token names
+/**
+ * @brief Initialize static members with proper token names for operators.
+ */
 const std::unordered_map<std::string, std::string> Scanner::operators = {
     {"==", "eq"}, {"<>", "noteq"}, {"<", "lt"}, {">", "gt"},
     {"<=", "leq"}, {">=", "geq"}, {"+", "plus"}, {"-", "minus"},
     {"*", "mult"}, {"/", "div"}, {":=", "assign"}, {"=>", "arrow"}
 };
 
+/**
+ * @brief Initialize static members with punctuation token names.
+ */
 const std::unordered_map<std::string, std::string> Scanner::punctuation = {
     {"(", "openpar"}, {")", "closepar"}, {"{", "opencubr"}, {"}", "closecubr"},
     {"[", "opensqbr"}, {"]", "closesqbr"}, {",", "comma"}, {".", "dot"},
     {":", "colon"}, {";", "semi"}
 };
 
+/**
+ * @brief Initialize static members with reserved words token names.
+ */
 const std::unordered_map<std::string, std::string> Scanner::reservedWords = {
     {"int", "int"}, {"float", "float"}, {"void", "void"}, {"class", "class"},
     {"self", "self"}, {"isa", "isa"}, {"while", "while"}, {"if", "if"},
@@ -26,20 +48,42 @@ const std::unordered_map<std::string, std::string> Scanner::reservedWords = {
     {"or", "or"}, {"and", "and"}, {"not", "not"}
 };
 
-Scanner::Scanner(const std::string& filename) : 
-    filename(filename), currentLine(1), currentColumn(0) {
+/**
+ * @brief Constructor with input file only.
+ * 
+ * @param in The input file name.
+ */
+Scanner::Scanner(const std::string& in) : Scanner(in,""){};
+
+/**
+ * @brief Constructor with input and output files.
+ * 
+ * @param in The input file name.
+ * @param out The output file name.
+ */
+Scanner::Scanner(const std::string& in, const std::string& out) : 
+    filename(in), currentLine(1), currentColumn(0) {
     input.open(filename);
-    tokenOutput.open(filename.substr(0, filename.size()-4)  + ".outlextokens");
-    errorOutput.open(filename.substr(0, filename.size()-4) + ".outlexerrors");
+    if (!input.is_open()) {
+        throw std::runtime_error("Unable to open file " + filename);
+    }
+    tokenOutput.open((out == "" ? filename.substr(0, filename.size()-4) : out) + ".outlextokens");
+    errorOutput.open((out == "" ? filename.substr(0, filename.size()-4) : out) + ".outlexerrors");
     getNextChar();
 }
 
+/**
+ * @brief Destructor to close file streams.
+ */
 Scanner::~Scanner() {
     if (input.is_open()) input.close();
     if (tokenOutput.is_open()) tokenOutput.close();
     if (errorOutput.is_open()) errorOutput.close();
 }
 
+/**
+ * @brief Get the next character from the input stream.
+ */
 void Scanner::getNextChar() {
     currentChar = input.get();
     if (currentChar == '\n') {
@@ -50,6 +94,9 @@ void Scanner::getNextChar() {
     }
 }
 
+/**
+ * @brief Skip whitespace characters in the input stream.
+ */
 void Scanner::skipWhitespace() {
     while (isspace(currentChar) && !input.eof()) {
         if (currentChar == '\n') {
@@ -62,6 +109,12 @@ void Scanner::skipWhitespace() {
     }
 }
 
+/**
+ * @brief Scan and return a comment token.
+ * 
+ * @param endLine Reference to store the end line of the comment.
+ * @return std::string The scanned comment.
+ */
 std::string Scanner::scanComment(int& endLine) {
     std::string comment;
     comment += '/';
@@ -72,7 +125,6 @@ std::string Scanner::scanComment(int& endLine) {
             comment += currentChar;
             getNextChar();
         } while (!input.eof() && currentChar != '\n');
-        std::cout << int(comment[comment.size()-1]);
         if (comment[comment.size()-1]=='\n' || comment[comment.size()-1]==13) comment.pop_back(); // Remove the newline character
         currentLine--;
         endLine = currentLine;
@@ -121,18 +173,44 @@ std::string Scanner::scanComment(int& endLine) {
     return comment;
 }
 
+/**
+ * @brief Check if a character is a letter.
+ * 
+ * @param c The character to check.
+ * @return true If the character is a letter.
+ * @return false Otherwise.
+ */
 bool Scanner::isLetter(char c) const {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
+/**
+ * @brief Check if a character is a digit.
+ * 
+ * @param c The character to check.
+ * @return true If the character is a digit.
+ * @return false Otherwise.
+ */
 bool Scanner::isDigit(char c) const {
     return c >= '0' && c <= '9';
 }
 
+/**
+ * @brief Check if a character is a non-zero digit.
+ * 
+ * @param c The character to check.
+ * @return true If the character is a non-zero digit.
+ * @return false Otherwise.
+ */
 bool Scanner::isNonZeroDigit(char c) const {
     return c >= '1' && c <= '9';
 }
 
+/**
+ * @brief Scan and return an identifier or keyword token.
+ * 
+ * @return Token The scanned token.
+ */
 Token Scanner::scanIdentifierOrKeyword() {
     std::string lexeme;
     int startLine = currentLine;
@@ -154,15 +232,23 @@ Token Scanner::scanIdentifierOrKeyword() {
     return {"invalidid", lexeme, startLine, startLine};
 }
 
+/**
+ * @brief Scan and return a number token.
+ * 
+ * @return Token The scanned token.
+ */
 Token Scanner::scanNumber() {
     std::string lexeme;
     int startLine = currentLine;
     bool isFloat = false;
+    bool isExponent = false;
+    std::string integerPart;
     std::string fractionPart;
     std::string exponentDigits;
     
     // Integer part
     while (isDigit(currentChar) && !input.eof()) {
+        integerPart += currentChar;
         lexeme += currentChar;
         getNextChar();
     }
@@ -181,8 +267,9 @@ Token Scanner::scanNumber() {
         
     }
     
+    // Exponent part
     if (currentChar == 'e' || currentChar == 'E') {
-        isFloat = true;
+        isExponent = true;
         lexeme += currentChar;
         getNextChar();
         
@@ -207,13 +294,24 @@ Token Scanner::scanNumber() {
         return {"invalidnum", lexeme, startLine, startLine};
     }
 
-    if ((lexeme.size() > 1 && lexeme[0] == '0' )|| (exponentDigits.size() > 1 && exponentDigits[0]=='0') || (fractionPart.size() > 1 && fractionPart[fractionPart.size() - 1] == '0')) {
+    // Check for invalid float or exponent without digits
+    if ((isFloat && fractionPart.empty()) || (isExponent && exponentDigits.empty())) {
+        return {"invalidnum", lexeme, startLine, startLine};
+    }
+
+    // Check for invalid number formats
+    if ((integerPart.size() > 1 && integerPart[0] == '0' ) || (exponentDigits.size() > 1 && exponentDigits[0]=='0') || (fractionPart.size() > 1 && fractionPart[fractionPart.size() - 1] == '0')) {
         return {"invalidnum", lexeme, startLine, startLine};
     }
     
     return {isFloat ? "floatnum" : "intnum", lexeme, startLine, startLine};
 }
 
+/**
+ * @brief Scan and return an operator or punctuation token.
+ * 
+ * @return Token The scanned token.
+ */
 Token Scanner::scanOperatorOrPunctuation() {
     std::string lexeme;
     int startLine = currentLine;
@@ -242,6 +340,7 @@ Token Scanner::scanOperatorOrPunctuation() {
         return {punctIt->second, lexeme, startLine, startLine};
     }
 
+    // Handle invalid identifier starting with underscore
     if (lexeme[0] == '_') {
         Token rest = scanIdentifierOrKeyword();
         return {"invalidid", lexeme.append(rest.lexeme) , rest.line, rest.line};
@@ -250,6 +349,11 @@ Token Scanner::scanOperatorOrPunctuation() {
     return {"invalidchar", lexeme, startLine, startLine};
 }
 
+/**
+ * @brief Get the next token from the input stream.
+ * 
+ * @return Token The next token.
+ */
 Token Scanner::getNextToken() {
     
     skipWhitespace();
@@ -275,10 +379,13 @@ Token Scanner::getNextToken() {
     if (isDigit(currentChar)) {
         return scanNumber();
     }
-    
+
     return scanOperatorOrPunctuation();
 }
 
+/**
+ * @brief Process the entire input file and generate tokens.
+ */
 void Scanner::processFile() {
     Token token;
     std::string currentOutput;
@@ -327,6 +434,12 @@ void Scanner::processFile() {
     }
 }
 
+/**
+ * @brief Report lexical errors to the error output stream.
+ * 
+ * @param message The error message.
+ * @param lexeme The lexeme that caused the error.
+ */
 void Scanner::reportError(const std::string& message, const std::string& lexeme) {
     std::string niceMessage;
 

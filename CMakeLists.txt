@@ -17,3 +17,6 @@ target_include_directories(lexdriver PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+# Add the tests directory
+add_subdirectory(tests)
+
