@@ -1,0 +1,40 @@
+stateDiagram-v2
+    [*] --> Start
+    Start --> Id: letter
+    Start --> Number: digit
+    Start --> Operator: operator_char
+    Start --> Comment: '/'
+    Start --> Punctuation: punct_char
+
+    Id --> Id: letter/digit/_
+    Id --> [*]: other
+
+    Number --> Integer: digit
+    Number --> Float: '.'
+    Integer --> Integer: digit
+    Integer --> Float: '.'
+    Integer --> [*]: other
+    Float --> FloatBody: digit
+    FloatBody --> FloatBody: digit
+    FloatBody --> Exponent: 'e'/'E'
+    FloatBody --> [*]: other
+    Exponent --> ExponentSign: '+'/'-'
+    Exponent --> ExponentBody: digit
+    ExponentSign --> ExponentBody: digit
+    ExponentBody --> ExponentBody: digit
+    ExponentBody --> [*]: other
+
+    Comment --> InlineComment: '/'
+    Comment --> BlockComment: '*'
+    InlineComment --> InlineComment: not newline
+    InlineComment --> [*]: newline
+    BlockComment --> BlockComment: not '*'
+    BlockComment --> BlockCommentEnd: '*'
+    BlockCommentEnd --> BlockComment: not '/'
+    BlockCommentEnd --> [*]: '/'
+
+    Operator --> TwoCharOp: '='/'>'/'<'
+    Operator --> [*]: other
+    TwoCharOp --> [*]: '='
+
+    Punctuation --> [*]
