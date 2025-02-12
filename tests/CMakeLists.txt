@@ -35,7 +35,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 # Add the test executable and include the Scanner source files
 add_executable(TestScanner
     TestScanner.cpp
-    ../src/Scanner.cpp  # Add the Scanner implementation file(s)
+    ../src/Scanner/Scanner.cpp  # Add the Scanner implementation file(s)
 )
 
 # Link the test executable against gtest_main

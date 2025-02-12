@@ -8,7 +8,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
 # Define executable
 add_executable(lexdriver
-    src/Scanner.cpp    # Scanner implementation
+    src/Scanner/Scanner.cpp    # Scanner implementation
     src/LexDriver.cpp          # Driver code
 )
 

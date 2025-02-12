@@ -14,7 +14,7 @@
  * @date 2025-01-26
  */
 
-#include "Scanner.h"
+#include "Scanner/Scanner.h"
 #include <iostream>
 #include <string>
 

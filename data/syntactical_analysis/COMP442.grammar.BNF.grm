@@ -1,0 +1,53 @@
+<START>              ::= <prog>
+<prog>               ::= {{<classOrImplOrFunc>}} 
+<classOrImplOrFunc>  ::= <classDecl> | <implDef> | <funcDef>   
+<classDecl>          ::= 'class' 'id' [['isa' 'id' {{',' 'id'}}]] '{' {{<visibility> <memberDecl>}} '}' ';'
+<implDef>            ::= 'implementation' 'id' '{' {{<funcDef>}} '}'
+<funcDef>            ::= <funcHead> <funcBody> 
+<visibility>         ::= 'public' | 'private' 
+<memberDecl>         ::= <funcDecl> | <attributeDecl>  
+<funcDecl>           ::= <funcHead> ';' 
+<funcHead>           ::= 'function' 'id' '(' <fParams> ')' '=>' <returnType> 
+                      |  'constructor' '(' <fParams> ')'
+<funcBody>           ::= '{' {{<localVarDeclOrStat>}} '}'
+<localVarDeclOrStat> ::= <localVarDecl> | <statement>
+<attributeDecl>      ::= 'attribute' <varDecl>
+<localVarDecl>       ::= 'local' <varDecl> 
+<varDecl>            ::= 'id' ':' <type> {{<arraySize>}} ';'
+<statement>          ::= <assignStat> ';'
+                      |  'if'     '(' <relExpr> ')' 'then' <statBlock> 'else' <statBlock> ';'
+                      |  'while'  '(' <relExpr> ')' <statBlock> ';'
+                      |  'read'   '(' <variable> ')' ';'
+                      |  'write'  '(' <expr> ')' ';'
+                      |  'return' '(' <expr> ')' ';'
+                      |  <functionCall> ';'
+<assignStat>         ::= <variable> <assignOp> <expr>
+<statBlock>          ::= '{' {{<statement>}} '}' | <statement> | EPSILON  
+<expr>               ::= <arithExpr> | <relExpr>
+<relExpr>            ::= <arithExpr> <relOp> <arithExpr>
+<arithExpr>          ::= <arithExpr> <addOp> <term> | <term> 
+<sign>               ::= '+' | '-'
+<term>               ::= <term> <multOp> <factor> | <factor>
+<factor>             ::= <variable>
+                      |  <functionCall>
+                      |  'intLit' | 'floatLit'
+                      |  '(' <arithExpr> ')'
+                      |  'not' <factor>
+                      |  <sign> <factor>
+<variable>           ::= {{<idnest>}} 'id' {{<indice>}}
+<functionCall>       ::= {{<idnest>}} 'id' (' <aParams> ')'
+<idnest>             ::= <idOrSelf> {{<indice>}} '.'
+                      |  <idOrSelf> '(' <aParams> ')' '.'
+<indice>             ::= '[' <arithExpr> ']'
+<arraySize>          ::= '[' 'intNum' ']' | '[' ']'
+<type>               ::= 'int' | 'float' | 'id'
+<returnType>         ::= <type> |  'void'
+<fParams>            ::= 'id' ':' <type> {{<arraySize>}} {{<fParamsTail>}} | EPSILON  
+<aParams>            ::= <expr> {{<aParamsTail>}} | EPSILON 
+<fParamsTail>        ::= ',' 'id' ':' <type> {{<arraySize>}}
+<aParamsTail>        ::= ',' <expr>
+<assignOp>           ::= ':='
+<relOp>              ::= '==' | '<>' | '<' | '>' | '<=' | '>=' 
+<addOp>              ::= '+' | '-' | 'or' 
+<multOp>             ::= '*' | '/' | 'and'
+<idOrSelf>           ::= 'id' | 'self' 

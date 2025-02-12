@@ -1,4 +1,4 @@
-#include "Scanner.h"
+#include "Scanner/Scanner.h"
 #include <gtest/gtest.h>
 #include <fstream>
 #include <string>
