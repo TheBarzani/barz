@@ -1,0 +1,125 @@
+<START> ::= <prog> 
+
+<aParams> ::= <expr> {{ <aParamsTail> }} 
+<aParams> ::= EPSILON 
+
+<aParamsTail> ::= ',' <expr> 
+
+<addOp> ::= '+' 
+<addOp> ::= '-' 
+<addOp> ::= 'or' 
+
+<arithExpr> ::= <arithExpr> <addOp> <term> 
+<arithExpr> ::= <term> 
+
+<arraySize> ::= '[' 'intNum' ']' 
+<arraySize> ::= '[' ']' 
+
+<assignOp> ::= 'coloneq' 
+
+<assignStat> ::= <variable> <assignOp> <expr> 
+
+<attributeDecl> ::= 'attribute' <varDecl> 
+
+<classDecl> ::= 'class' 'id' <opt-classDecl2> '{' {{ <visibility> <memberDecl> }} '}' ';' 
+
+<classOrImplOrFunc> ::= <classDecl> 
+<classOrImplOrFunc> ::= <implDef> 
+<classOrImplOrFunc> ::= <funcDef> 
+
+<expr> ::= <arithExpr> 
+<expr> ::= <relExpr> 
+
+<fParams> ::= 'id' ':' <type> {{ <arraySize> }} {{ <fParamsTail> }} 
+<fParams> ::= EPSILON 
+
+<fParamsTail> ::= ',' 'id' ':' <type> {{ <arraySize> }} 
+
+<factor> ::= <variable> 
+<factor> ::= <functionCall> 
+<factor> ::= 'intLit' 
+<factor> ::= 'floatLit' 
+<factor> ::= '(' <arithExpr> ')' 
+<factor> ::= 'not' <factor> 
+<factor> ::= <sign> <factor> 
+
+<funcBody> ::= '{' {{ <localVarDeclOrStat> }} '}' 
+
+<funcDecl> ::= <funcHead> ';' 
+
+<funcDef> ::= <funcHead> <funcBody> 
+
+<funcHead> ::= 'function' 'id' '(' <fParams> ')' 'eqgt' <returnType> 
+<funcHead> ::= 'constructor' '(' <fParams> ')' 
+
+<functionCall> ::= {{ <idnest> }} 'id' '(' <aParams> ')' 
+
+<idOrSelf> ::= 'id' 
+<idOrSelf> ::= 'self' 
+
+<idnest> ::= <idOrSelf> {{ <indice> }} '.' 
+<idnest> ::= <idOrSelf> '(' <aParams> ')' '.' 
+
+<implDef> ::= 'implementation' 'id' '{' {{ <funcDef> }} '}' 
+
+<indice> ::= '[' <arithExpr> ']' 
+
+<localVarDecl> ::= 'local' <varDecl> 
+
+<localVarDeclOrStat> ::= <localVarDecl> 
+<localVarDeclOrStat> ::= <statement> 
+
+<memberDecl> ::= <funcDecl> 
+<memberDecl> ::= <attributeDecl> 
+
+<multOp> ::= '*' 
+<multOp> ::= '/' 
+<multOp> ::= 'and' 
+
+<opt-classDecl2> ::= 'isa' 'id' {{ ',' 'id' }} 
+<opt-classDecl2> ::= EPSILON 
+
+<prog> ::= {{ <classOrImplOrFunc> }} 
+
+<relExpr> ::= <arithExpr> <relOp> <arithExpr> 
+
+<relOp> ::= 'eqeq' 
+<relOp> ::= 'ltgt' 
+<relOp> ::= 'lt' 
+<relOp> ::= 'gt' 
+<relOp> ::= 'lteq' 
+<relOp> ::= 'gteq' 
+
+<returnType> ::= <type> 
+<returnType> ::= 'void' 
+
+<sign> ::= '+' 
+<sign> ::= '-' 
+
+<statBlock> ::= '{' {{ <statement> }} '}' 
+<statBlock> ::= <statement> 
+<statBlock> ::= EPSILON 
+
+<statement> ::= <assignStat> ';' 
+<statement> ::= 'if' '(' <relExpr> ')' 'then' <statBlock> 'else' <statBlock> ';' 
+<statement> ::= 'while' '(' <relExpr> ')' <statBlock> ';' 
+<statement> ::= 'read' '(' <variable> ')' ';' 
+<statement> ::= 'write' '(' <expr> ')' ';' 
+<statement> ::= 'return' '(' <expr> ')' ';' 
+<statement> ::= <functionCall> ';' 
+
+<term> ::= <term> <multOp> <factor> 
+<term> ::= <factor> 
+
+<type> ::= 'int' 
+<type> ::= 'float' 
+<type> ::= 'id' 
+
+<varDecl> ::= 'id' ':' <type> {{ <arraySize> }} ';' 
+
+<variable> ::= {{ <idnest> }} 'id' {{ <indice> }} 
+
+<visibility> ::= 'public' 
+<visibility> ::= 'private' 
+
+

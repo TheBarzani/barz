@@ -8,7 +8,7 @@ Files:
 
 2. grammar (same as stated in the assignment statement)
 
-   COMP442.grammar.BNF.grm
+   `COMP442.grammar.BNF.grm`
 
 3. Executable jar file of the grammar transformation tool developed by Dr. Paquet
 
