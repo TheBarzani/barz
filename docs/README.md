@@ -6,7 +6,7 @@ Files:
 
    `assignment2.COMP442-6421.paquet.2025.4.pdf`
 
-2. grammar (same as stated in the assignment statement)
+2. Grammar (same as stated in the assignment statement)
 
    `COMP442.grammar.BNF.grm`
 
@@ -35,6 +35,12 @@ Files:
    ```bash
    bubblesort.src
    polynomial.src
-5. partial solution for the transformed grammar (only for expressions)
+5. Partial solution for the transformed grammar (only for expressions)
    ```bash
    COMP442.grammar.expressions.atocc.grm
+
+## Some Changes to the Grammer
+- `'=' ::= 'eq'`
+- `'>' ::= 'gt'`
+- `'<' ::= 'lt'`
+- `':' ::= 'colon'`
