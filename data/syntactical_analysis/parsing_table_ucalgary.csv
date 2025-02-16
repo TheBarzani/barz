@@ -1,4 +1,4 @@
-,$,private,public,rpar,lpar,id,dot,semi,colon,float,int,assign,rsqbr,lsqbr,return,write,read,while,else,then,if,rcurbr,lcurbr,minus,plus,void,comma,geq,leq,gt,lt,neq,eq,isa,and,div,mult,local,implementation,self,constructor,eqgt,function,not,floatlit,intlit,class,attribute,or
+,$,private,public,rpar,lpar,id,dot,semi,colon,float,int,eq,rsqbr,lsqbr,return,write,read,while,else,then,if,rcurbr,lcurbr,minus,plus,void,comma,geq,leq,gt,lt,neq,eq,isa,and,div,mult,local,implementation,self,constructor,arrow,function,not,floatlit,intlit,class,attribute,or
 START,START → PROG,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,START → PROG,,START → PROG,,START → PROG,,,,START → PROG,,
 ADDOP,,,,,,,,,,,,,,,,,,,,,,,,ADDOP → minus,ADDOP → plus,,,,,,,,,,,,,,,,,,,,,,,,ADDOP → or
 APARAMS,,,,APARAMS → &epsilon,APARAMS → EXPR REPTAPARAMS1,APARAMS → EXPR REPTAPARAMS1,,,,,,,,,,,,,,,,,,APARAMS → EXPR REPTAPARAMS1,APARAMS → EXPR REPTAPARAMS1,,,,,,,,,,,,,,,APARAMS → EXPR REPTAPARAMS1,,,,APARAMS → EXPR REPTAPARAMS1,APARAMS → EXPR REPTAPARAMS1,APARAMS → EXPR REPTAPARAMS1,,,
@@ -19,7 +19,7 @@ FPARAMSTAIL,,,,,,,,,,,,,,,,,,,,,,,,,,,FPARAMSTAIL → comma id colon TYPE REPTFP
 FUNCBODY,,,,,,,,,,,,,,,,,,,,,,,FUNCBODY → lcurbr REPTFUNCBODY1 rcurbr,,,,,,,,,,,,,,,,,,,,,,,,,,
 FUNCDECL,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,FUNCDECL → FUNCHEAD semi,,FUNCDECL → FUNCHEAD semi,,,,,,
 FUNCDEF,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,FUNCDEF → FUNCHEAD FUNCBODY,,FUNCDEF → FUNCHEAD FUNCBODY,,,,,,
-FUNCHEAD,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,FUNCHEAD → constructor lpar FPARAMS rpar,,FUNCHEAD → function id lpar FPARAMS rpar eqgt RETURNTYPE,,,,,,
+FUNCHEAD,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,FUNCHEAD → constructor lpar FPARAMS rpar,,FUNCHEAD → function id lpar FPARAMS rpar arrow RETURNTYPE,,,,,,
 IDNEST,,,,,,,IDNEST → dot id IDNEST2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 IDNEST2,,,,IDNEST2 → REPTIDNEST1,IDNEST2 → lpar APARAMS rpar,,IDNEST2 → REPTIDNEST1,IDNEST2 → REPTIDNEST1,,,,,IDNEST2 → REPTIDNEST1,IDNEST2 → REPTIDNEST1,,,,,,,,,,IDNEST2 → REPTIDNEST1,IDNEST2 → REPTIDNEST1,,IDNEST2 → REPTIDNEST1,IDNEST2 → REPTIDNEST1,IDNEST2 → REPTIDNEST1,IDNEST2 → REPTIDNEST1,IDNEST2 → REPTIDNEST1,IDNEST2 → REPTIDNEST1,IDNEST2 → REPTIDNEST1,,IDNEST2 → REPTIDNEST1,IDNEST2 → REPTIDNEST1,IDNEST2 → REPTIDNEST1,,,,,,,,,,,,IDNEST2 → REPTIDNEST1
 IDORSELF,,,,,,IDORSELF → id,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,IDORSELF → self,,,,,,,,,
@@ -53,7 +53,7 @@ STATBLOCK,,,,,,STATBLOCK → STATEMENT,,STATBLOCK → &epsilon,,,,,,,STATBLOCK �
 STATEMENT,,,,,,STATEMENT → IDORSELF SELECTORLIST0 STATEMENTSUFFIX0,,,,,,,,,STATEMENT → return lpar EXPR rpar semi,STATEMENT → write lpar EXPR rpar semi,STATEMENT → read lpar VARIABLE rpar semi,STATEMENT → while lpar RELEXPR rpar STATBLOCK semi,,,STATEMENT → if lpar RELEXPR rpar then STATBLOCK else STATBLOCK semi,,,,,,,,,,,,,,,,,,,STATEMENT → IDORSELF SELECTORLIST0 STATEMENTSUFFIX0,,,,,,,,,
 SELECTORLIST0,,,,,SELECTORLIST0 → &epsilon,,SELECTORLIST0 → TYPESELECTOR SELECTORLIST0,,,,,SELECTORLIST0 → &epsilon,,SELECTORLIST0 → TYPESELECTOR SELECTORLIST0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 TYPESELECTOR,,,,,,,TYPESELECTOR → dot id,,,,,,,TYPESELECTOR → lsqbr ARITHEXPR rsqbr,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-STATEMENTSUFFIX0,,,,,STATEMENTSUFFIX0 → lpar APARAMS rpar semi,,,,,,,STATEMENTSUFFIX0 → assign EXPR semi,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+STATEMENTSUFFIX0,,,,,STATEMENTSUFFIX0 → lpar APARAMS rpar semi,,,,,,,STATEMENTSUFFIX0 → eq EXPR semi,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 TERM,,,,,TERM → FACTOR RIGHTRECTERM,TERM → FACTOR RIGHTRECTERM,,,,,,,,,,,,,,,,,,TERM → FACTOR RIGHTRECTERM,TERM → FACTOR RIGHTRECTERM,,,,,,,,,,,,,,,TERM → FACTOR RIGHTRECTERM,,,,TERM → FACTOR RIGHTRECTERM,TERM → FACTOR RIGHTRECTERM,TERM → FACTOR RIGHTRECTERM,,,
 TYPE,,,,,,TYPE → id,,,,TYPE → float,TYPE → int,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 VARDECL,,,,,,VARDECL → id colon TYPE REPTVARDECL3 semi,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

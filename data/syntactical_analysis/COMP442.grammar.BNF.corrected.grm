@@ -7,7 +7,7 @@
 <visibility>         ::= 'public' | 'private' 
 <memberDecl>         ::= <funcDecl> | <attributeDecl>  
 <funcDecl>           ::= <funcHead> ';' 
-<funcHead>           ::= 'function' 'id' '(' <fParams> ')' 'eqgt' <returnType> 
+<funcHead>           ::= 'function' 'id' '(' <fParams> ')' 'arrow' <returnType> 
                       |  'constructor' '(' <fParams> ')'
 <funcBody>           ::= '{' {{<localVarDeclOrStat>}} '}'
 <localVarDeclOrStat> ::= <localVarDecl> | <statement>
@@ -46,8 +46,8 @@
 <aParams>            ::= <expr> {{<aParamsTail>}} | EPSILON 
 <fParamsTail>        ::= ',' 'id' ':' <type> {{<arraySize>}}
 <aParamsTail>        ::= ',' <expr>
-<assignOp>           ::= 'coloneq'
-<relOp>              ::= 'eqeq' | 'ltgt' | 'lt' | 'gt' | 'lteq' | 'gteq' 
+<assignOp>           ::= 'assign'
+<relOp>              ::= 'eq' | 'neq' | 'lt' | 'gt' | 'leq' | 'geq' 
 <addOp>              ::= '+' | '-' | 'or' 
 <multOp>             ::= '*' | '/' | 'and'
 <idOrSelf>           ::= 'id' | 'self' 

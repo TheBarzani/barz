@@ -40,10 +40,13 @@ Files:
    COMP442.grammar.expressions.atocc.grm
 
 ## Some Changes to the Grammer
-- `'=' ::= 'eq'`
+- `'==' ::= 'eq'`
 - `'>' ::= 'gt'`
 - `'<' ::= 'lt'`
 - `':' ::= 'colon'`
+- `'=>' ::= 'arrow'`
+- `':=' ::= 'assign'`
+
 
 ## UCalgary Ambiguity
 Below are the UCalgary Tool's vital statistics of the grammar after using the `grammartool.jar`:

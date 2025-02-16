@@ -53,7 +53,7 @@ FUNCDECL -> FUNCHEAD semi  .
 
 FUNCDEF -> FUNCHEAD FUNCBODY  . 
 
-FUNCHEAD -> function id lpar FPARAMS rpar eqgt RETURNTYPE  . 
+FUNCHEAD -> function id lpar FPARAMS rpar arrow RETURNTYPE  . 
 FUNCHEAD -> constructor lpar FPARAMS rpar  . 
 
 IDNEST -> dot id IDNEST2  .

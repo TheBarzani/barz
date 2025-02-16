@@ -12,8 +12,8 @@
  */
 enum class TokenType {
     ID,                ///< Identifier
-    INTNUM,            ///< Integer number
-    FLOATNUM,          ///< Floating-point number
+    INTLIT,            ///< Integer literal
+    FLOATLIT,          ///< Floating-point literal
     OPERATOR,          ///< Operator
     PUNCTUATION,       ///< Punctuation
     RESERVED_WORD,     ///< Reserved word
@@ -28,7 +28,7 @@ enum class TokenType {
  * @brief Structure representing a token.
  */
 struct Token {
-    std::string type;    ///< The token type as a string (e.g., "id", "intnum")
+    std::string type;    ///< The token type as a string (e.g., "id", "intlit")
     std::string lexeme;  ///< The actual text of the token
     int line;            ///< Line number where the token starts
     int endLine;         ///< End line number (for block comments)
