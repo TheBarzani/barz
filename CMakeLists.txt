@@ -11,12 +11,19 @@ add_executable(lexdriver
     src/Scanner/Scanner.cpp    # Scanner implementation
     src/LexDriver.cpp          # Driver code
 )
+add_executable(parsedriver
+    src/Parser/Parser.cpp      # Parser implementation
+    src/ParseDriver.cpp        # Driver code
+)
 
 # Include directories (headers in include/Scanner)
 target_include_directories(lexdriver PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-
+# Include directories (headers in include/Parser)
+target_include_directories(parsedriver PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
 # Add the tests directory
 add_subdirectory(tests)
 
