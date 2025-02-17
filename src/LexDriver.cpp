@@ -29,6 +29,7 @@ int main(int argc, char* argv[]) {
     try {
         Scanner scanner(argv[1], argc < 3 ? "" : argv[2]);
         scanner.processFile();
+        scanner.writeOutputsToFile();
         std::cout << "Lexical analysis completed successfully." << std::endl;
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

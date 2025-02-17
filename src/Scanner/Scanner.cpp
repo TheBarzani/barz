@@ -388,16 +388,27 @@ Token Scanner::getNextToken() {
  */
 void Scanner::processFile() {
     Token token;
+    do {
+        token = getNextToken();
+        if (token.type == "eof") break;
+        tokens.push_back(token);
+    } while (true);
+}
+
+/**
+ * @brief Write the generated tokens to the output file.
+ */
+void Scanner::writeOutputsToFile() {
+    Token token;
     std::string currentOutput;
     int lastLine = -1; // Track the last line number of the output
     
-    do {
-        token = getNextToken();
-        
-        if (token.type == "eof") break;
+    for (auto it = tokens.begin(); it != tokens.end(); ++it) {
+            
+        token = *it;
         
         if (token.type.substr(0,7) == "invalid") {
-            reportError(token.type, token.lexeme);
+            reportError(token);
         }
 
         // Format the token output
@@ -426,12 +437,13 @@ void Scanner::processFile() {
         // Update the last processed line number.
         lastLine = token.endLine;
         
-    } while (true);
-    
+    }
+
     // Output remaining tokens
     if (!currentOutput.empty()) {
         tokenOutput << currentOutput << "\n";
     }
+    
 }
 
 /**
@@ -440,9 +452,9 @@ void Scanner::processFile() {
  * @param message The error message.
  * @param lexeme The lexeme that caused the error.
  */
-void Scanner::reportError(const std::string& message, const std::string& lexeme) {
+void Scanner::reportError(const Token& token) {
     std::string niceMessage;
-
+    std::string message = token.type;
     if (message == "invalidid") {
         niceMessage = "Invalid identifier";
     } else if (message == "invalidlit") {
@@ -453,5 +465,5 @@ void Scanner::reportError(const std::string& message, const std::string& lexeme)
         niceMessage = "Unknown error";
     }
 
-    errorOutput << "Lexical error: " << niceMessage << ": \"" << lexeme << "\": line " << currentLine << "." << std::endl;
+    errorOutput << "Lexical error: " << niceMessage << ": \"" << token.lexeme << "\": line " << token.line << "." << std::endl;
 }
