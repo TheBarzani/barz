@@ -12,6 +12,7 @@ add_executable(lexdriver
     src/LexDriver.cpp          # Driver code
 )
 add_executable(parsedriver
+    src/Scanner/Scanner.cpp    # Scanner implementation
     src/Parser/Parser.cpp      # Parser implementation
     src/ParseDriver.cpp        # Driver code
 )
@@ -20,6 +21,8 @@ add_executable(parsedriver
 target_include_directories(lexdriver PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+# Include CSV file
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/Parser/parsing_table.csv ${CMAKE_BINARY_DIR}/parsing_table.csv COPYONLY)
 # Include directories (headers in include/Parser)
 target_include_directories(parsedriver PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src

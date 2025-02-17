@@ -358,7 +358,7 @@ Token Scanner::getNextToken() {
     
     skipWhitespace();
     if (input.eof()) {
-        return {"eof", "", currentLine, currentLine};
+        return {"$", "", currentLine, currentLine};
     }
     
     // Handle comments
@@ -390,7 +390,7 @@ void Scanner::processFile() {
     Token token;
     do {
         token = getNextToken();
-        if (token.type == "eof") break;
+        if (token.type == "$") break;
         tokens.push_back(token);
     } while (true);
 }

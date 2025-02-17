@@ -10,24 +10,21 @@
 class Parser {  
 
     public:
-        Parser();
-        Parser(const std::string& filename);
+        Parser(const std::string& parsingTable, const std::string& inputFile);
         ~Parser();
-        bool parse(const std::string& input);
-        bool loadParsingTable(const std::string& filename);
+        bool parse();
         bool skipErrors();
-        void inverseRHSMultiplePush(std::stack<std::string>& parseStack, const std::string& production);
+        void inverseRHSMultiplePush(const std::string& production);
+        Token nextToken();
 
     private:
-        ParsingTable table;
-        Scanner scanner;
-        std::string currentInput;           ///< current input
-        std::string filename;               ///< Name of the input file
-        std::ofstream derivationOutput;          ///< Output file stream for tokens
+        ParsingTable table;                 ///< Parsing table
+        Scanner scanner;                    ///< Scanner object
+        std::vector<Token> tokens;          ///< current input of tokens
+        std::ofstream derivationOutput;     ///< Output file stream for derivations
         std::ofstream errorOutput;          ///< Output file stream for errors
-        std::stack<std::string> stack;
-
-
+        std::stack<std::string> parseStack; ///< Stack for parsing
+        Token lookahead;                    ///< Current lookahead token
 };
 
 #endif // PARSER_H
