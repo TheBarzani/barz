@@ -1,27 +1,54 @@
-/**
- * @file Parse.cpp
- * @brief Entry point for the syntax analysis driver.
- * 
- * This file contains the main function which serves as the entry point for the syntax analysis driver.
- * 
- * Usage:
- * 
- * @author @TheBarzani
- * @date 2025-02-16
- */
+#include <Parser/Parser.h>
+#include <iostream>
+#include <string>
+#include <vector>
 
- #include <Parser/Parser.h>
- #include <iostream>
- #include <string>
- 
- int main(int argc, char* argv[]) {
-    
-    if (argc > 1 ) {
-        Parser parser(argv[1], "parsing_table.csv");
+void printUsage(const std::string& programName) {
+    std::cout << "Usage: " << programName << " [--table parsing_table.csv] file1 [file2 ...]\n"
+              << "Options:\n"
+              << "  --table <csv_file>   Specify a custom parsing table CSV file. Default is 'parsing_table.csv'.\n"
+              << "  -h, --help           Show this help message.\n";
+}
+
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        printUsage(argv[0]);
+        return 1;
+    }
+
+    std::string tableFile = "parsing_table.csv";
+    std::vector<std::string> inputFiles;
+
+    for (int i = 1; i < argc; ) {
+        std::string arg = argv[i];
+        if (arg == "-h" || arg == "--help") {
+            printUsage(argv[0]);
+            return 0;
+        } else if (arg == "-t" || arg == "--table") {
+            if (i + 1 < argc) {
+                tableFile = argv[i + 1];
+                i += 2;
+            } else {
+                std::cerr << "Error: --table requires a CSV file argument.\n";
+                return 1;
+            }
+        } else {
+            inputFiles.push_back(arg);
+            i++;
+        }
+    }
+
+    if (inputFiles.empty()) {
+        std::cerr << "Error: No input files provided.\n";
+        printUsage(argv[0]);
+        return 1;
+    }
+
+    for (const auto& file : inputFiles) {
+        std::cout << "Parsing file: " << file << " with table: " << tableFile << std::endl;
+        Parser parser(file, tableFile);
         parser.parse();
-    } else {
-        std::cout << "Failed to load parsing table" << std::endl;
     }
 
     return 0;
- }
+}

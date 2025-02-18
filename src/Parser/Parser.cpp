@@ -29,6 +29,12 @@ Parser::~Parser() {
         errorOutput << error << std::endl;
     }
     errorOutput.close();
+
+    // Clean memory
+    tokens.clear();
+    derivations.clear();
+    syntaxErrors.clear();
+    
 }
 
 bool Parser::parse() {
