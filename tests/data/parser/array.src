@@ -1,0 +1,31 @@
+// ====== Test: Array Operations and Complex Expressions ======
+function calculateAverage(numbers: float[], size: int) => float {
+  local sum: float;
+  local i: int;
+  local avg: float;
+  
+  sum := 0.0;
+  i := 0;
+  
+  while (i < size) {
+    sum := sum + numbers[i];
+    i := i + 1;
+  };
+  
+  avg := sum / size;
+  return (avg);
+}
+
+function main() => void {
+  local scores: float[5];
+  local average: float;
+  
+  scores[0] := 85.5;
+  scores[1] := 92.0;
+  scores[2] := 77.5;
+  scores[3] := 88.0;
+  scores[4] := 95.5;
+  
+  average := calculateAverage(scores, 5);
+  write(average);
+}

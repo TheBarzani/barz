@@ -1,9 +1,0 @@
-STATEMENT -> ASSIGNSTAT semi  .
-STATEMENT -> FUNCTIONCALL semi  .  
-STATEMENT -> if lpar RELEXPR rpar then STATBLOCK else STATBLOCK semi  . 
-STATEMENT -> while lpar RELEXPR rpar STATBLOCK semi  . 
-STATEMENT -> read lpar VARIABLE rpar semi  . 
-STATEMENT -> write lpar EXPR rpar semi  . 
-STATEMENT -> return lpar EXPR rpar semi  . 
-
-

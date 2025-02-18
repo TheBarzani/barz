@@ -1,0 +1,51 @@
+// ====== Test: Nested Control Structures and Complex Classes ======
+class CALCULATOR {
+  private attribute memory: float;
+  public function build() => CALCULATOR;
+  public function add(x: float) => float;
+  public function subtract(x: float) => float;
+  public function getMemory() => float;
+};
+
+implementation CALCULATOR {
+  function build() => CALCULATOR {
+    local new_calc: CALCULATOR;
+    new_calc.memory := 0.0;
+    return (new_calc);
+  }
+  
+  function add(x: float) => float {
+    memory := memory + x;
+    return (memory);
+  }
+  
+  function subtract(x: float) => float {
+    memory := memory - x;
+    return (memory);
+  }
+  
+  function getMemory() => float {
+    return (memory);
+  }
+}
+
+function main() => void {
+  local calc: CALCULATOR;
+  local result: float;
+  local i: int;
+  
+  calc := calc.build();
+  i := 1;
+  
+  while (i <= 5) {
+    if (i % 2 = 0) 
+      then {
+        result := calc.add(i);
+      }
+      else {
+        result := calc.subtract(i);
+      };
+    write(calc.getMemory());
+    i := i + 1;
+  };
+}
