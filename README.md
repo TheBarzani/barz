@@ -12,37 +12,97 @@ Broken Automated Reliable Zipper (BARZ): A bare-bone compiler written in CPP.
 
 # Project Structure Blueprint
 ```
-
 barz/
+├── bin
+│   ├── lexdriver
+│   ├── parsedriver
+│   └── parsing_table.csv
 ├── CMakeLists.txt
 ├── data
-│   ├── lexnegativegrading.alternative1.outlexerrors
-│   ├── lexnegativegrading.alternative1.outlextokens
-│   ├── lexnegativegrading.alternative2.outlexerrors
-│   ├── lexnegativegrading.alternative2.outlextokens
-│   ├── lexnegativegrading.outlexerrors
-│   ├── lexnegativegrading.outlextokens
-│   ├── lexnegativegrading.src
-│   ├── lexpositivegrading.outlexerrors
-│   ├── lexpositivegrading.outlextokens
-│   ├── lexpositivegrading.sample.outlextokens
-│   └── lexpositivegrading.src
+│   ├── lexical_analysis
+│   │   ├── lexnegativegrading.alternative1.outlexerrors
+│   │   ├── lexnegativegrading.alternative1.outlextokens
+│   │   ├── lexnegativegrading.alternative2.outlexerrors
+│   │   ├── lexnegativegrading.alternative2.outlextokens
+│   │   ├── lexnegativegrading.outlexerrors
+│   │   ├── lexnegativegrading.outlextokens
+│   │   ├── lexnegativegrading.src
+│   │   ├── lexpositivegrading.outlexerrors
+│   │   ├── lexpositivegrading.outlextokens
+│   │   ├── lexpositivegrading.sample.outlextokens
+│   │   └── lexpositivegrading.src
+│   └── syntactical_analysis
+│       ├── COMP442.grammar.BNF.clean.tool.grm
+│       ├── COMP442.grammar.BNF.corrected.grm
+│       ├── COMP442.grammar.BNF.original.grm
+│       ├── COMP442.grammar.final.grm.ucalgary
+│       ├── first_follow_sets_table.csv
+│       ├── first_follow_sets_table.html
+│       ├── others
+│       │   ├── COMP442.grammar.BNF.clean.manual.grm
+│       │   ├── COMP442.grammar.clean.atocc.grm
+│       │   ├── COMP442.grammar.clean.ucalgary.grm
+│       │   ├── COMP442.grammar.clean.ucalgary.grm.ucalgary
+│       │   ├── COMP442.grammar.expressions.atocc.grm
+│       │   ├── COMP442.grammar.rm.leftrec.grm
+│       │   ├── COMP442.grammar.rm.opt.grm
+│       │   └── COMP442.grammar.rm.rept0.grm
+│       ├── parsing_table_ucalgary.csv
+│       ├── parsing_table_ucalgary.html
+│       └── source_files
+│           ├── bubblesort.outderivation
+│           ├── bubblesort.outlexerrors
+│           ├── bubblesort.outlextokens
+│           ├── bubblesort.outsyntaxerrors
+│           ├── bubblesort.src
+│           ├── helloworld.outderivation
+│           ├── helloworld.outlexerrors
+│           ├── helloworld.outlextokens
+│           ├── helloworld.outsyntaxerrors
+│           ├── helloworld.src
+│           ├── polynomial.outderivation
+│           ├── polynomial.outlexerrors
+│           ├── polynomial.outlextokens
+│           ├── polynomial.outsyntaxerrors
+│           └── polynomial.src
 ├── docs
-│   └── LexicalAnalyzerSpecifications.pdf
+│   ├── compiler_design_A1_lexical_analysis_report.pdf
+│   ├── diagram.png
+│   ├── lexer_fsa.mermaid
+│   ├── lexical_analyzer_specifications.pdf
+│   ├── README.md
+│   └── syntax_analyzer_specifications.pdf
 ├── README.md
 ├── src
 │   ├── LexDriver.cpp
-│   ├── Scanner.cpp
-│   └── Scanner.h
-└── tests
-    ├── CMakeLists.txt
-    ├── CMakeLists.txt.in
-    ├── data
-    │   ├── invalidnums.src
-    │   ├── invalidops.src
-    │   ├── morecomments.src
-    │   └── validcomments.src
-    └── TestScanner.cpp
+│   ├── ParseDriver.cpp
+│   ├── Parser
+│   │   ├── Parser.cpp
+│   │   ├── Parser.h
+│   │   ├── parsing_table.csv
+│   │   └── ParsingTable.h
+│   └── Scanner
+│       ├── Scanner.cpp
+│       └── Scanner.h
+├── tests
+│   ├── CMakeLists.txt
+│   ├── CMakeLists.txt.in
+│   ├── data
+│   │   ├── parser
+│   │   │   ├── array.src
+│   │   │   ├── factorial.src
+│   │   │   ├── inheritance.src
+│   │   │   ├── nested.src
+│   │   │   ├── simple_class.src
+│   │   │   └── simple_main.src
+│   │   └── scanner
+│   │       ├── invalidnums.src
+│   │       ├── invalidops.src
+│   │       ├── morecomments.src
+│   │       └── validcomments.src
+│   └── TestScanner.cpp
+└── tools
+    └── grammartool.jar
 
 ```
 
