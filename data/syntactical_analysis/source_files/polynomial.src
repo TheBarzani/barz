@@ -64,7 +64,7 @@ implementation LINEAR {
 } 
 
 // ====== main ====== //
-func main() => void
+function main() => void
 {
   local f1: LINEAR;
   local f2: QUADRATIC;

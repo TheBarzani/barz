@@ -1,0 +1,37 @@
+// ====== Test: Basic Class Inheritance and Member Functions ======
+class SHAPE {
+  private attribute area: float;
+  public function calculate_area() => float;
+};
+
+class CIRCLE isa SHAPE {
+  private attribute radius: float;
+  public function build(r: float) => CIRCLE;
+  public function calculate_area() => float;
+};
+
+implementation SHAPE {
+  function calculate_area() => float {
+    return (0.0);
+  }
+}
+
+implementation CIRCLE {
+  function build(r: float) => CIRCLE {
+    local new_circle: CIRCLE;
+    new_circle.radius := r;
+    return (new_circle);
+  }
+  
+  function calculate_area() => float {
+    local result: float;
+    result := 3.14159 * radius * radius;
+    return (result);
+  }
+}
+
+function main() => void {
+  local c1: CIRCLE;
+  c1 := c1.build(5.0);
+  write(c1.calculate_area());
+}

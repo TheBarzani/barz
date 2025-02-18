@@ -1,0 +1,23 @@
+class SIMPLE {
+  private attribute a: float;
+  public function setA(val: float) => void;
+  public function getA() => float;
+};
+
+implementation SIMPLE {
+  function setA(val: float) => void
+  {
+    a := val;
+  }
+  function getA() => float
+  {
+    return(a);
+  }
+}
+
+function main() => void
+{
+  local obj: SIMPLE;
+  obj := obj.setA(10.5);
+  write(obj.getA());
+}

@@ -1,0 +1,19 @@
+// ====== Test: Calling factorial with 5 ======
+function factorial(n: int) => int
+{
+  local result: int;
+  local i: int;
+  result := 1;
+  i := 1;
+  while(i <= n)
+  {
+    result := result * i;
+    i := i + 1;
+  };
+  return(result);
+}
+
+function main() => void
+{
+  write(factorial(5));
+}

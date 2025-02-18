@@ -1,5 +1,3 @@
-
-
 /**
  * @file Scanner.cpp
  * @brief Implementation of the Scanner class for lexical analysis.
@@ -21,7 +19,7 @@
  * @brief Initialize static members with proper token names for operators.
  */
 const std::unordered_map<std::string, std::string> Scanner::operators = {
-    {"==", "eq"}, {"<>", "noteq"}, {"<", "lt"}, {">", "gt"},
+    {"==", "eq"}, {"<>", "neq"}, {"<", "lt"}, {">", "gt"},
     {"<=", "leq"}, {">=", "geq"}, {"+", "plus"}, {"-", "minus"},
     {"*", "mult"}, {"/", "div"}, {":=", "assign"}, {"=>", "arrow"}
 };
@@ -30,8 +28,8 @@ const std::unordered_map<std::string, std::string> Scanner::operators = {
  * @brief Initialize static members with punctuation token names.
  */
 const std::unordered_map<std::string, std::string> Scanner::punctuation = {
-    {"(", "openpar"}, {")", "closepar"}, {"{", "opencubr"}, {"}", "closecubr"},
-    {"[", "opensqbr"}, {"]", "closesqbr"}, {",", "comma"}, {".", "dot"},
+    {"(", "lpar"}, {")", "rpar"}, {"{", "lcurbr"}, {"}", "rcurbr"},
+    {"[", "lsqbr"}, {"]", "rsqbr"}, {",", "comma"}, {".", "dot"},
     {":", "colon"}, {";", "semi"}
 };
 
@@ -99,13 +97,7 @@ void Scanner::getNextChar() {
  */
 void Scanner::skipWhitespace() {
     while (isspace(currentChar) && !input.eof()) {
-        if (currentChar == '\n') {
-            currentLine++;
-            currentColumn = 0;
-        } else {
-            currentColumn++;
-        }
-        currentChar = input.get();
+        getNextChar();
     }
 }
 
@@ -125,9 +117,7 @@ std::string Scanner::scanComment(int& endLine) {
             comment += currentChar;
             getNextChar();
         } while (!input.eof() && currentChar != '\n');
-        if (comment[comment.size()-1]=='\n' || comment[comment.size()-1]==13) comment.pop_back(); // Remove the newline character
-        currentLine--;
-        endLine = currentLine;
+        endLine = currentLine-1;
         return comment;
     } 
     else if (currentChar == '*') {  // Block comment
@@ -158,7 +148,6 @@ std::string Scanner::scanComment(int& endLine) {
                 }
             } else {
                 if (currentChar == '\n') {
-                    comment.pop_back(); // Remove the newline character
                     comment += "\\n";
                 } else {
                     comment += currentChar;
@@ -166,10 +155,10 @@ std::string Scanner::scanComment(int& endLine) {
                 getNextChar();
             }
         }
-        endLine = currentLine;
+        endLine = currentLine-1;
         return comment;
     }
-    endLine = currentLine;
+    endLine = currentLine-1;
     return comment;
 }
 
@@ -291,20 +280,20 @@ Token Scanner::scanNumber() {
             lexeme += currentChar;
             getNextChar();
         }
-        return {"invalidnum", lexeme, startLine, startLine};
+        return {"invalidlit", lexeme, startLine, startLine};
     }
 
     // Check for invalid float or exponent without digits
     if ((isFloat && fractionPart.empty()) || (isExponent && exponentDigits.empty())) {
-        return {"invalidnum", lexeme, startLine, startLine};
+        return {"invalidlit", lexeme, startLine, startLine};
     }
 
     // Check for invalid number formats
     if ((integerPart.size() > 1 && integerPart[0] == '0' ) || (exponentDigits.size() > 1 && exponentDigits[0]=='0') || (fractionPart.size() > 1 && fractionPart[fractionPart.size() - 1] == '0')) {
-        return {"invalidnum", lexeme, startLine, startLine};
+        return {"invalidlit", lexeme, startLine, startLine};
     }
     
-    return {isFloat ? "floatnum" : "intnum", lexeme, startLine, startLine};
+    return {isFloat ? "floatlit" : "intlit", lexeme, startLine, startLine};
 }
 
 /**
@@ -358,7 +347,7 @@ Token Scanner::getNextToken() {
     
     skipWhitespace();
     if (input.eof()) {
-        return {"eof", "", currentLine, currentLine};
+        return {"$", "", currentLine, currentLine};
     }
     
     // Handle comments
@@ -388,16 +377,27 @@ Token Scanner::getNextToken() {
  */
 void Scanner::processFile() {
     Token token;
+    do {
+        token = getNextToken();
+        if (token.type == "$") break;
+        tokens.push_back(token);
+    } while (true);
+}
+
+/**
+ * @brief Write the generated tokens to the output file.
+ */
+void Scanner::writeOutputsToFile() {
+    Token token;
     std::string currentOutput;
     int lastLine = -1; // Track the last line number of the output
     
-    do {
-        token = getNextToken();
-        
-        if (token.type == "eof") break;
+    for (auto it = tokens.begin(); it != tokens.end(); ++it) {
+            
+        token = *it;
         
         if (token.type.substr(0,7) == "invalid") {
-            reportError(token.type, token.lexeme);
+            reportError(token);
         }
 
         // Format the token output
@@ -426,12 +426,13 @@ void Scanner::processFile() {
         // Update the last processed line number.
         lastLine = token.endLine;
         
-    } while (true);
-    
+    }
+
     // Output remaining tokens
     if (!currentOutput.empty()) {
         tokenOutput << currentOutput << "\n";
     }
+    
 }
 
 /**
@@ -440,18 +441,18 @@ void Scanner::processFile() {
  * @param message The error message.
  * @param lexeme The lexeme that caused the error.
  */
-void Scanner::reportError(const std::string& message, const std::string& lexeme) {
+void Scanner::reportError(const Token& token) {
     std::string niceMessage;
-
+    std::string message = token.type;
     if (message == "invalidid") {
         niceMessage = "Invalid identifier";
-    } else if (message == "invalidnum") {
-        niceMessage = "Invalid number";
+    } else if (message == "invalidlit") {
+        niceMessage = "Invalid literal";
     } else if (message == "invalidchar") {
         niceMessage = "Invalid character";
     } else {
         niceMessage = "Unknown error";
     }
 
-    errorOutput << "Lexical error: " << niceMessage << ": \"" << lexeme << "\": line " << currentLine << "." << std::endl;
+    errorOutput << "Lexical error: " << niceMessage << ": \"" << token.lexeme << "\": line " << token.line << "." << std::endl;
 }
