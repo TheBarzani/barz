@@ -1,0 +1,16 @@
+No production found for FUNCBODY with lookahead local
+Syntax error at line 3: Unexpected token 'local'
+No production found for FUNCBODY with lookahead id
+Syntax error at line 3: Unexpected token 'id'
+No production found for FUNCBODY with lookahead colon
+Syntax error at line 3: Unexpected token 'colon'
+No production found for FUNCBODY with lookahead int
+Syntax error at line 3: Unexpected token 'int'
+No production found for FUNCBODY with lookahead lsqbr
+Syntax error at line 3: Unexpected token 'lsqbr'
+No production found for FUNCBODY with lookahead intlit
+Syntax error at line 3: Unexpected token 'intlit'
+No production found for FUNCBODY with lookahead rsqbr
+Syntax error at line 3: Unexpected token 'rsqbr'
+No production found for FUNCBODY with lookahead semi
+Syntax error at line 3: Unexpected token 'semi'

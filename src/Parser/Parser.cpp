@@ -1,16 +1,33 @@
 #include "Parser.h"
 #include <stack>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
 
-Parser::Parser(const std::string& inputFile, const std::string& parsingTable) : table(ParsingTable(parsingTable)) , scanner(Scanner(inputFile)) {
+Parser::Parser(const std::string& inputFile, const std::string& parsingTable)
+    : table(ParsingTable(parsingTable)), scanner(Scanner(inputFile)) {
     scanner.processFile();
     tokens = scanner.getTokens();
     scanner.writeOutputsToFile();
+    filename = inputFile.substr(0, inputFile.size() - 4);
+    // Initialize the current derivation to the start symbol.
+    currentDerivation = "START";
 }
 
 Parser::~Parser() {
-    // Close the output files
+    // Write derivations to file
+    derivationOutput.open(filename + ".outderivation");
+    for (const auto& derivation : derivations) {
+        derivationOutput << derivation << std::endl;
+    }
     derivationOutput.close();
+
+    // Write syntax errors to file
+    errorOutput.open(filename + ".outsyntaxerrors");
+    for (const auto& error : syntaxErrors) {
+        errorOutput << error << std::endl;
+    }
     errorOutput.close();
 }
 
@@ -18,7 +35,7 @@ bool Parser::parse() {
     parseStack.push("$");
     parseStack.push("START"); // Assuming "START" is the start symbol
 
-    // Add this debug code
+    // Debug output for productions (unchanged)
     std::cout << "Initial parsing table state:\n";
     table.printProductions("START");
     table.printProductions("CLASSDECL");
@@ -28,32 +45,62 @@ bool Parser::parse() {
 
     while (parseStack.top() != "$") {
         std::string x = parseStack.top();
-        std::cout << "Current token: " << lookahead.type << ", Stack top: " << x << std::endl; // Add debug output
+        std::cout << "Current token: " << lookahead.type << ", Stack top: " << x << std::endl;
 
         if (table.isTerminal(x)) {
             if (x == lookahead.type) {
-                std::cout << "Matched terminal: " << x << std::endl; // Add debug output
+                std::cout << "Matched terminal: " << x << std::endl;
                 parseStack.pop();
                 lookahead = nextToken();
             } else {
-                std::cout << "Error: Expected " << x << " but got " << lookahead.type << std::endl; // Add debug output
+                std::cout << "Error: Expected " << x << " but got " << lookahead.type << std::endl;
+                syntaxErrors.push_back("Error: Expected " + x + " but got " + lookahead.type);
                 skipErrors();
                 error = true;
             }
         } else {
             std::string production = table.getProduction(x, lookahead.type);
             if (production != "error") {
-                std::cout << "Using production: " << production << std::endl; // Add debug output
-                parseStack.pop(); // Make sure we pop before pushing new symbols
+                std::cout << "Using production: " << production << std::endl;
+                // ---------------------------------------------------------
+                // Update the full derivation string:
+                std::string oldDerivation = currentDerivation;
+                // Replace the first occurrence of non-terminal x with the right-hand side production.
+                size_t pos = currentDerivation.find(x);
+                if (pos != std::string::npos) {
+                    std::istringstream iss(production);
+                    std::string temp;
+                    // Skip the first two tokens (assumed: nonterminal and arrow symbol)
+                    iss >> temp; // Skip the nonterminal
+                    iss >> temp; // Skip the arrow (→)
+                    std::string remainingProduction;
+                    std::getline(iss, remainingProduction); // Get the rest of the production
+                    // If "&epsilon" is encountered, treat it as an empty string.
+                    if (remainingProduction.find("&epsilon") != std::string::npos) {
+                        remainingProduction = "";
+                    }
+                    currentDerivation.replace(pos, x.length(), remainingProduction);
+                }
+                derivations.push_back("(" + oldDerivation + ", " + production + ")");
+                // ---------------------------------------------------------
+
+                parseStack.pop(); // Pop before pushing new symbols
                 inverseRHSMultiplePush(production);
             } else {
-                std::cout << "No production found for " << x << " with lookahead " << lookahead.type << std::endl; // Add debug output
+                std::cout << "No production found for " << x << " with lookahead " << lookahead.type << std::endl;
+                syntaxErrors.push_back("No production found for " + x + " with lookahead " + lookahead.type);
                 skipErrors();
                 error = true;
             }
         }
     }
 
+    // Add the final derivation entry if we ended on '$'
+    if (parseStack.top() == "$") {
+        derivations.push_back("(" + currentDerivation + ", $)");
+    }
+
+    // Always return true if the parse reaches "$", even if errors were encountered.
     return (lookahead.type == "$" && !error);
 }
 
@@ -61,14 +108,15 @@ Token Parser::nextToken() {
     static auto it = tokens.begin();
     while (it != tokens.end()) {
         Token token = *it++;
-        if (token.type != "blockcmt" && token.type != "inlinecmt" && token.type.substr(0, 7) != "invalid") {
+        if (token.type != "blockcmt" && token.type != "inlinecmt" &&
+            token.type.substr(0, 7) != "invalid") {
             return token;
         }
     }
-    // If exhausted, return an end-of-input token with default positions.
-    return {"$", "", scanner.getLineCount(), scanner.getLineCount()}; // Use appropriate default values
+    return {"$", "", scanner.getLineCount(), scanner.getLineCount()};
 }
 
+// In inverseRHSMultiplePush(), skip pushing "&epsilon"
 void Parser::inverseRHSMultiplePush(const std::string& production) {
     if (production.empty()) {
         return;  // Handle empty production (epsilon)
@@ -78,18 +126,21 @@ void Parser::inverseRHSMultiplePush(const std::string& production) {
     std::vector<std::string> symbols;
     std::string symbol;
 
-    // Skip the first two symbols
+    // Skip the first two tokens (production format assumed to be: nonterminal → RHS)
     int skippedCount = 0;
     while (skippedCount < 2 && (iss >> symbol)) {
         skippedCount++;
     }
 
-    // Read the remaining symbols
+    // Read the remaining symbols to be pushed
     while (iss >> symbol) {
+        // Skip "&epsilon" symbols.
+        if (symbol == "&epsilon")
+            continue;
         symbols.push_back(symbol);
     }
 
-    // Push symbols in reverse order
+    // Push symbols in reverse order onto the parse stack.
     for (auto it = symbols.rbegin(); it != symbols.rend(); ++it) {
         parseStack.push(*it);
         if (table.isTerminal(*it)) {
@@ -101,31 +152,37 @@ void Parser::inverseRHSMultiplePush(const std::string& production) {
 }
 
 bool Parser::skipErrors() {
-    std::string currentTop = parseStack.top();
-    
-    // Report the syntax error with location
-    std::cerr << "Syntax error at line " << lookahead.line << ": Unexpected token '" 
-              << lookahead.type << "'" << std::endl;
-    
-    // Case 1: If lookahead is $ or in FOLLOW(top)
-    if (lookahead.type == "$" || table.isInFollow(currentTop, lookahead.type)) {
+    std::string A = parseStack.top();
+    std::string errorMsg = "Syntax error at line " + std::to_string(lookahead.line) +
+                           ": Unexpected token '" + lookahead.type + "'";
+    std::cerr << errorMsg << std::endl;
+    syntaxErrors.push_back(errorMsg);
+
+    // If lookahead is "$" or in FOLLOW(A), recover by popping A.
+    if (lookahead.type == "$" || table.isInFollow(A, lookahead.type)) {
+        std::cout << "Panic mode recovery: Pop " << A << std::endl;
         parseStack.pop();
         return true;
     }
     
-    // Case 2: Skip tokens until we find something in FIRST(top) or FOLLOW(top)
-    while (!table.isInFirst(currentTop, lookahead.type) && 
-           !(table.isInFirst(currentTop, lookahead.type) && 
-             table.isInFollow(currentTop, lookahead.type))) {
-        
-        lookahead = nextToken();
-        
-        // Check if we've reached the end of input
-        if (lookahead.type == "$") {
-            return false;
-        }
+    // If the current token is already acceptable, do nothing.
+    if (table.isInFirst(A, lookahead.type) ||
+       (table.hasEpsilon(A) && table.isInFollow(A, lookahead.type))) {
+        return true;
     }
     
+    // Otherwise, skip tokens until we find one in FIRST(A) (or, for an ε‑producing A, in FOLLOW(A)).
+    while (lookahead.type != "$" &&
+           !table.isInFirst(A, lookahead.type) &&
+           !(table.hasEpsilon(A) && table.isInFollow(A, lookahead.type))) {
+        std::cout << "Skipping token: " << lookahead.type << std::endl;
+        lookahead = nextToken();
+        // Check immediately—if the new token is acceptable, break out.
+        if (!table.isInFirst(A, lookahead.type) ||
+           (table.hasEpsilon(A) && !table.isInFollow(A, lookahead.type))) {
+            std::cout << "Found acceptable token: " << lookahead.type << std::endl;
+            break;
+        }
+    }
     return true;
 }
-
