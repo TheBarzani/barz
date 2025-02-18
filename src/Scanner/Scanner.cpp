@@ -1,5 +1,3 @@
-
-
 /**
  * @file Scanner.cpp
  * @brief Implementation of the Scanner class for lexical analysis.
@@ -99,13 +97,7 @@ void Scanner::getNextChar() {
  */
 void Scanner::skipWhitespace() {
     while (isspace(currentChar) && !input.eof()) {
-        if (currentChar == '\n') {
-            currentLine++;
-            currentColumn = 0;
-        } else {
-            currentColumn++;
-        }
-        currentChar = input.get();
+        getNextChar();
     }
 }
 
@@ -125,9 +117,7 @@ std::string Scanner::scanComment(int& endLine) {
             comment += currentChar;
             getNextChar();
         } while (!input.eof() && currentChar != '\n');
-        if (comment[comment.size()-1]=='\n' || comment[comment.size()-1]==13) comment.pop_back(); // Remove the newline character
-        currentLine--;
-        endLine = currentLine;
+        endLine = currentLine-1;
         return comment;
     } 
     else if (currentChar == '*') {  // Block comment
@@ -158,7 +148,6 @@ std::string Scanner::scanComment(int& endLine) {
                 }
             } else {
                 if (currentChar == '\n') {
-                    comment.pop_back(); // Remove the newline character
                     comment += "\\n";
                 } else {
                     comment += currentChar;
@@ -166,10 +155,10 @@ std::string Scanner::scanComment(int& endLine) {
                 getNextChar();
             }
         }
-        endLine = currentLine;
+        endLine = currentLine-1;
         return comment;
     }
-    endLine = currentLine;
+    endLine = currentLine-1;
     return comment;
 }
 

@@ -66,7 +66,7 @@ Token Parser::nextToken() {
         }
     }
     // If exhausted, return an end-of-input token with default positions.
-    return {"$", "", -1, -1}; // Use appropriate default values
+    return {"$", "", scanner.getLineCount(), scanner.getLineCount()}; // Use appropriate default values
 }
 
 void Parser::inverseRHSMultiplePush(const std::string& production) {
@@ -104,8 +104,8 @@ bool Parser::skipErrors() {
     std::string currentTop = parseStack.top();
     
     // Report the syntax error with location
-    // std::cerr << "Syntax error at line " << lookahead.line << ": Unexpected token '" 
-            //   << lookahead.type << "'" << std::endl;
+    std::cerr << "Syntax error at line " << lookahead.line << ": Unexpected token '" 
+              << lookahead.type << "'" << std::endl;
     
     // Case 1: If lookahead is $ or in FOLLOW(top)
     if (lookahead.type == "$" || table.isInFollow(currentTop, lookahead.type)) {

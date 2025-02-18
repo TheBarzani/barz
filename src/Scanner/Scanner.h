@@ -88,6 +88,12 @@ public:
      */
     std::vector<Token> getTokens() const { return tokens; }
 
+    /**
+     * @brief Retrieves the total number of lines in the scanned source file.
+     * @return The total line count.
+     */
+    int getLineCount() const { return currentLine; }
+
 private:
     std::ifstream input;                ///< Input file stream
     std::string filename;               ///< Name of the input file
@@ -166,7 +172,7 @@ private:
      * @brief Retrieves the current line of text being processed.
      * @return The current line of text.
      */
-    std::string getCurrentLine();
+    // std::string getCurrentLine();
 
     static const std::unordered_map<std::string, std::string> reservedWords; ///< Map of reserved words
     static const std::unordered_map<std::string, std::string> operators;     ///< Map of operators
