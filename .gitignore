@@ -34,3 +34,4 @@
 # Added by TheBarzani
 build/
 bin/
+.vscode/

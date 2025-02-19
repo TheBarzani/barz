@@ -1,0 +1,65 @@
+nonterminal,first set,follow set
+START,class implementation function constructor,∅
+ARRAYSIZE2,intlit rsqbr,semi lsqbr rpar comma
+CLASSDECL,class,class implementation function constructor
+EXPR2,eq neq lt gt leq geq,comma rpar semi
+FACTOR2,lpar lsqbr,mult div and dot eq neq lt gt leq geq rsqbr plus minus or comma rpar semi
+REPTVARIABLEORFUNCTIONCALL,dot,mult div and eq neq lt gt leq geq rsqbr plus minus or comma rpar semi
+FUNCBODY,lcurbr,class implementation function constructor rcurbr
+FUNCHEAD,function constructor,semi lcurbr
+FPARAMS,id,rpar
+IDNEST,dot,mult div and dot eq neq lt gt leq geq rsqbr plus minus or comma rpar semi
+IDNEST2,lpar lsqbr,mult div and dot eq neq lt gt leq geq rsqbr plus minus or comma rpar semi
+IMPLDEF,implementation,class implementation function constructor
+LOCALVARDECL,local,local if while read write return id self rcurbr
+FUNCDECL,function constructor,public private rcurbr
+ATTRIBUTEDECL,attribute,public private rcurbr
+OPTCLASSDECL2,isa,lcurbr
+PROG,class implementation function constructor,∅
+RELOP,eq neq lt gt leq geq,intlit floatlit lpar not id self plus minus
+APARAMSTAIL,comma,comma rpar
+REPTAPARAMS1,comma,rpar
+MEMBERDECL,attribute function constructor,public private rcurbr
+REPTCLASSDECL4,public private,rcurbr
+REPTFPARAMS3,lsqbr,rpar comma
+FPARAMSTAIL,comma,comma rpar
+REPTFPARAMS4,comma,rpar
+REPTFPARAMSTAIL4,lsqbr,comma rpar
+LOCALVARDECLORSTAT,local if while read write return id self,local if while read write return id self rcurbr
+REPTFUNCBODY1,local if while read write return id self,rcurbr
+INDICE,lsqbr,mult div and lsqbr dot eq neq lt gt leq geq rsqbr plus minus or comma rpar semi
+FUNCDEF,function constructor,class implementation function constructor rcurbr
+REPTIMPLDEF3,function constructor,rcurbr
+REPTOPTCLASSDECL22,comma,lcurbr
+CLASSORIMPLORFUNC,class implementation function constructor,class implementation function constructor
+REPTPROG0,class implementation function constructor,∅
+ARRAYSIZE,lsqbr,semi lsqbr rpar comma
+RETURNTYPE,void int float id,semi lcurbr
+ADDOP,plus minus or,intlit floatlit lpar not id self plus minus
+RIGHTRECARITHEXPR,plus minus or,eq neq lt gt leq geq rsqbr comma rpar semi
+MULTOP,mult div and,intlit floatlit lpar not id self plus minus
+SIGN,plus minus,intlit floatlit lpar not id self plus minus
+REPTSTATBLOCK1,if while read write return id self,rcurbr
+STATEMENT,if while read write return id self,else semi local if while read write return id self rcurbr
+RELEXPR,intlit floatlit lpar not id self plus minus,rpar
+STATBLOCK,lcurbr if while read write return id self,else semi
+SELECTORLIST0,lsqbr dot,lpar assign
+TYPESELECTOR,lsqbr dot,lsqbr dot lpar assign
+ARITHEXPR,intlit floatlit lpar not id self plus minus,eq neq lt gt leq geq rsqbr comma rpar semi
+STATEMENTSUFFIX0,lpar assign,else semi local if while read write return id self rcurbr
+EXPR,intlit floatlit lpar not id self plus minus,comma rpar semi
+TERM,intlit floatlit lpar not id self plus minus,eq neq lt gt leq geq rsqbr plus minus or comma rpar semi
+FACTOR,intlit floatlit lpar not id self plus minus,mult div and eq neq lt gt leq geq rsqbr plus minus or comma rpar semi
+RIGHTRECTERM,mult div and,eq neq lt gt leq geq rsqbr plus minus or comma rpar semi
+VARDECL,id,local if while read write return id self public private rcurbr
+TYPE,int float id,rpar lcurbr comma lsqbr semi
+REPTVARDECL3,lsqbr,semi
+VARIABLE,id self,rpar
+IDORSELF,id self,mult div and assign lpar lsqbr dot eq neq lt gt leq geq rsqbr plus minus or comma rpar semi
+VARIABLE2,lpar lsqbr dot,rpar
+REPTVARIABLE,dot,rpar
+VARIDNEST2,lpar lsqbr,dot rpar
+APARAMS,intlit floatlit lpar not id self plus minus,rpar
+VARIDNEST,dot,dot rpar
+REPTIDNEST1,lsqbr,mult div and dot eq neq lt gt leq geq rsqbr plus minus or comma rpar semi
+VISIBILITY,public private,attribute function constructor
