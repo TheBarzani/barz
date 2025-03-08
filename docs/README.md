@@ -163,3 +163,33 @@ STATEMENTSUFFIX0 -> assign EXPR semi  .
 *The grammar is now an LL(1) grammar.*
 
 `NOTE: In the partial solution, the 'self' keyword is completely eliminated. However, I kept it in my grammar for adhering to the original grammar. In the original grammar calling 'self' on 'self' keyword is allowed, however I changed this as it does not have a meaning without eliminating the self keyword.` 
+
+# More Specs
+Files:
+
+1. assigment statement
+
+   assignment3.COMP442-6421.paquet.2025.4.pdf
+  
+2. example outast output
+
+   examples/example1.source                 source file (warning: not is the same language as we have now)
+   examples/example1.ast.outast             text-readable output  
+   examples/example1.dot.outast             graphviz/dot-readable output
+
+   examples/example2.source                 source file (warning: not is the same language as we have now)
+   examples/example2.ast.outast             text-readable output  
+   examples/example2.dot.outast             graphviz/dot-readable output
+
+   examples/example3.source                 source file (warning: not is the same language as we have now)
+   examples/example3.ast.outast             text-readable output  
+   examples/example3.dot.outast             graphviz/dot-readable output
+
+3. example source files
+
+   source files/bubblesort.src
+   source files/polynomial.src
+
+4. LL(1) grammar
+
+   grammar.LL1.grm

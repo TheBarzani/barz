@@ -1,0 +1,84 @@
+
+class id {
+	public func id ( id : float ) arrow float ;
+} ;
+
+class id isa id {
+	private attribute id : float ;
+	private attribute id : float ;
+	public  function id ( id : float , id : float ) arrow id ;
+	public  function id ( id : float ) arrow float ;
+} ;
+
+class id isa id {
+	private attribute id : float ;
+	private attribute id : float ;
+	private attribute id : float ;
+	public  function id ( id : float , id : float , id : float ) arrow id ;
+	public  function id ( id : float ) arrow float ;
+} ;
+
+
+implementation id {   
+  function id ( id : float ) arrow float
+  {
+    return ( intLit ) ;
+  }
+}
+  
+implementation id { 
+  function id ( id : float ) arrow float
+  {
+    local id : float ;
+
+    id = a ;
+    id = id * id + id ; 
+    id = id * id + id ;
+    return ( id ) ;
+   }
+
+  function  id ( id : float , id : float , id : float ) arrow id
+  {
+    local id : id ;
+    id . id = id ;
+    id . id = id ;
+    id . id = id ;
+    return ( id ) ;
+  }
+}
+  
+implementation id {
+  function id ( id : float , id : float ) arrow id 
+  {
+    local id : id ;
+    id . id = id ;
+    id . id = id ;
+    return ( id ) ;
+  }
+
+  function id ( id : float ) arrow float 
+  {
+    local id : float ;
+    id = floatLit ;
+    id = id * id + id ;
+    return ( id ) ;
+  }
+} 
+
+
+function id ( ) arrow void
+{
+  local id : id ;
+  local id : id ;
+  local id : integer ;
+  id = id . id ( intLit , floatLit ) ;
+  id = id . id ( floatLit , floatLit , floatLit ) ;
+  id = 1 ;
+	
+  while ( id leq intLit )
+  {
+    write ( id ) ;
+    write ( id . id ( id ) ) ;
+    write ( id . id ( id ) ) ;
+  } ;
+}

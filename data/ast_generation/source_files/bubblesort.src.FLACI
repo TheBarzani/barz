@@ -1,0 +1,51 @@
+function id ( id : integer [ ] , id : integer ) arrow void 
+{
+  local id : integer ;
+  local id : integer ;
+  local id : integer ;
+  local id : integer ; 
+  id = id ;
+  id = intLit ;
+  id = intLit ;
+  id = intLit ;
+  while ( id lt id - intLit ) { 
+    while ( id lt id - id - intLit ) {
+      if (id [ id ] gt id [ id + intLit ] ) 
+        then {
+          id = id [ id ] ;
+          id [ id ] = id [ id + intLit ] ;
+          id [ id + intLit ] = id ;
+        } else ;
+        id = id + intLit ;
+      };
+    id = id + intLit ;
+  };
+}
+   
+function id ( id : integer [ ] , id : integer ) arrow void 
+{
+  local id : integer ;
+  local id : integer ; 
+  id = id;
+  id = intLit; 
+  while ( id lt id ) { 
+    write ( id [ id ] ) ;
+      id = id + intLit ;
+  };
+} 
+
+function id ( ) arrow void
+{
+  local id : integer [ intLit ] ; 
+  id [ intLit ] = intLit ;
+  id [ intLit ] = intLit ;
+  id [ intLit ] = intLit ;
+  id [ intLit ] = intLit ;
+  id [ intLit ] = intLit ;
+  id [ intLit ] = intLit ;
+  id [ intLit ] = intLit ;
+  id ( id , intLit ) ; 
+  id ( id , intLit ) ;
+  id ( id , intLit ) ; 
+}
+
