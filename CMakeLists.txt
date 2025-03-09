@@ -16,17 +16,30 @@ add_executable(parsedriver
     src/Parser/Parser.cpp      # Parser implementation
     src/ParseDriver.cpp        # Driver code
 )
+add_executable(astdriver
+    src/Scanner/Scanner.cpp    # Scanner implementation
+    src/Parser/Parser.cpp      # Parser implementation
+    src/ASTGenerator/AST.cpp   # AST generation code
+    src/ASTDriver.cpp          # Driver code
+)
 
 # Include directories (headers in include/Scanner)
 target_include_directories(lexdriver PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-# Include CSV file
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/Parser/parsing_table.csv ${CMAKE_BINARY_DIR}/parsing_table.csv COPYONLY)
+
 # Include directories (headers in include/Parser)
 target_include_directories(parsedriver PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+# Include CSV file
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/syntactical_analysis/ll1_parsing_table.csv ${CMAKE_BINARY_DIR}/ll1_parsing_table.csv COPYONLY)
+
+# Include directories (headers in include/Parser)
+target_include_directories(astdriver PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
 # Add the tests directory
 add_subdirectory(tests)
 

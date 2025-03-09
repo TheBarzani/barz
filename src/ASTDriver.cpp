@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string tableFile = "LL1_parsing_table.csv";
+    std::string tableFile = "attribute_grammar_parsing_table.csv";
     std::vector<std::string> inputFiles;
 
     for (int i = 1; i < argc; ) {

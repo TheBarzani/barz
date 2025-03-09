@@ -219,7 +219,7 @@ public:
      * @param filename The CSV file name from which the parsing table is loaded.
      * @throws std::runtime_error If the CSV file cannot be loaded.
      */
-    ParsingTable(const std::string& filename = "parsing_table.csv") {
+    ParsingTable(const std::string& filename = "LL1_parsing_table.csv") {
         if (!loadFromCSV(filename)) {
             throw std::runtime_error("Failed to load parsing table from CSV file: " + filename);
         }

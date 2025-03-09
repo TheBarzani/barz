@@ -1,5 +1,4 @@
 /**
- * @class Parser
  * @brief Responsible for syntactical parsing of an input file using a parsing table.
  *
  * The Parser class implements the logic to perform syntactic analysis on the tokenized input
@@ -21,28 +20,9 @@
 #include <stack>
 #include "ParsingTable.h"
 #include "Scanner/Scanner.h"
-
+#include "ASTGenerator/AST.h"
 
 class Parser {  
-    public:
-        // Constructor: Initializes the Parser with the given parsing table and input file.
-        Parser(const std::string& parsingTable, const std::string& inputFile);
-        
-        // Destructor: Cleans up any resources used by the Parser.
-        ~Parser();
-        
-        // parse: Starts the syntactical parsing process.
-        bool parse();
-        
-        // skipErrors: Attempts to recover from a parsing error by skipping erroneous tokens.
-        bool skipErrors();
-        
-        // inverseRHSMultiplePush: Pushes the right-hand side production symbols onto the parse stack in reverse order.
-        void inverseRHSMultiplePush(const std::string& production);
-        
-        // nextToken: Retrieves the next token from the input.
-        Token nextToken();
-
     private:
         ParsingTable table;                 // Parsing table used to guide the parsing process.
         Scanner scanner;                    // Scanner object to tokenize the input file.
@@ -55,5 +35,58 @@ class Parser {
         std::vector<std::string> derivations;    // List of derivation strings produced during parsing.
         std::vector<std::string> syntaxErrors;   // List of detected syntax errors.
         std::string currentDerivation;      // Current derivation in progress.
+        AST ast;                            // Abstract syntax tree (AST) object.
+
+    public:
+    /**
+     * @brief Initializes the Parser with the given parsing table and input file.
+     * @param parsingTable Path to the file containing the parsing table.
+     * @param inputFile Path to the source code file to be parsed.
+     */
+    Parser(const std::string& parsingTable, const std::string& inputFile);
+    
+    /**
+     * @brief Cleans up any resources used by the Parser.
+     */
+    ~Parser();
+    
+    /**
+     * @brief Starts the syntactical parsing process.
+     * @return true if the parsing completes successfully, false otherwise.
+     * 
+     * This method drives the main parsing algorithm, consuming tokens from the input,
+     * consulting the parsing table, and applying appropriate productions until
+     * the input is fully processed or an unrecoverable error is encountered.
+     */
+    bool parse();
+    
+    /**
+     * @brief Attempts to recover from a parsing error by skipping erroneous tokens.
+     * @return true if recovery was successful, false otherwise.
+     * 
+     * This method implements an error recovery strategy to allow parsing to continue
+     * after encountering a syntax error, typically by skipping tokens until a 
+     * synchronization point is reached.
+     */
+    bool skipErrors();
+    
+    /**
+     * @brief Pushes the right-hand side production symbols onto the parse stack in reverse order.
+     * @param production The production rule whose symbols will be pushed onto the stack.
+     * 
+     * Since the parse stack processes elements from top to bottom, this method ensures
+     * that symbols are pushed in the correct order for top-down parsing.
+     */
+    void inverseRHSMultiplePush(const std::string& production);
+    
+    /**
+     * @brief Retrieves the next token from the input.
+     * @return The next token from the input stream.
+     * 
+     * This method advances the scanner and returns the next meaningful token
+     * from the input source code.
+     */
+    Token nextToken();
 };
+
 #endif // PARSER_H

@@ -39,7 +39,7 @@ Parser::~Parser() {
 
 bool Parser::parse() {
     parseStack.push("$");
-    parseStack.push("START"); // Assuming "START" is the start symbol
+    parseStack.push("START");
 
     // Debug output for productions (unchanged)
     std::cout << "Initial parsing table state:\n";
@@ -64,11 +64,10 @@ bool Parser::parse() {
                 skipErrors();
                 error = true;
             }
-        } else {
+        } else if (table.isNonTerminal(x)) {    
             std::string production = table.getProduction(x, lookahead.type);
             if (production != "error") {
                 std::cout << "Using production: " << production << std::endl;
-                // ---------------------------------------------------------
                 // Update the full derivation string:
                 std::string oldDerivation = currentDerivation;
                 // Replace the first occurrence of non-terminal x with the right-hand side production.
@@ -76,7 +75,7 @@ bool Parser::parse() {
                 if (pos != std::string::npos) {
                     std::istringstream iss(production);
                     std::string temp;
-                    // Skip the first two tokens (assumed: nonterminal and arrow symbol)
+                    // Skip the first two tokens
                     iss >> temp; // Skip the nonterminal
                     iss >> temp; // Skip the arrow (→)
                     std::string remainingProduction;
@@ -98,6 +97,10 @@ bool Parser::parse() {
                 skipErrors();
                 error = true;
             }
+        }
+        else {
+            // Perform action on the AST for the corresponding semantic attribute rule.
+            ast.performAction(x);
         }
     }
 
@@ -122,7 +125,6 @@ Token Parser::nextToken() {
     return {"$", "", scanner.getLineCount(), scanner.getLineCount()};
 }
 
-// In inverseRHSMultiplePush(), skip pushing "&epsilon"
 void Parser::inverseRHSMultiplePush(const std::string& production) {
     if (production.empty()) {
         return;  // Handle empty production (epsilon)
