@@ -1,5 +1,5 @@
 ,$,private,public,rpar,lpar,id,dot,semi,colon,float,int,assign,rsqbr,lsqbr,return,write,read,while,else,then,if,rcurbr,lcurbr,minus,plus,void,comma,geq,leq,gt,lt,neq,eq,isa,and,div,mult,local,implementation,self,constructor,arrow,function,not,floatlit,intlit,class,attribute,or
-START,START -> PROG,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,START -> PROG,,START -> PROG,,START -> PROG,,,,START -> PROG,,
+START,START -> _createLists PROG _mergeLists,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,START -> _createLists PROG _mergeLists,,START -> _createLists PROG _mergeLists,,START -> _createLists PROG _mergeLists,,,,START -> _createLists PROG _mergeLists,,
 ADDOP,,,,,,,,,,,,,,,,,,,,,,,,ADDOP -> minus,ADDOP -> plus,,,,,,,,,,,,,,,,,,,,,,,,ADDOP -> or
 APARAMS,,,,APARAMS -> &epsilon,APARAMS -> EXPR REPTAPARAMS1,APARAMS -> EXPR REPTAPARAMS1,,,,,,,,,,,,,,,,,,APARAMS -> EXPR REPTAPARAMS1,APARAMS -> EXPR REPTAPARAMS1,,,,,,,,,,,,,,,APARAMS -> EXPR REPTAPARAMS1,,,,APARAMS -> EXPR REPTAPARAMS1,APARAMS -> EXPR REPTAPARAMS1,APARAMS -> EXPR REPTAPARAMS1,,,
 APARAMSTAIL,,,,,,,,,,,,,,,,,,,,,,,,,,,APARAMSTAIL -> comma EXPR,,,,,,,,,,,,,,,,,,,,,,
@@ -8,7 +8,7 @@ ARRAYSIZE,,,,,,,,,,,,,,ARRAYSIZE -> lsqbr ARRAYSIZE2,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 ARRAYSIZE2,,,,,,,,,,,,,ARRAYSIZE2 -> rsqbr,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ARRAYSIZE2 -> intlit rsqbr,,,
 ATTRIBUTEDECL,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ATTRIBUTEDECL -> attribute VARDECL,
 CLASSDECL,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,CLASSDECL -> class id OPTCLASSDECL2 lcurbr REPTCLASSDECL4 rcurbr semi,,
-CLASSORIMPLORFUNC,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,CLASSORIMPLORFUNC -> IMPLDEF,,CLASSORIMPLORFUNC -> FUNCDEF,,CLASSORIMPLORFUNC -> FUNCDEF,,,,CLASSORIMPLORFUNC -> CLASSDECL,,
+CLASSORIMPLORFUNC,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,CLASSORIMPLORFUNC -> IMPLDEF _createImplementation,,CLASSORIMPLORFUNC -> FUNCDEF _createFunction,,CLASSORIMPLORFUNC -> FUNCDEF _createFunction,,,,CLASSORIMPLORFUNC -> CLASSDECL _createClass,,
 EXPR,,,,,EXPR -> ARITHEXPR EXPR2,EXPR -> ARITHEXPR EXPR2,,,,,,,,,,,,,,,,,,EXPR -> ARITHEXPR EXPR2,EXPR -> ARITHEXPR EXPR2,,,,,,,,,,,,,,,EXPR -> ARITHEXPR EXPR2,,,,EXPR -> ARITHEXPR EXPR2,EXPR -> ARITHEXPR EXPR2,EXPR -> ARITHEXPR EXPR2,,,
 EXPR2,,,,EXPR2 -> &epsilon,,,,EXPR2 -> &epsilon,,,,,,,,,,,,,,,,,,,EXPR2 -> &epsilon,EXPR2 -> RELOP ARITHEXPR,EXPR2 -> RELOP ARITHEXPR,EXPR2 -> RELOP ARITHEXPR,EXPR2 -> RELOP ARITHEXPR,EXPR2 -> RELOP ARITHEXPR,EXPR2 -> RELOP ARITHEXPR,,,,,,,,,,,,,,,,
 FACTOR,,,,,FACTOR -> lpar ARITHEXPR rpar,FACTOR -> IDORSELF FACTOR2 REPTVARIABLEORFUNCTIONCALL,,,,,,,,,,,,,,,,,,FACTOR -> SIGN FACTOR,FACTOR -> SIGN FACTOR,,,,,,,,,,,,,,,FACTOR -> IDORSELF FACTOR2 REPTVARIABLEORFUNCTIONCALL,,,,FACTOR -> not FACTOR,FACTOR -> floatlit,FACTOR -> intlit,,,

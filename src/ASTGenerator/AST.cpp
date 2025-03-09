@@ -27,27 +27,27 @@ void AST::writeToFile(std::string filename) {
 }
 
 void AST::performAction(std::string action) {
-    if (action == "createLists")
+    if (action == "_createLists")
     {
 
     }
-    else if (action == "mergeLists")
+    else if (action == "_mergeLists")
     {
 
     }
-    else if (action == "createClass")
+    else if (action == "_createClass")
     {
     
     }
-    else if (action == "createFunc")
+    else if (action == "_createFunc")
     {
 
     }
-    else if (action == "createImpl")
+    else if (action == "_createImpl")
     {
 
     }
-    else if (action == "addToList")
+    else if (action == "_addToList")
     {
 
     }

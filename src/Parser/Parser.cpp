@@ -78,8 +78,14 @@ bool Parser::parse() {
                     // Skip the first two tokens
                     iss >> temp; // Skip the nonterminal
                     iss >> temp; // Skip the arrow (->)
-                    std::string remainingProduction;
-                    std::getline(iss, remainingProduction); // Get the rest of the production
+
+                    std::string remainingProduction = "";
+                    // Remove any strings that start with '_' from the production
+                    while (iss >> temp) {
+                        if (temp.empty() || temp[0] != '_') {
+                            remainingProduction += " " + temp;
+                        }
+                    }
                     // If "&epsilon" is encountered, treat it as an empty string.
                     if (remainingProduction.find("&epsilon") != std::string::npos) {
                         remainingProduction = "";
