@@ -77,7 +77,7 @@ bool Parser::parse() {
                     std::string temp;
                     // Skip the first two tokens
                     iss >> temp; // Skip the nonterminal
-                    iss >> temp; // Skip the arrow (→)
+                    iss >> temp; // Skip the arrow (->)
                     std::string remainingProduction;
                     std::getline(iss, remainingProduction); // Get the rest of the production
                     // If "&epsilon" is encountered, treat it as an empty string.
