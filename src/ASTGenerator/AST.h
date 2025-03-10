@@ -34,7 +34,7 @@ private:
      * @var ASTStack
      * @brief Stack used to track nodes during tree traversal and construction.
      */
-    std::stack<ASTNode*> ASTStack;
+    std::vector<ASTNode*> ASTStack;
     
 public:
     /**

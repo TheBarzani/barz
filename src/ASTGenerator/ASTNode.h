@@ -38,6 +38,8 @@ private:
     ASTNode *parent;          ///< Pointer to the parent node.
     NodeType nodeType;        ///< Type of this AST node.
     std::string nodeValue;    ///< Value or content of this AST node.
+    int nodeNumber;           ///< Unique number assigned to this node.
+    static int nodeCount;     ///< Counter for generating unique node numbers.
 
 public:
     /**
@@ -128,6 +130,12 @@ public:
      * @param nodeValue String value to be assigned to this node.
      */
     void setNodeValue(std::string nodeValue);
+
+    /**
+     * @brief Gets the unique node number.
+     * @return Unique number assigned to this node.
+     */
+    int getNodeNumber() const { return nodeNumber; }
 
     /**
      * @brief Adds a child node to this node.

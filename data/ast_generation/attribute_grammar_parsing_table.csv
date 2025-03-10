@@ -1,5 +1,5 @@
 ,$,private,public,rpar,lpar,id,dot,semi,colon,float,int,assign,rsqbr,lsqbr,return,write,read,while,else,then,if,rcurbr,lcurbr,minus,plus,void,comma,geq,leq,gt,lt,neq,eq,isa,and,div,mult,local,implementation,self,constructor,arrow,function,not,floatlit,intlit,class,attribute,or
-START,START -> _createLists PROG _mergeLists,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,START -> _createLists PROG _mergeLists,,START -> _createLists PROG _mergeLists,,START -> _createLists PROG _mergeLists,,,,START -> _createLists PROG _mergeLists,,
+START,START -> _createLists PROG,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,START -> _createLists PROG,,START -> _createLists PROG,,START -> _createLists PROG,,,,START -> _createLists PROG,,
 ADDOP,,,,,,,,,,,,,,,,,,,,,,,,ADDOP -> minus,ADDOP -> plus,,,,,,,,,,,,,,,,,,,,,,,,ADDOP -> or
 APARAMS,,,,APARAMS -> &epsilon,APARAMS -> EXPR REPTAPARAMS1,APARAMS -> EXPR REPTAPARAMS1,,,,,,,,,,,,,,,,,,APARAMS -> EXPR REPTAPARAMS1,APARAMS -> EXPR REPTAPARAMS1,,,,,,,,,,,,,,,APARAMS -> EXPR REPTAPARAMS1,,,,APARAMS -> EXPR REPTAPARAMS1,APARAMS -> EXPR REPTAPARAMS1,APARAMS -> EXPR REPTAPARAMS1,,,
 APARAMSTAIL,,,,,,,,,,,,,,,,,,,,,,,,,,,APARAMSTAIL -> comma EXPR,,,,,,,,,,,,,,,,,,,,,,

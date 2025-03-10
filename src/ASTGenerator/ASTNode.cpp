@@ -1,4 +1,7 @@
 #include "ASTNode.h"
+#include <iostream>
+
+int ASTNode::nodeCount = 0;
 
 ASTNode::ASTNode()
     : leftMostChild(nullptr),
@@ -6,8 +9,10 @@ ASTNode::ASTNode()
       rightSibling(nullptr),
       parent(nullptr),
       nodeType(NodeType::EMPTY),
-      nodeValue("")
+      nodeValue(""),
+      nodeNumber(nodeCount)
 {
+    nodeCount++;
 }
 
 ASTNode::ASTNode(NodeType nodeType, std::string nodeValue)
@@ -16,16 +21,14 @@ ASTNode::ASTNode(NodeType nodeType, std::string nodeValue)
       rightSibling(nullptr),
       parent(nullptr),
       nodeType(nodeType),
-      nodeValue(nodeValue)
+      nodeValue(nodeValue),
+      nodeNumber(nodeCount)   
 {
+    nodeCount++;
 }
 
 ASTNode::~ASTNode()
 {
-    delete leftMostChild;
-    delete leftMostSibling;
-    delete rightSibling;
-    delete parent;
 }
 
 ASTNode* ASTNode::getLeftMostChild()
@@ -40,7 +43,7 @@ void ASTNode::setLeftMostChild(ASTNode* leftMost)
 
 ASTNode* ASTNode::getLeftMostSibling()
 {
-    return leftMostSibling;
+    return leftMostSibling == nullptr ? this : leftMostSibling;
 }
 
 void ASTNode::setLeftMostSibling(ASTNode* leftMost)
@@ -121,6 +124,7 @@ void ASTNode::adoptChildren(ASTNode* child)
         // Set leftmost child
         ASTNode* ysibs = child->getLeftMostSibling();
         this->leftMostChild = ysibs;
+        ysibs->setParent(this);
         
         // Set parent for the right siblings
         while (ysibs != nullptr) {

@@ -12,15 +12,18 @@ add_executable(lexdriver
     src/LexDriver.cpp          # Driver code
 )
 add_executable(parsedriver
-    src/Scanner/Scanner.cpp    # Scanner implementation
-    src/Parser/Parser.cpp      # Parser implementation
-    src/ParseDriver.cpp        # Driver code
+    src/Scanner/Scanner.cpp         # Scanner implementation
+    src/Parser/Parser.cpp           # Parser implementation
+    src/ASTGenerator/AST.cpp        # AST generation code
+    src/ASTGenerator/ASTNode.cpp    # AST node code
+    src/ASTDriver.cpp               # Driver code
 )
 add_executable(astdriver
-    src/Scanner/Scanner.cpp    # Scanner implementation
-    src/Parser/Parser.cpp      # Parser implementation
-    src/ASTGenerator/AST.cpp   # AST generation code
-    src/ASTDriver.cpp          # Driver code
+    src/Scanner/Scanner.cpp         # Scanner implementation
+    src/Parser/Parser.cpp           # Parser implementation
+    src/ASTGenerator/AST.cpp        # AST generation code
+    src/ASTGenerator/ASTNode.cpp    # AST node code
+    src/ASTDriver.cpp               # Driver code
 )
 
 # Include directories (headers in include/Scanner)
@@ -33,7 +36,8 @@ target_include_directories(parsedriver PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 # Include CSV file
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/syntactical_analysis/ll1_parsing_table.csv ${CMAKE_BINARY_DIR}/ll1_parsing_table.csv COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/syntactical_analysis/LL1_parsing_table.csv ${CMAKE_BINARY_DIR}/LL1_parsing_table.csv COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/ast_generation/attribute_grammar_parsing_table.csv ${CMAKE_BINARY_DIR}/attribute_grammar_parsing_table.csv COPYONLY)
 
 # Include directories (headers in include/Parser)
 target_include_directories(astdriver PRIVATE

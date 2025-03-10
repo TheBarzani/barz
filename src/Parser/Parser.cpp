@@ -16,6 +16,8 @@ Parser::Parser(const std::string& inputFile, const std::string& parsingTable)
 }
 
 Parser::~Parser() {
+    // Write AST to file
+    ast.writeToFile(filename + ".astout");
     // Write derivations to file
     derivationOutput.open(filename + ".outderivation");
     for (const auto& derivation : derivations) {
@@ -107,6 +109,7 @@ bool Parser::parse() {
         else {
             // Perform action on the AST for the corresponding semantic attribute rule.
             ast.performAction(x);
+            parseStack.pop();
         }
     }
 
