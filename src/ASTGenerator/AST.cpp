@@ -107,7 +107,6 @@ void AST::performAction(std::string action) {
     {
         // TODO: Implement implementation creation
         current = createNode(NodeType::IMPLEMENTATION, "");
-        current->setParent((ASTStack.back())->getLeftMostChild()->getRightSibling()->getRightSibling()); // Add to function list
         (ASTStack.back())->getLeftMostChild()->getRightSibling()->getRightSibling()->adoptChildren(current);
     }
     
