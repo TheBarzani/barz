@@ -25,12 +25,6 @@ private:
     ASTNode *root;
     
     /**
-     * @var current
-     * @brief Pointer to the current node being processed or manipulated.
-     */
-    ASTNode *current;
-    
-    /**
      * @var ASTStack
      * @brief Stack used to track nodes during tree traversal and construction.
      */
@@ -67,6 +61,34 @@ public:
      * @param value String representing the value to be used in the action.
      */
     void performAction(std::string action, std::string value);
+    
+    /**
+     * @brief Creates a family node structure with a parent and two children.
+     * @param op The node type for the parent.
+     * @param kid1 First child node.
+     * @param kid2 Second child node.
+     * @return Pointer to the parent node with the children attached.
+     */
+    ASTNode* makeFamily(NodeType op, ASTNode* kid1, ASTNode* kid2);
+    
+    /**
+     * @brief Creates a family node structure with a parent and multiple children (variadic).
+     * @param op The node type for the parent.
+     * @param kid1 First child node.
+     * @param kid2 Second child node.
+     * @param rest Remaining child nodes.
+     * @return Pointer to the parent node with the children attached.
+     */
+    template<typename... Args>
+    ASTNode* makeFamily(NodeType op, ASTNode* kid1, ASTNode* kid2, Args... rest);
+    
+    /**
+     * @brief Creates a family node structure with a parent and a single child.
+     * @param op The node type for the parent.
+     * @param kid Single child node.
+     * @return Pointer to the parent node with the child attached.
+     */
+    ASTNode* makeFamily(NodeType op, ASTNode* kid);
 };
 
 #endif // AST_H
