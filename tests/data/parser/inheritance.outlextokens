@@ -24,7 +24,7 @@
 [rcurbr, }, 28]
 [function, function, 30] [id, calculate_area, 30] [lpar, (, 30] [rpar, ), 30] [arrow, =>, 30] [float, float, 30] [lcurbr, {, 30]
 [local, local, 31] [id, result, 31] [colon, :, 31] [float, float, 31] [semi, ;, 31]
-[id, result, 32] [assign, :=, 32] [floatlit, 3.14159, 32] [mult, *, 32] [id, radius, 32] [mult, *, 32] [id, radius, 32] [semi, ;, 32]
+[id, result, 32] [assign, :=, 32] [floatlit, 3.14159, 32] [minus, -, 32] [id, radius, 32] [mult, *, 32] [id, radius, 32] [minus, -, 32] [floatlit, 10.0, 32] [semi, ;, 32]
 [return, return, 33] [lpar, (, 33] [id, result, 33] [rpar, ), 33] [semi, ;, 33]
 [rcurbr, }, 34]
 [rcurbr, }, 35]

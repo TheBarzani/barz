@@ -26,8 +26,8 @@ STATEMENT -> FUNCALLORASSIGN semi _createExpressionStatement
 | write lpar EXPR rpar semi _createWriteStatement
 | return lpar EXPR rpar semi _createReturnStatement .
 FUNCALLORASSIGN -> IDORSELF FUNCALLORASSIGN2 .
-FUNCALLORASSIGN2 -> INDICES FUNCALLORASSIGN3 | lpar APARAMS rpar _createFunctionCall FUNCALLORASSIGN4 .
-FUNCALLORASSIGN3 -> ASSIGNOP EXPR _createAssignment | dot id _processDotAccess FUNCALLORASSIGN2 .
+FUNCALLORASSIGN2 -> INDICES _processDotAccess FUNCALLORASSIGN3 | lpar APARAMS rpar _createFunctionCall FUNCALLORASSIGN4 .
+FUNCALLORASSIGN3 -> ASSIGNOP EXPR _createAssignment | dot id _pushDotIdentifier FUNCALLORASSIGN2 _processDotAccess.
 FUNCALLORASSIGN4 -> dot id _processFunctionReturn FUNCALLORASSIGN2 | .
 STATBLOCK -> lcurbr STATEMENTS rcurbr _createBlock | STATEMENT _createSingleStatement | .
 STATEMENTS -> STATEMENT _addStatement STATEMENTS | .
@@ -35,7 +35,7 @@ EXPR -> ARITHEXPR EXPR2 _finishExpression .
 EXPR2 -> RELOP ARITHEXPR _createRelationalExpr | .
 RELEXPR -> ARITHEXPR RELOP _setRelop ARITHEXPR _createRelationalExpr .
 ARITHEXPR -> TERM RIGHTRECARITHEXPR _finishArithExpr .
-RIGHTRECARITHEXPR -> ADDOP _pushAddOp TERM _processAddOp RIGHTRECARITHEXPR | .
+RIGHTRECARITHEXPR -> ADDOP TERM _processAddOp RIGHTRECARITHEXPR | .
 SIGN -> plus _pushSign | minus _pushSign .
 TERM -> FACTOR _addTerm RIGHTRECTERM .
 RIGHTRECTERM -> MULTOP FACTOR _processMultOp RIGHTRECTERM | .
@@ -61,8 +61,8 @@ ARRAYSIZE2 -> intlit _addArrayDimension rsqbr | _addDynamicArrayDimension rsqbr 
 ARRAYSIZES -> ARRAYSIZE _processArraySize ARRAYSIZES | .
 TYPE -> int _setTypeInt | float _setTypeFloat | id _setTypeCustom .
 RETURNTYPE -> TYPE | void _setTypeVoid .
-APARAMS -> EXPR _addActualParam REPTAPARAMS1 | .
-REPTAPARAMS1 -> APARAMSTAIL _continueParamList REPTAPARAMS1 | .
+APARAMS -> _createParamList EXPR _addActualParam REPTAPARAMS1 | _createParamList .
+REPTAPARAMS1 -> APARAMSTAIL REPTAPARAMS1 | .
 APARAMSTAIL -> comma EXPR _addActualParam .
 FPARAMS -> _createParamList id _setParamId colon TYPE ARRAYSIZES _createParam REPTFPARAMS1 | _createParamList .
 REPTFPARAMS1 -> FPARAMSTAIL REPTFPARAMS1 | .

@@ -284,8 +284,9 @@ void AST::performAction(std::string action, std::string value) {
         ASTNode* op = ASTStack.back(); ASTStack.pop_back();
         ASTNode* var = ASTStack.back(); ASTStack.pop_back();
         
-        ASTNode* assign = makeFamily(NodeType::ASSIGNMENT, var, op, expr);
+        ASTNode* assign = makeFamily(NodeType::ASSIGNMENT, var, expr);
         ASTStack.push_back(assign);
+        delete op;
     }
     else if (action == "_createFunctionDeclaration") {
         ASTNode* signature = ASTStack.back(); ASTStack.pop_back();
@@ -392,8 +393,8 @@ void AST::performAction(std::string action, std::string value) {
     }
     else if (action == "_addActualParam") {
             ASTNode* expr = ASTStack.back(); ASTStack.pop_back();
-            ASTNode* actualParams = ASTStack.back();
-            actualParams->adoptChildren(expr);
+            ASTNode* actualParamsList = ASTStack.back();
+            actualParamsList->adoptChildren(expr);
     }
     else if (action == "_createFunctionCall") {
             ASTNode* params = ASTStack.back(); ASTStack.pop_back();
@@ -454,7 +455,10 @@ void AST::performAction(std::string action, std::string value) {
         ASTStack.push_back(intNode);
     }
     else if (action == "_processDotAccess") {
-        ASTNode* identifier = createNode(NodeType::DOT_IDENTIFIER, value); // Create DOT_IDENTIFIER node
+        if (ASTStack.back()->getNodeEnum() != NodeType::DOT_IDENTIFIER && ASTStack.back()->getNodeEnum() != NodeType::FUNCTION_CALL) {
+            return;
+        }
+        ASTNode* identifier = ASTStack.back(); ASTStack.pop_back();// Create DOT_IDENTIFIER node
         ASTNode* left = ASTStack.back(); ASTStack.pop_back(); // Get the left-hand side
 
         // Create a new node to represent the dot access (e.g., DOT_ACCESS)
@@ -474,6 +478,14 @@ void AST::performAction(std::string action, std::string value) {
         ASTStack.push_back(createNode(NodeType::IMPLEMENTATION_FUNCTION_LIST,""));
     }
     else if (action == "_processMultOp"){
+        ASTNode* right = ASTStack.back(); ASTStack.pop_back();
+        ASTNode* op = ASTStack.back(); ASTStack.pop_back();
+        ASTNode* left = ASTStack.back(); ASTStack.pop_back();
+        op->setLeftMostChild(left);
+        op->adoptChildren(right);
+        ASTStack.push_back(makeFamily(NodeType::TERM, op));
+    }
+    else if (action == "_processAddOp"){
         ASTNode* right = ASTStack.back(); ASTStack.pop_back();
         ASTNode* op = ASTStack.back(); ASTStack.pop_back();
         ASTNode* left = ASTStack.back(); ASTStack.pop_back();

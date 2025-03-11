@@ -29,7 +29,7 @@ implementation CIRCLE {
   
   function calculate_area() => float {
     local result: float;
-    result := 3.14159 * radius * radius;
+    result := 3.14159 - radius * radius - 10.0;
     return (result);
   }
 }
