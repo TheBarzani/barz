@@ -49,7 +49,7 @@ void AST::writeToFile(std::string filename) {
             
             // Create this node
             out << "  node" << node->getNodeNumber() << " [label=\""
-                << node->getNodeType() << " | \\"
+                << node->getNodeType() << " | "
                 << node->getNodeValue() << " \"];\n";
             
             // Process left child and right siblings
@@ -103,6 +103,7 @@ ASTNode* AST::makeFamily(NodeType op, ASTNode* kid) {
 }
 
 void AST::performAction(std::string action, std::string value) {
+    DD("===========================================================");
     std::cout << "Action: " << action << " Value: " << value << std::endl;
     printVector(ASTStack);
 
@@ -147,9 +148,6 @@ void AST::performAction(std::string action, std::string value) {
             ASTStack.back()->adoptChildren(inheritId);
         }
     }
-    else if (action == "_makeInheritanceList") {
-        // The inheritance list is already built through _addInheritanceId
-    }
     else if (action == "_createClass") {
         ASTNode* memberList = ASTStack.back(); ASTStack.pop_back();
         ASTNode* inheritList = ASTStack.back(); ASTStack.pop_back();
@@ -167,9 +165,8 @@ void AST::performAction(std::string action, std::string value) {
         ASTStack.push_back(createNode(NodeType::IMPLEMENTATION_ID, value));
     }
     else if (action == "_addImplementationFunction") {
-        ASTNode* function = ASTStack.back();
-        ASTNode* impl = ASTStack[ASTStack.size() - 2];
-        impl->adoptChildren(function);
+        ASTNode* function = ASTStack.back();ASTStack.pop_back();
+        ASTStack.back()->adoptChildren(function);
     }
     else if (action == "_createImplementation") {
         ASTNode* functions = ASTStack.back(); ASTStack.pop_back();
@@ -202,9 +199,8 @@ void AST::performAction(std::string action, std::string value) {
         ASTStack.push_back(signature);
     }
     else if (action == "_createFunctionBody") {
-        ASTNode* statements = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* body = makeFamily(NodeType::FUNCTION_BODY, statements);
-        ASTStack.push_back(body);
+        ASTStack.back()->setNodeType(NodeType::FUNCTION_BODY);
+        ASTStack.back()->setNodeValue("");
     }
     else if (action == "_createFunction") {
         ASTNode* body = ASTStack.back(); ASTStack.pop_back();
@@ -326,125 +322,166 @@ void AST::performAction(std::string action, std::string value) {
         ASTNode* expr = ASTStack.back(); ASTStack.pop_back();
         ASTNode* writeStatement = makeFamily(NodeType::WRITE_STATEMENT, expr);
         ASTStack.push_back(writeStatement);
-   }
-   else if (action == "_createReturnStatement") {
-        ASTNode* expr = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* returnStatement = makeFamily(NodeType::RETURN_STATEMENT, expr);
-        ASTStack.push_back(returnStatement);
-   }
-   else if (action == "_setAssignOperator") {
-        ASTNode* assignOp = createNode(NodeType::ASSIGN_OP, value);
-        ASTStack.push_back(assignOp);
-   }
-   else if (action == "_setRelop") {
-        ASTNode* relop = createNode(NodeType::REL_OP, value);
-        ASTStack.push_back(relop);
-   }
-   else if (action == "_setAddOp") {
-        ASTNode* addop = createNode(NodeType::ADD_OP, value);
-        ASTStack.push_back(addop);
-   }
-   else if (action == "_setMultOp") {
-        ASTNode* multop = createNode(NodeType::MULT_OP, value);
-        ASTStack.push_back(multop);
-   }
-   else if (action == "_setIdentifier") {
-        ASTNode* identifier = createNode(NodeType::IDENTIFIER, value);
-        ASTStack.push_back(identifier);
-   }
-   else if (action == "_setSelfIdentifier") {
-        ASTNode* selfIdentifier = createNode(NodeType::SELF_IDENTIFIER, "self");
-        ASTStack.push_back(selfIdentifier);
-   }
-   else if (action == "_setTypeInt" || action == "_setTypeFloat" || action == "_setTypeCustom" || action == "_setTypeVoid") {
-        ASTNode* typeNode = createNode(NodeType::TYPE, value);
-        ASTStack.push_back(typeNode);
-   }
-   else if (action == "_addArrayDimension") {
-        ASTNode* arrayDimension = createNode(NodeType::ARRAY_DIMENSION, value);
-        ASTStack.push_back(arrayDimension);
-   }
-   else if (action == "_addDynamicArrayDimension") {
-        ASTNode* dynamicArrayDimension = createNode(NodeType::DYNAMIC_ARRAY_DIMENSION, "[]");
-        ASTStack.push_back(dynamicArrayDimension);
-   }
-   else if (action == "_createParamList") {
-        ASTStack.push_back(createNode(NodeType::PARAM_LIST, "paramList"));
-   }
-   else if (action == "_createFormalParam") {
-        ASTNode* type = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* id = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* formalParam = makeFamily(NodeType::FORMAL_PARAM, id, type);
+    }
+    else if (action == "_createReturnStatement") {
+            ASTNode* expr = ASTStack.back(); ASTStack.pop_back();
+            ASTNode* returnStatement = makeFamily(NodeType::RETURN_STATEMENT, expr);
+            ASTStack.push_back(returnStatement);
+    }
+    else if (action == "_setAssignOperator") {
+            ASTNode* assignOp = createNode(NodeType::ASSIGN_OP, value);
+            ASTStack.push_back(assignOp);
+    }
+    else if (action == "_setRelop") {
+            ASTNode* relop = createNode(NodeType::REL_OP, value);
+            ASTStack.push_back(relop);
+    }
+    else if (action == "_setAddOp") {
+            ASTNode* addop = createNode(NodeType::ADD_OP, value);
+            ASTStack.push_back(addop);
+    }
+    else if (action == "_setMultOp") {
+            ASTNode* multop = createNode(NodeType::MULT_OP, value);
+            ASTStack.push_back(multop);
+    }
+    else if (action == "_setIdentifier") {
+            ASTNode* identifier = createNode(NodeType::IDENTIFIER, value);
+            ASTStack.push_back(identifier);
+    }
+    else if (action == "_setSelfIdentifier") {
+            ASTNode* selfIdentifier = createNode(NodeType::SELF_IDENTIFIER, "self");
+            ASTStack.push_back(selfIdentifier);
+    }
+    else if (action == "_setTypeInt" || action == "_setTypeFloat" || action == "_setTypeCustom" || action == "_setTypeVoid") {
+            ASTNode* typeNode = createNode(NodeType::TYPE, value);
+            ASTStack.push_back(typeNode);
+    }
+    else if (action == "_addArrayDimension") {
+            ASTNode* arrayDimension = createNode(NodeType::ARRAY_DIMENSION, value);
+            ASTStack.push_back(arrayDimension);
+    }
+    else if (action == "_addDynamicArrayDimension") {
+            ASTNode* dynamicArrayDimension = createNode(NodeType::ARRAY_DIMENSION, "dynamic");
+            ASTStack.push_back(dynamicArrayDimension);
+    }
+    else if (action == "_createParamList") {
+            ASTStack.push_back(createNode(NodeType::PARAM_LIST, "paramList"));
+    }
+    else if (action == "_createParam") {
+            ASTNode* param;
+            if(ASTStack.back()->getNodeEnum() == NodeType::ARRAY_DIMENSION){
+                ASTNode* array_dimension = ASTStack.back(); ASTStack.pop_back();
+                ASTNode* type = ASTStack.back(); ASTStack.pop_back();
+                ASTNode* id = ASTStack.back(); ASTStack.pop_back();
+                param = makeFamily(NodeType::PARAM, id, type, array_dimension);
+            }
+            else{
+                ASTNode* type = ASTStack.back(); ASTStack.pop_back();
+                ASTNode* id = ASTStack.back(); ASTStack.pop_back();
+                param = makeFamily(NodeType::PARAM, id, type);
+            }
 
-        // Get the parameter list node
-        ASTNode* paramList = ASTStack.back();
+            // Get the parameter list node
+            ASTNode* paramList = ASTStack.back();
 
-        // Add the formal parameter to the list
-        paramList->adoptChildren(formalParam);
+            // Add the formal parameter to the list
+            paramList->adoptChildren(param);
+    }
+    else if (action == "_setParamId"){
+            ASTStack.push_back(createNode(NodeType::PARAM_ID, value));
+    }
+    else if (action == "_addActualParam") {
+            ASTNode* expr = ASTStack.back(); ASTStack.pop_back();
+            ASTNode* actualParams = ASTStack.back();
+            actualParams->adoptChildren(expr);
+    }
+    else if (action == "_createFunctionCall") {
+            ASTNode* params = ASTStack.back(); ASTStack.pop_back();
+            ASTNode* id = ASTStack.back(); ASTStack.pop_back();
+            ASTNode* functionCall = makeFamily(NodeType::FUNCTION_CALL, id, params);
+            ASTStack.push_back(functionCall);
+    }
+    else if (action == "_processArrayAccess") {
+            ASTNode* indices = ASTStack.back(); ASTStack.pop_back();
+            ASTNode* variable = ASTStack.back(); ASTStack.pop_back();
+            ASTNode* arrayAccess = makeFamily(NodeType::ARRAY_ACCESS, variable, indices);
+            ASTStack.push_back(arrayAccess);
+    }
+    else if (action == "_pushIdentifier") {
+            ASTNode* identifier = createNode(NodeType::IDENTIFIER, value);
+            ASTStack.push_back(identifier);
+    }
+    else if (action == "_pushDotIdentifier") {
+            ASTNode* dotIdentifier = createNode(NodeType::DOT_IDENTIFIER, value);
+            ASTStack.push_back(dotIdentifier);
+    }
+    else if (action ==  "_finishVariable") {
+            // For handling the completion of a variable node
+            ASTNode* identifier = ASTStack.back(); ASTStack.pop_back();
+            ASTNode* variableNode = makeFamily(NodeType::VARIABLE, identifier);
+            ASTStack.push_back(variableNode);
+    }
+    else if (action == "_finishFactor") {
+            // For handling the completion of a factor node
+            ASTNode* identifier = ASTStack.back(); ASTStack.pop_back();
+            ASTNode* factorNode = makeFamily(NodeType::FACTOR, identifier);
+            ASTStack.push_back(factorNode);
+    }
+    else if (action == "_addTerm") {
+            // For handling the completion of a term node
+            ASTNode* factor = ASTStack.back(); ASTStack.pop_back();
+            ASTNode* termNode = makeFamily(NodeType::TERM, factor);
+            ASTStack.push_back(termNode);
+    }
+    else if (action == "_finishArithExpr") {
+            // For handling the completion of an arithmetic expression node
+            ASTNode* term = ASTStack.back(); ASTStack.pop_back();
+            ASTNode* arithExprNode = makeFamily(NodeType::ARITH_EXPR, term);
+            ASTStack.push_back(arithExprNode);
+    }
+    else if (action == "_finishExpression") {
+            // For handling the completion of an expression node
+            ASTNode* arithExpr = ASTStack.back(); ASTStack.pop_back();
+            ASTNode* exprNode = makeFamily(NodeType::EXPR, arithExpr);
+            ASTStack.push_back(exprNode);
+    }
+    else if (action == "_pushFloatLiteral") {
+            ASTNode* floatNode = createNode(NodeType::FLOAT, value);
+            ASTStack.push_back(floatNode);
+    }
+    else if (action == "_pushIntLiteral") {
+        ASTNode* intNode = createNode(NodeType::INT, value);
+        ASTStack.push_back(intNode);
+    }
+    else if (action == "_processDotAccess") {
+        ASTNode* identifier = createNode(NodeType::DOT_IDENTIFIER, value); // Create DOT_IDENTIFIER node
+        ASTNode* left = ASTStack.back(); ASTStack.pop_back(); // Get the left-hand side
 
-        // Push the parameter list back onto the stack
-        ASTStack.push_back(paramList);
-   }
-   else if (action == "_addFormalParam") {
-        ASTNode* formalParam = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* formalParams = ASTStack.back();
-        formalParams->adoptChildren(formalParam);
-   }
-   else if (action == "_addActualParam") {
-        ASTNode* expr = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* actualParams = ASTStack.back();
-        actualParams->adoptChildren(expr);
-   }
-   else if (action == "_createFunctionCall") {
-        ASTNode* params = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* id = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* functionCall = makeFamily(NodeType::FUNCTION_CALL, id, params);
-        ASTStack.push_back(functionCall);
-   }
-   else if (action == "_processArrayAccess") {
-        ASTNode* indices = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* variable = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* arrayAccess = makeFamily(NodeType::ARRAY_ACCESS, variable, indices);
-        ASTStack.push_back(arrayAccess);
-   }
-   else if (action == "_pushIdentifier") {
-        ASTNode* identifier = createNode(NodeType::IDENTIFIER, value);
-        ASTStack.push_back(identifier);
-   }
-   else if (action == "_pushDotIdentifier") {
-        ASTNode* dotIdentifier = createNode(NodeType::DOT_IDENTIFIER, value);
-        ASTStack.push_back(dotIdentifier);
-   }
-   else if (action ==  "_finishVariable") {
-        // For handling the completion of a variable node
-        ASTNode* identifier = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* variableNode = makeFamily(NodeType::VARIABLE, identifier);
-        ASTStack.push_back(variableNode);
-   }
-   else if (action == "_finishFactor") {
-        // For handling the completion of a factor node
-        ASTNode* identifier = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* factorNode = makeFamily(NodeType::FACTOR, identifier);
-        ASTStack.push_back(factorNode);
-   }
-   else if (action == "_finishTerm") {
-        // For handling the completion of a term node
-        ASTNode* factor = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* termNode = makeFamily(NodeType::TERM, factor);
-        ASTStack.push_back(termNode);
-   }
-   else if (action == "_finishArithExpr") {
-        // For handling the completion of an arithmetic expression node
-        ASTNode* term = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* arithExprNode = makeFamily(NodeType::ARITH_EXPR, term);
-        ASTStack.push_back(arithExprNode);
-   }
-   else if (action == "_finishExpression") {
-        // For handling the completion of an expression node
-        ASTNode* arithExpr = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* exprNode = makeFamily(NodeType::EXPR, arithExpr);
-        ASTStack.push_back(exprNode);
-   }
+        // Create a new node to represent the dot access (e.g., DOT_ACCESS)
+        ASTNode* dotAccess = makeFamily(NodeType::DOT_IDENTIFIER, left, identifier);
+
+        ASTStack.push_back(dotAccess); // Push the result onto the stack
+    }
+    else if (action == "_addBodyStatement") {
+        ASTNode* statement = ASTStack.back(); ASTStack.pop_back(); // Get the statement
+    
+        ASTStack.back()->adoptChildren(statement); // Add the statement to the block
+    }
+    else if (action == "_addStatementsList"){
+        ASTStack.push_back(createNode(NodeType::STATEMENTS_LIST, ""));
+    }
+    else if (action == "_createImplementationList"){
+        ASTStack.push_back(createNode(NodeType::IMPLEMENTATION_FUNCTION_LIST,""));
+    }
+    else if (action == "_processMultOp"){
+        ASTNode* right = ASTStack.back(); ASTStack.pop_back();
+        ASTNode* op = ASTStack.back(); ASTStack.pop_back();
+        ASTNode* left = ASTStack.back(); ASTStack.pop_back();
+        op->setLeftMostChild(left);
+        op->adoptChildren(right);
+        ASTStack.push_back(makeFamily(NodeType::TERM, op));
+    }
     // Debug output
+    printVector(ASTStack);
     std::cout << "Stack size after action: " << ASTStack.size() << std::endl;
 }

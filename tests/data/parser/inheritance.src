@@ -4,7 +4,11 @@ class SHAPE {
   public function calculate_area() => float;
 };
 
-class CIRCLE isa SHAPE {
+class GENERAL {
+  private attribute type: int;
+};
+
+class CIRCLE isa SHAPE, GENERAL {
   private attribute radius: float;
   public function build(r: float) => CIRCLE;
   public function calculate_area() => float;
@@ -32,6 +36,6 @@ implementation CIRCLE {
 
 function main() => void {
   local c1: CIRCLE;
-  c1 := c1.build(5.0);
-  write(c1.calculate_area());
+  c1 := c1.build(5.0); // This has problems, remove assignop and dotidentifier
+  write(c1.calculate_area()); 
 }

@@ -1,7 +1,7 @@
 [class, class, 1] [id, SIMPLE, 1] [lcurbr, {, 1]
 [private, private, 2] [attribute, attribute, 2] [id, a, 2] [colon, :, 2] [float, float, 2] [semi, ;, 2]
 [rcurbr, }, 3] [semi, ;, 3]
-[function, function, 5] [id, main, 5] [lpar, (, 5] [rpar, ), 5] [arrow, =>, 5] [void, void, 5]
+[function, function, 5] [id, main, 5] [lpar, (, 5] [id, myarr, 5] [colon, :, 5] [int, int, 5] [lsqbr, [, 5] [rsqbr, ], 5] [comma, ,, 5] [id, myvar, 5] [colon, :, 5] [float, float, 5] [rpar, ), 5] [arrow, =>, 5] [void, void, 5]
 [lcurbr, {, 6]
 [local, local, 7] [id, x, 7] [colon, :, 7] [int, int, 7] [semi, ;, 7]
 [rcurbr, }, 8]

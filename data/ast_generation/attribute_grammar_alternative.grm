@@ -3,11 +3,11 @@ PROG -> CLASSIMPLFUNC _addToProgram PROG | .
 CLASSIMPLFUNC -> CLASSDECL | IMPLDEF | FUNCDEF .
 CLASSDECL -> class id _createClassId _createInheritanceList ISA1 lcurbr _addMemberList VISMEMBERDECL rcurbr semi _createClass .
 VISMEMBERDECL -> VISIBILITY MEMDECL _addMember VISMEMBERDECL | .
-ISA1 -> isa id _addInheritanceId ISA2 _makeInheritanceList | .
-ISA2 -> comma id _addInheritanceId ISA2 _makeInheritanceList | .
-IMPLDEF -> implementation id _createImplementationId lcurbr IMPLBODY rcurbr _createImplementation .
+ISA1 -> isa id _addInheritanceId ISA2 | .
+ISA2 -> comma id _addInheritanceId ISA2 | .
+IMPLDEF -> implementation id _createImplementationId lcurbr _createImplementationList IMPLBODY rcurbr _createImplementation .
 IMPLBODY -> FUNCDEF _addImplementationFunction IMPLBODY | .
-FUNCDEF -> FUNCHEAD FUNCBODY _createFunction .
+FUNCDEF -> FUNCHEAD _addStatementsList FUNCBODY _createFunction .
 VISIBILITY -> public _setVisibility | private _setVisibility .
 MEMDECL -> FUNCDECL | ATTRDECL .
 FUNCDECL -> FUNCHEAD semi _createFunctionDeclaration .
@@ -25,8 +25,8 @@ STATEMENT -> FUNCALLORASSIGN semi _createExpressionStatement
 | read lpar VARIABLE rpar semi _createReadStatement
 | write lpar EXPR rpar semi _createWriteStatement
 | return lpar EXPR rpar semi _createReturnStatement .
-FUNCALLORASSIGN -> IDORSELF _pushIdentifier FUNCALLORASSIGN2 .
-FUNCALLORASSIGN2 -> INDICES _processArrayAccess FUNCALLORASSIGN3 | lpar APARAMS rpar _createFunctionCall FUNCALLORASSIGN4 .
+FUNCALLORASSIGN -> IDORSELF FUNCALLORASSIGN2 .
+FUNCALLORASSIGN2 -> INDICES FUNCALLORASSIGN3 | lpar APARAMS rpar _createFunctionCall FUNCALLORASSIGN4 .
 FUNCALLORASSIGN3 -> ASSIGNOP EXPR _createAssignment | dot id _processDotAccess FUNCALLORASSIGN2 .
 FUNCALLORASSIGN4 -> dot id _processFunctionReturn FUNCALLORASSIGN2 | .
 STATBLOCK -> lcurbr STATEMENTS rcurbr _createBlock | STATEMENT _createSingleStatement | .
@@ -37,36 +37,36 @@ RELEXPR -> ARITHEXPR RELOP _setRelop ARITHEXPR _createRelationalExpr .
 ARITHEXPR -> TERM RIGHTRECARITHEXPR _finishArithExpr .
 RIGHTRECARITHEXPR -> ADDOP _pushAddOp TERM _processAddOp RIGHTRECARITHEXPR | .
 SIGN -> plus _pushSign | minus _pushSign .
-TERM -> FACTOR RIGHTRECTERM _finishTerm .
-RIGHTRECTERM -> MULTOP _pushMultOp FACTOR _processMultOp RIGHTRECTERM | .
-FACTOR -> IDORSELF _pushIdentifier FACTOR2 REPTVARIABLEORFUNCTIONCALL _finishFactor
+TERM -> FACTOR _addTerm RIGHTRECTERM .
+RIGHTRECTERM -> MULTOP FACTOR _processMultOp RIGHTRECTERM | .
+FACTOR -> IDORSELF FACTOR2 REPTVARIABLEORFUNCTIONCALL _finishFactor
 | floatlit _pushFloatLiteral
 | intlit _pushIntLiteral
 | lpar ARITHEXPR rpar _handleParenExpr
 | not FACTOR _createNotExpr
 | SIGN FACTOR _applySign .
-FACTOR2 -> lpar APARAMS rpar _createFunctionCall | INDICES _processArrayAccess .
-INDICES -> INDICE _addIndex INDICES | .
+FACTOR2 -> lpar APARAMS rpar _createFunctionCall | INDICES .
+INDICES -> INDICE _addIndex _processArrayAccess INDICES | .
 REPTVARIABLEORFUNCTIONCALL -> IDNEST _processDotAccess REPTVARIABLEORFUNCTIONCALL | .
-VARIABLE -> IDORSELF _pushIdentifier VARIABLE2 _finishVariable .
-VARIABLE2 -> INDICES _processArrayAccess REPTVARIABLE | lpar APARAMS rpar _createFunctionCall VARIDNEST .
+VARIABLE -> IDORSELF VARIABLE2 _finishVariable .
+VARIABLE2 -> INDICES REPTVARIABLE | lpar APARAMS rpar _createFunctionCall VARIDNEST .
 REPTVARIABLE -> VARIDNEST _processDotAccess REPTVARIABLE | .
 VARIDNEST -> dot id _pushDotIdentifier VARIDNEST2 .
-VARIDNEST2 -> lpar APARAMS rpar _createFunctionCall VARIDNEST | INDICES _processArrayAccess .
+VARIDNEST2 -> lpar APARAMS rpar _createFunctionCall VARIDNEST | INDICES .
 INDICE -> lsqbr ARITHEXPR rsqbr _createArrayIndex .
 IDNEST -> dot id _pushDotIdentifier IDNEST2 .
-IDNEST2 -> lpar APARAMS rpar _createFunctionCall | INDICES _processArrayAccess .
+IDNEST2 -> lpar APARAMS rpar _createFunctionCall | INDICES .
 ARRAYSIZE -> lsqbr ARRAYSIZE2 .
-ARRAYSIZE2 -> intlit _addArrayDimension rsqbr | rsqbr _addDynamicArrayDimension .
+ARRAYSIZE2 -> intlit _addArrayDimension rsqbr | _addDynamicArrayDimension rsqbr .
 ARRAYSIZES -> ARRAYSIZE _processArraySize ARRAYSIZES | .
 TYPE -> int _setTypeInt | float _setTypeFloat | id _setTypeCustom .
 RETURNTYPE -> TYPE | void _setTypeVoid .
 APARAMS -> EXPR _addActualParam REPTAPARAMS1 | .
 REPTAPARAMS1 -> APARAMSTAIL _continueParamList REPTAPARAMS1 | .
 APARAMSTAIL -> comma EXPR _addActualParam .
-FPARAMS -> _createParamList id _setParamId colon TYPE _setParamType ARRAYSIZES _createFormalParam REPTFPARAMS1 | _createParamList .
-REPTFPARAMS1 -> FPARAMSTAIL _addFormalParam REPTFPARAMS1 | .
-FPARAMSTAIL -> comma id _setParamId colon TYPE _setParamType ARRAYSIZES _createFormalParam .
+FPARAMS -> _createParamList id _setParamId colon TYPE ARRAYSIZES _createParam REPTFPARAMS1 | _createParamList .
+REPTFPARAMS1 -> FPARAMSTAIL REPTFPARAMS1 | .
+FPARAMSTAIL -> comma id _setParamId colon TYPE ARRAYSIZES _createParam .
 ASSIGNOP -> assign _setAssignOperator .
 RELOP -> eq _setRelop | neq _setRelop | lt _setRelop | gt _setRelop | lteq _setRelop | gteq _setRelop .
 ADDOP -> plus _setAddOp | minus _setAddOp | or _setAddOp .

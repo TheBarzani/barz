@@ -119,8 +119,7 @@ std::string ASTNode::getNodeType()
         case NodeType::SELF_IDENTIFIER:     return "SELF_IDENTIFIER";
         case NodeType::TYPE:                return "TYPE";
         case NodeType::ARRAY_DIMENSION:     return "ARRAY_DIMENSION";
-        case NodeType::DYNAMIC_ARRAY_DIMENSION: return "DYNAMIC_ARRAY_DIMENSION";
-        case NodeType::FORMAL_PARAM:        return "FORMAL_PARAM";
+        case NodeType::PARAM:               return "PARAMATER";
         case NodeType::FUNCTION_CALL:       return "FUNCTION_CALL";
         case NodeType::ARRAY_ACCESS:        return "ARRAY_ACCESS";
         case NodeType::DOT_IDENTIFIER:      return "DOT_IDENTIFIER";
@@ -131,6 +130,11 @@ std::string ASTNode::getNodeType()
         case NodeType::IMPLEMENTATION_ID:   return "IMPLEMENTATION_ID";
         case NodeType::VARIABLE_ID:         return "VARIABLE_ID";
         case NodeType::PARAM_LIST:          return "PARAM_LIST";
+        case NodeType::PARAM_ID:            return "PARAM_ID";
+        case NodeType::FLOAT:               return "FLOAT";
+        case NodeType::INT:                 return "INTEGER";
+        case NodeType::STATEMENTS_LIST:     return "STATEMENTS_LIST";
+        case NodeType::IMPLEMENTATION_FUNCTION_LIST: return "IMPLEMENTATION_FUNCTION_LIST";
         default:
             // TODO: throw an exception when this happens
             return "UNKNOWN";

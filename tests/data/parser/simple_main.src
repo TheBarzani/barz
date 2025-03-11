@@ -2,7 +2,7 @@ class SIMPLE {
   private attribute a: float;
 };
 
-function main() => void
+function main(myarr: int[], myvar: float) => void
 {
   local x: int;
 }
