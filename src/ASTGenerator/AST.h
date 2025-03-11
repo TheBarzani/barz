@@ -64,8 +64,9 @@ public:
     /**
      * @brief Performs a specified action on the AST.
      * @param action String representing the action to be performed.
+     * @param value String representing the value to be used in the action.
      */
-    void performAction(std::string action);
+    void performAction(std::string action, std::string value);
 };
 
 #endif // AST_H

@@ -21,7 +21,14 @@ enum class NodeType
     IMPLEMENTATION_LIST,
     CLASS,
     FUNCTION,
-    IMPLEMENTATION
+    IMPLEMENTATION,
+    CLASS_ID,
+    INHERITANCE_LIST,
+    INHERITANCE_ID,
+    VISIBILITY,
+    MEMBER_LIST,
+    MEMBER,
+    VARIABLE
 };
 
 /**
@@ -107,6 +114,11 @@ public:
      */
     void setParent(ASTNode *parent);
 
+    /**
+     * @brief Gets the node's enum value
+     * @return The node's enum value
+     */
+    NodeType getNodeEnum();
     /**
      * @brief Gets the node type as string.
      * @return String representation of the node type.

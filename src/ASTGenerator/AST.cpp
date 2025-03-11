@@ -1,5 +1,21 @@
 #include "AST.h"
 
+void DD(std::string s){
+    std::cout << s << std::endl;
+}
+
+// Helper function to print contents of a string vector
+void printVector(const std::vector<ASTNode* >& vec) {
+    std::cout << "Vector contents: [";
+    for (size_t i = 0; i < vec.size(); ++i) {
+        std::cout << vec[i]->getNodeType();
+        if (i < vec.size() - 1) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "]" << std::endl;
+}
+
 AST::AST() : root(nullptr), current(nullptr) {
     // Initialize empty AST
 }
@@ -34,8 +50,8 @@ void AST::writeToFile(std::string filename) {
             
             // Create this node
             out << "  node" << node->getNodeNumber() << " [label=\""
-                << node->getNodeType() << " | "
-                << node->getNodeValue() << "\"];\n";
+                << node->getNodeType() << " | \\"
+                << node->getNodeValue() << " \"];\n";
             
             // Process left child and right siblings
             self(node->getLeftMostChild(), out, self);
@@ -69,9 +85,8 @@ void AST::writeToFile(std::string filename) {
     outFile.close();
 }
 
-void AST::performAction(std::string action) {
-    if (action == "_createLists")
-    {
+void AST::performAction(std::string action, std::string value) {
+    if (action == "_createLists") {
         // Create the lists by pushing ASTnodes onto the stack
         ASTNode *classList = createNode(NodeType::CLASS_LIST, "");
         ASTNode *funcList = createNode(NodeType::FUNCTION_LIST, "");
@@ -79,9 +94,6 @@ void AST::performAction(std::string action) {
         
         // Create the root node
         this->root = createNode(NodeType::PROGRAM, "");
-        this->root->setParent(nullptr);
-        this->root->setLeftMostSibling(nullptr);
-        this->root->setRightSibling(nullptr);
 
         // Merge the lists
         this->root->adoptChildren(classList);
@@ -89,25 +101,80 @@ void AST::performAction(std::string action) {
         this->root->adoptChildren(implList);
         this->ASTStack.push_back(this->root);
     }
-    else if (action == "_createClass")
-    {   
-        std::cout << "Creating class==========================================" << std::endl;
-        // TODO: Implement class creation
-        current = createNode(NodeType::CLASS, "");
-        // std::cout << ASTStack.back()->getLeftMostChild()->getNodeType() << std::endl;
-        (ASTStack.back())->getLeftMostChild()->adoptChildren(current);
+    else if (action == "_createClass") { 
+        if (ASTStack.back()->getNodeEnum() == NodeType::PROGRAM){
+            return;
+        }
+        current = ASTStack.back(); ASTStack.pop_back();
+        while (ASTStack.back()->getNodeEnum() != NodeType::PROGRAM){
+            ASTStack.back()->makeSiblings(current); current = ASTStack.back(); ASTStack.pop_back();
+        }
+        ASTNode * classNode = createNode(NodeType::CLASS, "");
+        classNode->adoptChildren(current);
+        (ASTStack.back())->getLeftMostChild()->adoptChildren(classNode);
     }
-    else if (action == "_createFunction")
-    {
-        // TODO: Implement function creation
+    else if (action == "_createFunction") {
         current = createNode(NodeType::FUNCTION, "");
         (ASTStack.back())->getLeftMostChild()->getRightSibling()->adoptChildren(current);
     }
-    else if (action == "_createImplemepntation")
-    {
-        // TODO: Implement implementation creation
+    else if (action == "_createImplementation") {
         current = createNode(NodeType::IMPLEMENTATION, "");
         (ASTStack.back())->getLeftMostChild()->getRightSibling()->getRightSibling()->adoptChildren(current);
     }
-    
+    else if (action == "_createClassId") {
+        current = createNode(NodeType::CLASS_ID, value);
+        ASTStack.push_back(current);
+    }
+    else if (action == "_createInheritanceList"){
+        current = createNode(NodeType::INHERITANCE_LIST, "");
+        ASTStack.push_back(current);   
+    }
+    else if (action == "_addInheritanceId"){
+        current = createNode(NodeType::INHERITANCE_ID, value);
+        ASTStack.push_back(current);
+    }
+    else if (action == "_makeInheritanceList"){
+        if (ASTStack.back()->getNodeEnum() == NodeType::INHERITANCE_LIST){
+            return;
+        }
+        current = ASTStack.back(); ASTStack.pop_back();
+        while (ASTStack.back()->getNodeEnum() != NodeType::INHERITANCE_LIST){
+            current->setLeftMostSibling(ASTStack.back()); ASTStack.pop_back();
+        }
+        ASTStack.back()->adoptChildren(current);
+    }
+    else if (action == "_setVisibility"){
+        current = createNode(NodeType::VISIBILITY, value);
+        ASTStack.push_back(current);
+    }
+    else if (action == "_createMemberList"){
+        current = createNode(NodeType::MEMBER_LIST, "");
+        ASTStack.push_back(current);
+    }
+    else if (action == "_addMember"){; 
+        current = createNode(NodeType::MEMBER, "");
+        ASTStack.push_back(current);
+    }
+    else if (action == "_makeMemberList"){
+        if (ASTStack.back()->getNodeEnum() == NodeType::MEMBER_LIST){
+            return;
+        }
+        current = ASTStack.back(); ASTStack.pop_back();
+        while (ASTStack.back()->getNodeEnum() != NodeType::MEMBER && ASTStack.back()->getNodeEnum() != NodeType::MEMBER){
+            DD(ASTStack.back()->getNodeType());
+            ASTStack.back()->makeSiblings(current); current = ASTStack.back(); ASTStack.pop_back();
+        }
+        printVector(ASTStack); 
+        ASTStack.back()->adoptChildren(current); current = ASTStack.back(); ASTStack.pop_back();
+        (ASTStack.back())->getLeftMostChild()->adoptChildren(current);
+    }
+    else if (action == "_addVariable"){
+        current = createNode(NodeType::VARIABLE, "");
+        ASTStack.push_back(current);
+    }
+    else if (action == ""){
+        
+    }
+
 }
+

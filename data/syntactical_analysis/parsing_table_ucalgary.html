@@ -1,5 +1,5 @@
 </table><table class="parse_table" border="1">
-    <tr><td></td><th><terminal>$</terminal></th><th><terminal>private</terminal></th><th><terminal>public</terminal></th><th><terminal>rpar</terminal></th><th><terminal>lpar</terminal></th><th><terminal>id</terminal></th><th><terminal>dot</terminal></th><th><terminal>semi</terminal></th><th><terminal>colon</terminal></th><th><terminal>float</terminal></th><th><terminal>int</terminal></th><th><terminal>assign</terminal></th><th><terminal>rsqbr</terminal></th><th><terminal>lsqbr</terminal></th><th><terminal>return</terminal></th><th><terminal>write</terminal></th><th><terminal>read</terminal></th><th><terminal>while</terminal></th><th><terminal>else</terminal></th><th><terminal>then</terminal></th><th><terminal>if</terminal></th><th><terminal>rcurbr</terminal></th><th><terminal>lcurbr</terminal></th><th><terminal>minus</terminal></th><th><terminal>plus</terminal></th><th><terminal>void</terminal></th><th><terminal>comma</terminal></th><th><terminal>geq</terminal></th><th><terminal>leq</terminal></th><th><terminal>gt</terminal></th><th><terminal>lt</terminal></th><th><terminal>neq</terminal></th><th><terminal>eq</terminal></th><th><terminal>isa</terminal></th><th><terminal>and</terminal></th><th><terminal>div</terminal></th><th><terminal>mult</terminal></th><th><terminal>local</terminal></th><th><terminal>implementation</terminal></th><th><terminal>self</terminal></th><th><terminal>constructor</terminal></th><th><terminal>arrow</terminal></th><th><terminal>function</terminal></th><th><terminal>not</terminal></th><th><terminal>floatlit</terminal></th><th><terminal>intlit</terminal></th><th><terminal>class</terminal></th><th><terminal>attribute</terminal></th><th><terminal>or</terminal></th></tr>
+    <tr><td></td><th><terminal>$</terminal></th><th><terminal>self</terminal></th><th><terminal>id</terminal></th><th><terminal>and</terminal></th><th><terminal>div</terminal></th><th><terminal>mult</terminal></th><th><terminal>or</terminal></th><th><terminal>minus</terminal></th><th><terminal>plus</terminal></th><th><terminal>gteq</terminal></th><th><terminal>lteq</terminal></th><th><terminal>gt</terminal></th><th><terminal>lt</terminal></th><th><terminal>neq</terminal></th><th><terminal>eq</terminal></th><th><terminal>assign</terminal></th><th><terminal>colon</terminal></th><th><terminal>comma</terminal></th><th><terminal>void</terminal></th><th><terminal>float</terminal></th><th><terminal>int</terminal></th><th><terminal>rsqbr</terminal></th><th><terminal>intlit</terminal></th><th><terminal>lsqbr</terminal></th><th><terminal>rpar</terminal></th><th><terminal>lpar</terminal></th><th><terminal>dot</terminal></th><th><terminal>not</terminal></th><th><terminal>floatlit</terminal></th><th><terminal>rcurbr</terminal></th><th><terminal>lcurbr</terminal></th><th><terminal>semi</terminal></th><th><terminal>return</terminal></th><th><terminal>write</terminal></th><th><terminal>read</terminal></th><th><terminal>while</terminal></th><th><terminal>else</terminal></th><th><terminal>then</terminal></th><th><terminal>if</terminal></th><th><terminal>local</terminal></th><th><terminal>attribute</terminal></th><th><terminal>constructor</terminal></th><th><terminal>arrow</terminal></th><th><terminal>function</terminal></th><th><terminal>private</terminal></th><th><terminal>public</terminal></th><th><terminal>implementation</terminal></th><th><terminal>isa</terminal></th><th><terminal>class</terminal></th></tr>
     <tr><th><nonterm>START</nonterm></th>
     <td><nonterm>START</nonterm> &rarr; <nonterm>PROG</nonterm></td>
     <td>&nbsp;</td>
@@ -39,19 +39,20 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>START</nonterm> &rarr; <nonterm>PROG</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>START</nonterm> &rarr; <nonterm>PROG</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>START</nonterm> &rarr; <nonterm>PROG</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td><nonterm>START</nonterm> &rarr; <nonterm>PROG</nonterm></td>
     <td>&nbsp;</td>
+    <td><nonterm>START</nonterm> &rarr; <nonterm>PROG</nonterm></td>
     <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>START</nonterm> &rarr; <nonterm>PROG</nonterm></td>
+    <td>&nbsp;</td>
+    <td><nonterm>START</nonterm> &rarr; <nonterm>PROG</nonterm></td>
     </tr>
-    <tr><th><nonterm>ADDOP</nonterm></th>
+    <tr><th><nonterm>PROG</nonterm></th>
+    <td><nonterm>PROG</nonterm> &rarr; &epsilon</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -75,8 +76,6 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>ADDOP</nonterm> &rarr; <term>minus</term></td>
-    <td><nonterm>ADDOP</nonterm> &rarr; <term>plus</term></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -94,21 +93,19 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td><nonterm>PROG</nonterm> &rarr; <nonterm>CLASSIMPLFUNC</nonterm> <nonterm>PROG</nonterm></td>
+    <td>&nbsp;</td>
+    <td><nonterm>PROG</nonterm> &rarr; <nonterm>CLASSIMPLFUNC</nonterm> <nonterm>PROG</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td><nonterm>PROG</nonterm> &rarr; <nonterm>CLASSIMPLFUNC</nonterm> <nonterm>PROG</nonterm></td>
     <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>ADDOP</nonterm> &rarr; <term>or</term></td>
+    <td><nonterm>PROG</nonterm> &rarr; <nonterm>CLASSIMPLFUNC</nonterm> <nonterm>PROG</nonterm></td>
     </tr>
-    <tr><th><nonterm>APARAMS</nonterm></th>
+    <tr><th><nonterm>CLASSIMPLFUNC</nonterm></th>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>APARAMS</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
-    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -126,8 +123,6 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
-    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -142,271 +137,21 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
-    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
-    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>APARAMSTAIL</nonterm></th>
     <td>&nbsp;</td>
+    <td><nonterm>CLASSIMPLFUNC</nonterm> &rarr; <nonterm>FUNCDEF</nonterm></td>
     <td>&nbsp;</td>
+    <td><nonterm>CLASSIMPLFUNC</nonterm> &rarr; <nonterm>FUNCDEF</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td><nonterm>CLASSIMPLFUNC</nonterm> &rarr; <nonterm>IMPLDEF</nonterm></td>
     <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>APARAMSTAIL</nonterm> &rarr; <term>comma</term> <nonterm>EXPR</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>ARITHEXPR</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
-    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
-    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
-    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
-    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>ARRAYSIZE</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>ARRAYSIZE</nonterm> &rarr; <term>lsqbr</term> <nonterm>ARRAYSIZE2</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>ARRAYSIZE2</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>ARRAYSIZE2</nonterm> &rarr; <term>rsqbr</term></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>ARRAYSIZE2</nonterm> &rarr; <term>intlit</term> <term>rsqbr</term></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>ATTRIBUTEDECL</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>ATTRIBUTEDECL</nonterm> &rarr; <term>attribute</term> <nonterm>VARDECL</nonterm></td>
-    <td>&nbsp;</td>
+    <td><nonterm>CLASSIMPLFUNC</nonterm> &rarr; <nonterm>CLASSDECL</nonterm></td>
     </tr>
     <tr><th><nonterm>CLASSDECL</nonterm></th>
     <td>&nbsp;</td>
@@ -455,11 +200,11 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>CLASSDECL</nonterm> &rarr; <term>class</term> <term>id</term> <nonterm>OPTCLASSDECL2</nonterm> <term>lcurbr</term> <nonterm>REPTCLASSDECL4</nonterm> <term>rcurbr</term> <term>semi</term></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td><nonterm>CLASSDECL</nonterm> &rarr; <term>class</term> <term>id</term> <nonterm>ISA1</nonterm> <term>lcurbr</term> <nonterm>VISMEMBERDECL</nonterm> <term>rcurbr</term> <term>semi</term></td>
     </tr>
-    <tr><th><nonterm>CLASSORIMPLORFUNC</nonterm></th>
+    <tr><th><nonterm>VISMEMBERDECL</nonterm></th>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -489,6 +234,7 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td><nonterm>VISMEMBERDECL</nonterm> &rarr; &epsilon</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -498,78 +244,18 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>CLASSORIMPLORFUNC</nonterm> &rarr; <nonterm>IMPLDEF</nonterm></td>
     <td>&nbsp;</td>
-    <td><nonterm>CLASSORIMPLORFUNC</nonterm> &rarr; <nonterm>FUNCDEF</nonterm></td>
     <td>&nbsp;</td>
-    <td><nonterm>CLASSORIMPLORFUNC</nonterm> &rarr; <nonterm>FUNCDEF</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>CLASSORIMPLORFUNC</nonterm> &rarr; <nonterm>CLASSDECL</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>EXPR</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
-    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
-    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
-    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
-    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
+    <td><nonterm>VISMEMBERDECL</nonterm> &rarr; <nonterm>VISIBILITY</nonterm> <nonterm>MEMDECL</nonterm> <nonterm>VISMEMBERDECL</nonterm></td>
+    <td><nonterm>VISMEMBERDECL</nonterm> &rarr; <nonterm>VISIBILITY</nonterm> <nonterm>MEMDECL</nonterm> <nonterm>VISMEMBERDECL</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     </tr>
-    <tr><th><nonterm>EXPR2</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>EXPR2</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>EXPR2</nonterm> &rarr; &epsilon</td>
+    <tr><th><nonterm>ISA1</nonterm></th>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -588,13 +274,19 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>EXPR2</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>EXPR2</nonterm> &rarr; <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
-    <td><nonterm>EXPR2</nonterm> &rarr; <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
-    <td><nonterm>EXPR2</nonterm> &rarr; <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
-    <td><nonterm>EXPR2</nonterm> &rarr; <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
-    <td><nonterm>EXPR2</nonterm> &rarr; <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
-    <td><nonterm>EXPR2</nonterm> &rarr; <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>ISA1</nonterm> &rarr; &epsilon</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -610,15 +302,15 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>ISA1</nonterm> &rarr; <term>isa</term> <term>id</term> <nonterm>ISA2</nonterm></td>
     <td>&nbsp;</td>
     </tr>
-    <tr><th><nonterm>FACTOR</nonterm></th>
+    <tr><th><nonterm>ISA2</nonterm></th>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>FACTOR</nonterm> &rarr; <term>lpar</term> <nonterm>ARITHEXPR</nonterm> <term>rpar</term></td>
-    <td><nonterm>FACTOR</nonterm> &rarr; <nonterm>IDORSELF</nonterm> <nonterm>FACTOR2</nonterm> <nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -632,12 +324,11 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td><nonterm>ISA2</nonterm> &rarr; <term>comma</term> <term>id</term> <nonterm>ISA2</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>FACTOR</nonterm> &rarr; <nonterm>SIGN</nonterm> <nonterm>FACTOR</nonterm></td>
-    <td><nonterm>FACTOR</nonterm> &rarr; <nonterm>SIGN</nonterm> <nonterm>FACTOR</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -646,574 +337,16 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td><nonterm>ISA2</nonterm> &rarr; &epsilon</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>FACTOR</nonterm> &rarr; <nonterm>IDORSELF</nonterm> <nonterm>FACTOR2</nonterm> <nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>FACTOR</nonterm> &rarr; <term>not</term> <nonterm>FACTOR</nonterm></td>
-    <td><nonterm>FACTOR</nonterm> &rarr; <term>floatlit</term></td>
-    <td><nonterm>FACTOR</nonterm> &rarr; <term>intlit</term></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>FACTOR2</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <term>lpar</term> <nonterm>APARAMS</nonterm> <term>rpar</term></td>
-    <td>&nbsp;</td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    </tr>
-    <tr><th><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; <nonterm>IDNEST</nonterm> <nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm></td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
-    </tr>
-    <tr><th><nonterm>FPARAMS</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>FPARAMS</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td><nonterm>FPARAMS</nonterm> &rarr; <term>id</term> <term>colon</term> <nonterm>TYPE</nonterm> <nonterm>REPTFPARAMS3</nonterm> <nonterm>REPTFPARAMS4</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>FPARAMSTAIL</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>FPARAMSTAIL</nonterm> &rarr; <term>comma</term> <term>id</term> <term>colon</term> <nonterm>TYPE</nonterm> <nonterm>REPTFPARAMSTAIL4</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>FUNCBODY</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>FUNCBODY</nonterm> &rarr; <term>lcurbr</term> <nonterm>REPTFUNCBODY1</nonterm> <term>rcurbr</term></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>FUNCDECL</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>FUNCDECL</nonterm> &rarr; <nonterm>FUNCHEAD</nonterm> <term>semi</term></td>
-    <td>&nbsp;</td>
-    <td><nonterm>FUNCDECL</nonterm> &rarr; <nonterm>FUNCHEAD</nonterm> <term>semi</term></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>FUNCDEF</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>FUNCDEF</nonterm> &rarr; <nonterm>FUNCHEAD</nonterm> <nonterm>FUNCBODY</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>FUNCDEF</nonterm> &rarr; <nonterm>FUNCHEAD</nonterm> <nonterm>FUNCBODY</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>FUNCHEAD</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>FUNCHEAD</nonterm> &rarr; <term>constructor</term> <term>lpar</term> <nonterm>FPARAMS</nonterm> <term>rpar</term></td>
-    <td>&nbsp;</td>
-    <td><nonterm>FUNCHEAD</nonterm> &rarr; <term>function</term> <term>id</term> <term>lpar</term> <nonterm>FPARAMS</nonterm> <term>rpar</term> <term>arrow</term> <nonterm>RETURNTYPE</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>IDNEST</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>IDNEST</nonterm> &rarr; <term>dot</term> <term>id</term> <nonterm>IDNEST2</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>IDNEST2</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <term>lpar</term> <nonterm>APARAMS</nonterm> <term>rpar</term></td>
-    <td>&nbsp;</td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    </tr>
-    <tr><th><nonterm>IDORSELF</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>IDORSELF</nonterm> &rarr; <term>id</term></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>IDORSELF</nonterm> &rarr; <term>self</term></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -1263,7 +396,364 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>IMPLDEF</nonterm> &rarr; <term>implementation</term> <term>id</term> <term>lcurbr</term> <nonterm>REPTIMPLDEF3</nonterm> <term>rcurbr</term></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>IMPLDEF</nonterm> &rarr; <term>implementation</term> <term>id</term> <term>lcurbr</term> <nonterm>IMPLBODY</nonterm> <term>rcurbr</term></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>IMPLBODY</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>IMPLBODY</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>IMPLBODY</nonterm> &rarr; <nonterm>FUNCDEF</nonterm> <nonterm>IMPLBODY</nonterm></td>
+    <td>&nbsp;</td>
+    <td><nonterm>IMPLBODY</nonterm> &rarr; <nonterm>FUNCDEF</nonterm> <nonterm>IMPLBODY</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>FUNCDEF</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FUNCDEF</nonterm> &rarr; <nonterm>FUNCHEAD</nonterm> <nonterm>FUNCBODY</nonterm></td>
+    <td>&nbsp;</td>
+    <td><nonterm>FUNCDEF</nonterm> &rarr; <nonterm>FUNCHEAD</nonterm> <nonterm>FUNCBODY</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>VISIBILITY</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>VISIBILITY</nonterm> &rarr; <term>private</term></td>
+    <td><nonterm>VISIBILITY</nonterm> &rarr; <term>public</term></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>MEMDECL</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>MEMDECL</nonterm> &rarr; <nonterm>ATTRDECL</nonterm></td>
+    <td><nonterm>MEMDECL</nonterm> &rarr; <nonterm>FUNCDECL</nonterm></td>
+    <td>&nbsp;</td>
+    <td><nonterm>MEMDECL</nonterm> &rarr; <nonterm>FUNCDECL</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>FUNCDECL</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FUNCDECL</nonterm> &rarr; <nonterm>FUNCHEAD</nonterm> <term>semi</term></td>
+    <td>&nbsp;</td>
+    <td><nonterm>FUNCDECL</nonterm> &rarr; <nonterm>FUNCHEAD</nonterm> <term>semi</term></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>FUNCHEAD</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FUNCHEAD</nonterm> &rarr; <term>constructor</term> <term>lpar</term> <nonterm>FPARAMS</nonterm> <term>rpar</term></td>
+    <td>&nbsp;</td>
+    <td><nonterm>FUNCHEAD</nonterm> &rarr; <term>function</term> <term>id</term> <term>lpar</term> <nonterm>FPARAMS</nonterm> <term>rpar</term> <term>arrow</term> <nonterm>RETURNTYPE</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>FUNCBODY</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FUNCBODY</nonterm> &rarr; <term>lcurbr</term> <nonterm>LOCALVARDECLORSTAT2</nonterm> <term>rcurbr</term></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -1275,21 +765,12 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     </tr>
-    <tr><th><nonterm>INDICE</nonterm></th>
+    <tr><th><nonterm>LOCALVARDECLORSTAT</nonterm></th>
+    <td>&nbsp;</td>
+    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
+    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>INDICE</nonterm> &rarr; <term>lsqbr</term> <nonterm>ARITHEXPR</nonterm> <term>rsqbr</term></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -1317,6 +798,117 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
+    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
+    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
+    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
+    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>LOCALVARDECL</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>LOCALVARDECLORSTAT2</nonterm></th>
+    <td>&nbsp;</td>
+    <td><nonterm>LOCALVARDECLORSTAT2</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>LOCALVARDECLORSTAT2</nonterm></td>
+    <td><nonterm>LOCALVARDECLORSTAT2</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>LOCALVARDECLORSTAT2</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>LOCALVARDECLORSTAT2</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>LOCALVARDECLORSTAT2</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>LOCALVARDECLORSTAT2</nonterm></td>
+    <td><nonterm>LOCALVARDECLORSTAT2</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>LOCALVARDECLORSTAT2</nonterm></td>
+    <td><nonterm>LOCALVARDECLORSTAT2</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>LOCALVARDECLORSTAT2</nonterm></td>
+    <td><nonterm>LOCALVARDECLORSTAT2</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>LOCALVARDECLORSTAT2</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>LOCALVARDECLORSTAT2</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>LOCALVARDECLORSTAT2</nonterm></td>
+    <td><nonterm>LOCALVARDECLORSTAT2</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>LOCALVARDECLORSTAT2</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>ATTRDECL</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>ATTRDECL</nonterm> &rarr; <term>attribute</term> <nonterm>VARDECL</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -1364,6 +956,8 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
     <td><nonterm>LOCALVARDECL</nonterm> &rarr; <term>local</term> <nonterm>VARDECL</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -1374,16 +968,14 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
     </tr>
-    <tr><th><nonterm>LOCALVARDECLORSTAT</nonterm></th>
+    <tr><th><nonterm>VARDECL</nonterm></th>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td><nonterm>VARDECL</nonterm> &rarr; <term>id</term> <term>colon</term> <nonterm>TYPE</nonterm> <nonterm>ARRAYSIZES</nonterm> <term>semi</term></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -1392,13 +984,8 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
-    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
-    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
-    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -1415,9 +1002,7 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>LOCALVARDECL</nonterm></td>
     <td>&nbsp;</td>
-    <td><nonterm>LOCALVARDECLORSTAT</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -1425,1172 +1010,6 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>MEMBERDECL</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>MEMBERDECL</nonterm> &rarr; <nonterm>FUNCDECL</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>MEMBERDECL</nonterm> &rarr; <nonterm>FUNCDECL</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>MEMBERDECL</nonterm> &rarr; <nonterm>ATTRIBUTEDECL</nonterm></td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>MULTOP</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>MULTOP</nonterm> &rarr; <term>and</term></td>
-    <td><nonterm>MULTOP</nonterm> &rarr; <term>div</term></td>
-    <td><nonterm>MULTOP</nonterm> &rarr; <term>mult</term></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>OPTCLASSDECL2</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>OPTCLASSDECL2</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>OPTCLASSDECL2</nonterm> &rarr; <term>isa</term> <term>id</term> <nonterm>REPTOPTCLASSDECL22</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>PROG</nonterm></th>
-    <td><nonterm>PROG</nonterm> &rarr; <nonterm>REPTPROG0</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>PROG</nonterm> &rarr; <nonterm>REPTPROG0</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>PROG</nonterm> &rarr; <nonterm>REPTPROG0</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>PROG</nonterm> &rarr; <nonterm>REPTPROG0</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>PROG</nonterm> &rarr; <nonterm>REPTPROG0</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>RELEXPR</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
-    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
-    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
-    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
-    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>RELOP</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RELOP</nonterm> &rarr; <term>geq</term></td>
-    <td><nonterm>RELOP</nonterm> &rarr; <term>leq</term></td>
-    <td><nonterm>RELOP</nonterm> &rarr; <term>gt</term></td>
-    <td><nonterm>RELOP</nonterm> &rarr; <term>lt</term></td>
-    <td><nonterm>RELOP</nonterm> &rarr; <term>neq</term></td>
-    <td><nonterm>RELOP</nonterm> &rarr; <term>eq</term></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>REPTAPARAMS1</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTAPARAMS1</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTAPARAMS1</nonterm> &rarr; <nonterm>APARAMSTAIL</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>REPTCLASSDECL4</nonterm></th>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTCLASSDECL4</nonterm> &rarr; <nonterm>VISIBILITY</nonterm> <nonterm>MEMBERDECL</nonterm> <nonterm>REPTCLASSDECL4</nonterm></td>
-    <td><nonterm>REPTCLASSDECL4</nonterm> &rarr; <nonterm>VISIBILITY</nonterm> <nonterm>MEMBERDECL</nonterm> <nonterm>REPTCLASSDECL4</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTCLASSDECL4</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>REPTFPARAMS3</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTFPARAMS3</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTFPARAMS3</nonterm> &rarr; <nonterm>ARRAYSIZE</nonterm> <nonterm>REPTFPARAMS3</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTFPARAMS3</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>REPTFPARAMS4</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTFPARAMS4</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTFPARAMS4</nonterm> &rarr; <nonterm>FPARAMSTAIL</nonterm> <nonterm>REPTFPARAMS4</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>REPTFPARAMSTAIL4</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTFPARAMSTAIL4</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTFPARAMSTAIL4</nonterm> &rarr; <nonterm>ARRAYSIZE</nonterm> <nonterm>REPTFPARAMSTAIL4</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTFPARAMSTAIL4</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>REPTFUNCBODY1</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTFUNCBODY1</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>REPTFUNCBODY1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTFUNCBODY1</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>REPTFUNCBODY1</nonterm></td>
-    <td><nonterm>REPTFUNCBODY1</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>REPTFUNCBODY1</nonterm></td>
-    <td><nonterm>REPTFUNCBODY1</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>REPTFUNCBODY1</nonterm></td>
-    <td><nonterm>REPTFUNCBODY1</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>REPTFUNCBODY1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTFUNCBODY1</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>REPTFUNCBODY1</nonterm></td>
-    <td><nonterm>REPTFUNCBODY1</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTFUNCBODY1</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>REPTFUNCBODY1</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTFUNCBODY1</nonterm> &rarr; <nonterm>LOCALVARDECLORSTAT</nonterm> <nonterm>REPTFUNCBODY1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>REPTIDNEST1</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; <nonterm>INDICE</nonterm> <nonterm>REPTIDNEST1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTIDNEST1</nonterm> &rarr; &epsilon</td>
-    </tr>
-    <tr><th><nonterm>REPTIMPLDEF3</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTIMPLDEF3</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTIMPLDEF3</nonterm> &rarr; <nonterm>FUNCDEF</nonterm> <nonterm>REPTIMPLDEF3</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTIMPLDEF3</nonterm> &rarr; <nonterm>FUNCDEF</nonterm> <nonterm>REPTIMPLDEF3</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>REPTOPTCLASSDECL22</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTOPTCLASSDECL22</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTOPTCLASSDECL22</nonterm> &rarr; <term>comma</term> <term>id</term> <nonterm>REPTOPTCLASSDECL22</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>REPTPROG0</nonterm></th>
-    <td><nonterm>REPTPROG0</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nnbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTPROG0</nonterm> &rarr; <nonterm>CLASSORIMPLORFUNC</nonterm> <nonterm>REPTPROG0</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTPROG0</nonterm> &rarr; <nonterm>CLASSORIMPLORFUNC</nonterm> <nonterm>REPTPROG0</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTPROG0</nonterm> &rarr; <nonterm>CLASSORIMPLORFUNC</nonterm> <nonterm>REPTPROG0</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTPROG0</nonterm> &rarr; <nonterm>CLASSORIMPLORFUNC</nonterm> <nonterm>REPTPROG0</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>REPTSTATBLOCK1</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTSTATBLOCK1</nonterm> &rarr; <nonterm>STATEMENT</nonterm> <nonterm>REPTSTATBLOCK1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTSTATBLOCK1</nonterm> &rarr; <nonterm>STATEMENT</nonterm> <nonterm>REPTSTATBLOCK1</nonterm></td>
-    <td><nonterm>REPTSTATBLOCK1</nonterm> &rarr; <nonterm>STATEMENT</nonterm> <nonterm>REPTSTATBLOCK1</nonterm></td>
-    <td><nonterm>REPTSTATBLOCK1</nonterm> &rarr; <nonterm>STATEMENT</nonterm> <nonterm>REPTSTATBLOCK1</nonterm></td>
-    <td><nonterm>REPTSTATBLOCK1</nonterm> &rarr; <nonterm>STATEMENT</nonterm> <nonterm>REPTSTATBLOCK1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTSTATBLOCK1</nonterm> &rarr; <nonterm>STATEMENT</nonterm> <nonterm>REPTSTATBLOCK1</nonterm></td>
-    <td><nonterm>REPTSTATBLOCK1</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTSTATBLOCK1</nonterm> &rarr; <nonterm>STATEMENT</nonterm> <nonterm>REPTSTATBLOCK1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>REPTVARDECL3</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTVARDECL3</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTVARDECL3</nonterm> &rarr; <nonterm>ARRAYSIZE</nonterm> <nonterm>REPTVARDECL3</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>RETURNTYPE</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RETURNTYPE</nonterm> &rarr; <nonterm>TYPE</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RETURNTYPE</nonterm> &rarr; <nonterm>TYPE</nonterm></td>
-    <td><nonterm>RETURNTYPE</nonterm> &rarr; <nonterm>TYPE</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RETURNTYPE</nonterm> &rarr; <term>void</term></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>RIGHTRECARITHEXPR</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; <nonterm>ADDOP</nonterm> <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
-    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; <nonterm>ADDOP</nonterm> <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; <nonterm>ADDOP</nonterm> <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
-    </tr>
-    <tr><th><nonterm>RIGHTRECTERM</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; <nonterm>MULTOP</nonterm> <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; <nonterm>MULTOP</nonterm> <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; <nonterm>MULTOP</nonterm> <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
-    </tr>
-    <tr><th><nonterm>SIGN</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>SIGN</nonterm> &rarr; <term>minus</term></td>
-    <td><nonterm>SIGN</nonterm> &rarr; <term>plus</term></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>STATBLOCK</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>STATBLOCK</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>STATBLOCK</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>STATBLOCK</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
-    <td><nonterm>STATBLOCK</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
-    <td><nonterm>STATBLOCK</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
-    <td><nonterm>STATBLOCK</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
-    <td><nonterm>STATBLOCK</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td><nonterm>STATBLOCK</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>STATBLOCK</nonterm> &rarr; <term>lcurbr</term> <nonterm>REPTSTATBLOCK1</nonterm> <term>rcurbr</term></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>STATBLOCK</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -2603,11 +1022,29 @@
     </tr>
     <tr><th><nonterm>STATEMENT</nonterm></th>
     <td>&nbsp;</td>
+    <td><nonterm>STATEMENT</nonterm> &rarr; <nonterm>FUNCALLORASSIGN</nonterm> <term>semi</term></td>
+    <td><nonterm>STATEMENT</nonterm> &rarr; <nonterm>FUNCALLORASSIGN</nonterm> <term>semi</term></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>STATEMENT</nonterm> &rarr; <nonterm>IDORSELF</nonterm> <nonterm>SELECTORLIST0</nonterm> <nonterm>STATEMENTSUFFIX0</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -2633,40 +1070,22 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>STATEMENT</nonterm> &rarr; <nonterm>IDORSELF</nonterm> <nonterm>SELECTORLIST0</nonterm> <nonterm>STATEMENTSUFFIX0</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
     </tr>
-    <tr><th><nonterm>SELECTORLIST0</nonterm></th>
+    <tr><th><nonterm>FUNCALLORASSIGN</nonterm></th>
+    <td>&nbsp;</td>
+    <td><nonterm>FUNCALLORASSIGN</nonterm> &rarr; <nonterm>IDORSELF</nonterm> <nonterm>FUNCALLORASSIGN2</nonterm></td>
+    <td><nonterm>FUNCALLORASSIGN</nonterm> &rarr; <nonterm>IDORSELF</nonterm> <nonterm>FUNCALLORASSIGN2</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>SELECTORLIST0</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td><nonterm>SELECTORLIST0</nonterm> &rarr; <nonterm>TYPESELECTOR</nonterm> <nonterm>SELECTORLIST0</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>SELECTORLIST0</nonterm> &rarr; &epsilon</td>
     <td>&nbsp;</td>
-    <td><nonterm>SELECTORLIST0</nonterm> &rarr; <nonterm>TYPESELECTOR</nonterm> <nonterm>SELECTORLIST0</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -2703,21 +1122,7 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     </tr>
-    <tr><th><nonterm>TYPESELECTOR</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>TYPESELECTOR</nonterm> &rarr; <term>dot</term> <term>id</term></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>TYPESELECTOR</nonterm> &rarr; <term>lsqbr</term> <nonterm>ARITHEXPR</nonterm> <term>rsqbr</term></td>
+    <tr><th><nonterm>FUNCALLORASSIGN2</nonterm></th>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -2731,6 +1136,20 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FUNCALLORASSIGN2</nonterm> &rarr; <nonterm>INDICES</nonterm> <nonterm>FUNCALLORASSIGN3</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FUNCALLORASSIGN2</nonterm> &rarr; <nonterm>INDICES</nonterm> <nonterm>FUNCALLORASSIGN3</nonterm></td>
+    <td>&nbsp;</td>
+    <td><nonterm>FUNCALLORASSIGN2</nonterm> &rarr; <term>lpar</term> <nonterm>APARAMS</nonterm> <term>rpar</term> <nonterm>FUNCALLORASSIGN4</nonterm></td>
+    <td><nonterm>FUNCALLORASSIGN2</nonterm> &rarr; <nonterm>INDICES</nonterm> <nonterm>FUNCALLORASSIGN3</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -2754,19 +1173,478 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     </tr>
-    <tr><th><nonterm>STATEMENTSUFFIX0</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>STATEMENTSUFFIX0</nonterm> &rarr; <term>lpar</term> <nonterm>APARAMS</nonterm> <term>rpar</term> <term>semi</term></td>
+    <tr><th><nonterm>FUNCALLORASSIGN3</nonterm></th>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>STATEMENTSUFFIX0</nonterm> &rarr; <term>assign</term> <nonterm>EXPR</nonterm> <term>semi</term></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FUNCALLORASSIGN3</nonterm> &rarr; <nonterm>ASSIGNOP</nonterm> <nonterm>EXPR</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FUNCALLORASSIGN3</nonterm> &rarr; <term>dot</term> <term>id</term> <nonterm>FUNCALLORASSIGN2</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>FUNCALLORASSIGN4</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FUNCALLORASSIGN4</nonterm> &rarr; <term>dot</term> <term>id</term> <nonterm>FUNCALLORASSIGN2</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FUNCALLORASSIGN4</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>STATBLOCK</nonterm></th>
+    <td>&nbsp;</td>
+    <td><nonterm>STATBLOCK</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
+    <td><nonterm>STATBLOCK</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>STATBLOCK</nonterm> &rarr; <term>lcurbr</term> <nonterm>STATEMENTS</nonterm> <term>rcurbr</term></td>
+    <td><nonterm>STATBLOCK</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>STATBLOCK</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
+    <td><nonterm>STATBLOCK</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
+    <td><nonterm>STATBLOCK</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
+    <td><nonterm>STATBLOCK</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
+    <td><nonterm>STATBLOCK</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td><nonterm>STATBLOCK</nonterm> &rarr; <nonterm>STATEMENT</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>STATEMENTS</nonterm></th>
+    <td>&nbsp;</td>
+    <td><nonterm>STATEMENTS</nonterm> &rarr; <nonterm>STATEMENT</nonterm> <nonterm>STATEMENTS</nonterm></td>
+    <td><nonterm>STATEMENTS</nonterm> &rarr; <nonterm>STATEMENT</nonterm> <nonterm>STATEMENTS</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>STATEMENTS</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>STATEMENTS</nonterm> &rarr; <nonterm>STATEMENT</nonterm> <nonterm>STATEMENTS</nonterm></td>
+    <td><nonterm>STATEMENTS</nonterm> &rarr; <nonterm>STATEMENT</nonterm> <nonterm>STATEMENTS</nonterm></td>
+    <td><nonterm>STATEMENTS</nonterm> &rarr; <nonterm>STATEMENT</nonterm> <nonterm>STATEMENTS</nonterm></td>
+    <td><nonterm>STATEMENTS</nonterm> &rarr; <nonterm>STATEMENT</nonterm> <nonterm>STATEMENTS</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>STATEMENTS</nonterm> &rarr; <nonterm>STATEMENT</nonterm> <nonterm>STATEMENTS</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>EXPR</nonterm></th>
+    <td>&nbsp;</td>
+    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
+    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
+    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
+    <td>&nbsp;</td>
+    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
+    <td><nonterm>EXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>EXPR2</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>EXPR2</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>EXPR2</nonterm> &rarr; <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
+    <td><nonterm>EXPR2</nonterm> &rarr; <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
+    <td><nonterm>EXPR2</nonterm> &rarr; <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
+    <td><nonterm>EXPR2</nonterm> &rarr; <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
+    <td><nonterm>EXPR2</nonterm> &rarr; <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
+    <td><nonterm>EXPR2</nonterm> &rarr; <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>EXPR2</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>EXPR2</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>EXPR2</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>RELEXPR</nonterm></th>
+    <td>&nbsp;</td>
+    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
+    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
+    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
+    <td>&nbsp;</td>
+    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
+    <td><nonterm>RELEXPR</nonterm> &rarr; <nonterm>ARITHEXPR</nonterm> <nonterm>RELOP</nonterm> <nonterm>ARITHEXPR</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>ARITHEXPR</nonterm></th>
+    <td>&nbsp;</td>
+    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
+    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
+    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
+    <td>&nbsp;</td>
+    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
+    <td><nonterm>ARITHEXPR</nonterm> &rarr; <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>RIGHTRECARITHEXPR</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; <nonterm>ADDOP</nonterm> <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
+    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; <nonterm>ADDOP</nonterm> <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
+    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; <nonterm>ADDOP</nonterm> <nonterm>TERM</nonterm> <nonterm>RIGHTRECARITHEXPR</nonterm></td>
+    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>RIGHTRECARITHEXPR</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>SIGN</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>SIGN</nonterm> &rarr; <term>minus</term></td>
+    <td><nonterm>SIGN</nonterm> &rarr; <term>plus</term></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -2807,8 +1685,31 @@
     </tr>
     <tr><th><nonterm>TERM</nonterm></th>
     <td>&nbsp;</td>
+    <td><nonterm>TERM</nonterm> &rarr; <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
+    <td><nonterm>TERM</nonterm> &rarr; <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>TERM</nonterm> &rarr; <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
+    <td><nonterm>TERM</nonterm> &rarr; <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>TERM</nonterm> &rarr; <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>TERM</nonterm> &rarr; <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
     <td>&nbsp;</td>
     <td><nonterm>TERM</nonterm> &rarr; <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
     <td><nonterm>TERM</nonterm> &rarr; <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
@@ -2829,8 +1730,43 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>TERM</nonterm> &rarr; <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
-    <td><nonterm>TERM</nonterm> &rarr; <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>RIGHTRECTERM</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; <nonterm>MULTOP</nonterm> <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; <nonterm>MULTOP</nonterm> <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; <nonterm>MULTOP</nonterm> <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>RIGHTRECTERM</nonterm> &rarr; &epsilon</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -2845,13 +1781,771 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>TERM</nonterm> &rarr; <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>TERM</nonterm> &rarr; <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
-    <td><nonterm>TERM</nonterm> &rarr; <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
-    <td><nonterm>TERM</nonterm> &rarr; <nonterm>FACTOR</nonterm> <nonterm>RIGHTRECTERM</nonterm></td>
+    </tr>
+    <tr><th><nonterm>FACTOR</nonterm></th>
+    <td>&nbsp;</td>
+    <td><nonterm>FACTOR</nonterm> &rarr; <nonterm>IDORSELF</nonterm> <nonterm>FACTOR2</nonterm> <nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm></td>
+    <td><nonterm>FACTOR</nonterm> &rarr; <nonterm>IDORSELF</nonterm> <nonterm>FACTOR2</nonterm> <nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FACTOR</nonterm> &rarr; <nonterm>SIGN</nonterm> <nonterm>FACTOR</nonterm></td>
+    <td><nonterm>FACTOR</nonterm> &rarr; <nonterm>SIGN</nonterm> <nonterm>FACTOR</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FACTOR</nonterm> &rarr; <term>intlit</term></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FACTOR</nonterm> &rarr; <term>lpar</term> <nonterm>ARITHEXPR</nonterm> <term>rpar</term></td>
+    <td>&nbsp;</td>
+    <td><nonterm>FACTOR</nonterm> &rarr; <term>not</term> <nonterm>FACTOR</nonterm></td>
+    <td><nonterm>FACTOR</nonterm> &rarr; <term>floatlit</term></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>FACTOR2</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td>&nbsp;</td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <term>lpar</term> <nonterm>APARAMS</nonterm> <term>rpar</term></td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FACTOR2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>INDICES</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td><nonterm>INDICES</nonterm> &rarr; <nonterm>INDICE</nonterm> <nonterm>INDICES</nonterm></td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>INDICES</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; <nonterm>IDNEST</nonterm> <nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>REPTVARIABLEORFUNCTIONCALL</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>VARIABLE</nonterm></th>
+    <td>&nbsp;</td>
+    <td><nonterm>VARIABLE</nonterm> &rarr; <nonterm>IDORSELF</nonterm> <nonterm>VARIABLE2</nonterm></td>
+    <td><nonterm>VARIABLE</nonterm> &rarr; <nonterm>IDORSELF</nonterm> <nonterm>VARIABLE2</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>VARIABLE2</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>VARIABLE2</nonterm> &rarr; <nonterm>INDICES</nonterm> <nonterm>REPTVARIABLE</nonterm></td>
+    <td><nonterm>VARIABLE2</nonterm> &rarr; <nonterm>INDICES</nonterm> <nonterm>REPTVARIABLE</nonterm></td>
+    <td><nonterm>VARIABLE2</nonterm> &rarr; <term>lpar</term> <nonterm>APARAMS</nonterm> <term>rpar</term> <nonterm>VARIDNEST</nonterm></td>
+    <td><nonterm>VARIABLE2</nonterm> &rarr; <nonterm>INDICES</nonterm> <nonterm>REPTVARIABLE</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>REPTVARIABLE</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>REPTVARIABLE</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td><nonterm>REPTVARIABLE</nonterm> &rarr; <nonterm>VARIDNEST</nonterm> <nonterm>REPTVARIABLE</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>VARIDNEST</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>VARIDNEST</nonterm> &rarr; <term>dot</term> <term>id</term> <nonterm>VARIDNEST2</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>VARIDNEST2</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>VARIDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>VARIDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>VARIDNEST2</nonterm> &rarr; <term>lpar</term> <nonterm>APARAMS</nonterm> <term>rpar</term> <nonterm>VARIDNEST</nonterm></td>
+    <td><nonterm>VARIDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>INDICE</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>INDICE</nonterm> &rarr; <term>lsqbr</term> <nonterm>ARITHEXPR</nonterm> <term>rsqbr</term></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>IDNEST</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>IDNEST</nonterm> &rarr; <term>dot</term> <term>id</term> <nonterm>IDNEST2</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>IDNEST2</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td>&nbsp;</td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <term>lpar</term> <nonterm>APARAMS</nonterm> <term>rpar</term></td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>IDNEST2</nonterm> &rarr; <nonterm>INDICES</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>ARRAYSIZE</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>ARRAYSIZE</nonterm> &rarr; <term>lsqbr</term> <nonterm>ARRAYSIZE2</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>ARRAYSIZE2</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>ARRAYSIZE2</nonterm> &rarr; <term>rsqbr</term></td>
+    <td><nonterm>ARRAYSIZE2</nonterm> &rarr; <term>intlit</term> <term>rsqbr</term></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>ARRAYSIZES</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>ARRAYSIZES</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>ARRAYSIZES</nonterm> &rarr; <nonterm>ARRAYSIZE</nonterm> <nonterm>ARRAYSIZES</nonterm></td>
+    <td><nonterm>ARRAYSIZES</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>ARRAYSIZES</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -2859,10 +2553,20 @@
     <tr><th><nonterm>TYPE</nonterm></th>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
     <td><nonterm>TYPE</nonterm> &rarr; <term>id</term></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -2896,25 +2600,11 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
     </tr>
-    <tr><th><nonterm>VARDECL</nonterm></th>
+    <tr><th><nonterm>RETURNTYPE</nonterm></th>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>VARDECL</nonterm> &rarr; <term>id</term> <term>colon</term> <nonterm>TYPE</nonterm> <nonterm>REPTVARDECL3</nonterm> <term>semi</term></td>
-    <td>&nbsp;</td>
+    <td><nonterm>RETURNTYPE</nonterm> &rarr; <nonterm>TYPE</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -2929,6 +2619,10 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>RETURNTYPE</nonterm> &rarr; <term>void</term></td>
+    <td><nonterm>RETURNTYPE</nonterm> &rarr; <nonterm>TYPE</nonterm></td>
+    <td><nonterm>RETURNTYPE</nonterm> &rarr; <nonterm>TYPE</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -2958,13 +2652,16 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     </tr>
-    <tr><th><nonterm>VARIABLE</nonterm></th>
+    <tr><th><nonterm>APARAMS</nonterm></th>
     <td>&nbsp;</td>
+    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
+    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>VARIABLE</nonterm> &rarr; <nonterm>IDORSELF</nonterm> <nonterm>VARIABLE2</nonterm></td>
+    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
+    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -2978,67 +2675,13 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
     <td>&nbsp;</td>
+    <td><nonterm>APARAMS</nonterm> &rarr; &epsilon</td>
+    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
     <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>VARIABLE</nonterm> &rarr; <nonterm>IDORSELF</nonterm> <nonterm>VARIABLE2</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>VARIABLE2</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>VARIABLE2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm> <nonterm>REPTVARIABLE</nonterm></td>
-    <td><nonterm>VARIABLE2</nonterm> &rarr; <term>lpar</term> <nonterm>APARAMS</nonterm> <term>rpar</term> <nonterm>VARIDNEST</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>VARIABLE2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm> <nonterm>REPTVARIABLE</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>VARIABLE2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm> <nonterm>REPTVARIABLE</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
+    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
+    <td><nonterm>APARAMS</nonterm> &rarr; <nonterm>EXPR</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -3060,14 +2703,7 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     </tr>
-    <tr><th><nonterm>REPTVARIABLE</nonterm></th>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTVARIABLE</nonterm> &rarr; &epsilon</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>REPTVARIABLE</nonterm> &rarr; <nonterm>VARIDNEST</nonterm> <nonterm>REPTVARIABLE</nonterm></td>
+    <tr><th><nonterm>REPTAPARAMS1</nonterm></th>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -3079,6 +2715,64 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>REPTAPARAMS1</nonterm> &rarr; <nonterm>APARAMSTAIL</nonterm> <nonterm>REPTAPARAMS1</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>REPTAPARAMS1</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>APARAMSTAIL</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>APARAMSTAIL</nonterm> &rarr; <term>comma</term> <nonterm>EXPR</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -3111,14 +2805,320 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     </tr>
-    <tr><th><nonterm>VARIDNEST</nonterm></th>
+    <tr><th><nonterm>FPARAMS</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FPARAMS</nonterm> &rarr; <term>id</term> <term>colon</term> <nonterm>TYPE</nonterm> <nonterm>ARRAYSIZES</nonterm> <nonterm>REPTFPARAMS1</nonterm></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
-    <td><nonterm>VARIDNEST</nonterm> &rarr; <term>dot</term> <term>id</term> <nonterm>VARIDNEST2</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FPARAMS</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>REPTFPARAMS1</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>REPTFPARAMS1</nonterm> &rarr; <nonterm>FPARAMSTAIL</nonterm> <nonterm>REPTFPARAMS1</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>REPTFPARAMS1</nonterm> &rarr; &epsilon</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>FPARAMSTAIL</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>FPARAMSTAIL</nonterm> &rarr; <term>comma</term> <term>id</term> <term>colon</term> <nonterm>TYPE</nonterm> <nonterm>ARRAYSIZES</nonterm></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>ASSIGNOP</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>ASSIGNOP</nonterm> &rarr; <term>assign</term></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>RELOP</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>RELOP</nonterm> &rarr; <term>gteq</term></td>
+    <td><nonterm>RELOP</nonterm> &rarr; <term>lteq</term></td>
+    <td><nonterm>RELOP</nonterm> &rarr; <term>gt</term></td>
+    <td><nonterm>RELOP</nonterm> &rarr; <term>lt</term></td>
+    <td><nonterm>RELOP</nonterm> &rarr; <term>neq</term></td>
+    <td><nonterm>RELOP</nonterm> &rarr; <term>eq</term></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>ADDOP</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>ADDOP</nonterm> &rarr; <term>or</term></td>
+    <td><nonterm>ADDOP</nonterm> &rarr; <term>minus</term></td>
+    <td><nonterm>ADDOP</nonterm> &rarr; <term>plus</term></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    </tr>
+    <tr><th><nonterm>MULTOP</nonterm></th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><nonterm>MULTOP</nonterm> &rarr; <term>and</term></td>
+    <td><nonterm>MULTOP</nonterm> &rarr; <term>div</term></td>
+    <td><nonterm>MULTOP</nonterm> &rarr; <term>mult</term></td>
+    <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
@@ -3162,61 +3162,10 @@
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     </tr>
-    <tr><th><nonterm>VARIDNEST2</nonterm></th>
+    <tr><th><nonterm>IDORSELF</nonterm></th>
     <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>VARIDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td><nonterm>VARIDNEST2</nonterm> &rarr; <term>lpar</term> <nonterm>APARAMS</nonterm> <term>rpar</term> <nonterm>VARIDNEST</nonterm></td>
-    <td>&nbsp;</td>
-    <td><nonterm>VARIDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td><nonterm>VARIDNEST2</nonterm> &rarr; <nonterm>REPTIDNEST1</nonterm></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    </tr>
-    <tr><th><nonterm>VISIBILITY</nonterm></th>
-    <td>&nbsp;</td>
-    <td><nonterm>VISIBILITY</nonterm> &rarr; <term>private</term></td>
-    <td><nonterm>VISIBILITY</nonterm> &rarr; <term>public</term></td>
+    <td><nonterm>IDORSELF</nonterm> &rarr; <term>self</term></td>
+    <td><nonterm>IDORSELF</nonterm> &rarr; <term>id</term></td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>
     <td>&nbsp;</td>

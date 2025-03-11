@@ -17,7 +17,7 @@ Parser::Parser(const std::string& inputFile, const std::string& parsingTable)
 
 Parser::~Parser() {
     // Write AST to file
-    ast.writeToFile(filename + ".astout");
+    ast.writeToFile(filename + ".dot");
     // Write derivations to file
     derivationOutput.open(filename + ".outderivation");
     for (const auto& derivation : derivations) {
@@ -49,16 +49,18 @@ bool Parser::parse() {
     table.printProductions("CLASSDECL");
 
     lookahead = nextToken();
+    std::string currentLexeme;
     bool error = false;
 
     while (parseStack.top() != "$") {
         std::string x = parseStack.top();
-        std::cout << "Current token: " << lookahead.type << ", Stack top: " << x << std::endl;
+        // std::cout << "Current token: " << lookahead.type << ", Stack top: " << x << std::endl;
 
         if (table.isTerminal(x)) {
             if (x == lookahead.type) {
-                std::cout << "Matched terminal: " << x << std::endl;
+                // std::cout << "Matched terminal: " << x << std::endl;
                 parseStack.pop();
+                currentLexeme = lookahead.lexeme;
                 lookahead = nextToken();
             } else {
                 std::cout << "Error: Expected " << x << " but got " << lookahead.type << std::endl;
@@ -69,7 +71,7 @@ bool Parser::parse() {
         } else if (table.isNonTerminal(x)) {    
             std::string production = table.getProduction(x, lookahead.type);
             if (production != "error") {
-                std::cout << "Using production: " << production << std::endl;
+                // std::cout << "Using production: " << production << std::endl;
                 // Update the full derivation string:
                 std::string oldDerivation = currentDerivation;
                 // Replace the first occurrence of non-terminal x with the right-hand side production.
@@ -108,7 +110,7 @@ bool Parser::parse() {
         }
         else {
             // Perform action on the AST for the corresponding semantic attribute rule.
-            ast.performAction(x);
+            ast.performAction(x, currentLexeme);
             parseStack.pop();
         }
     }
@@ -160,11 +162,11 @@ void Parser::inverseRHSMultiplePush(const std::string& production) {
     // Push symbols in reverse order onto the parse stack.
     for (auto it = symbols.rbegin(); it != symbols.rend(); ++it) {
         parseStack.push(*it);
-        if (table.isTerminal(*it)) {
-            std::cout << "Pushed terminal: " << *it << std::endl;
-        } else {
-            std::cout << "Pushed non-terminal: " << *it << std::endl;
-        }
+        // if (table.isTerminal(*it)) {
+        //     std::cout << "Pushed terminal: " << *it << std::endl;
+        // } else {
+        //     std::cout << "Pushed non-terminal: " << *it << std::endl;
+        // }
     }
 }
 

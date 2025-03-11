@@ -70,6 +70,10 @@ void ASTNode::setParent(ASTNode* parent)
 {
     this->parent = parent;
 }
+NodeType ASTNode::getNodeEnum()
+{
+    return nodeType;
+}
 
 std::string ASTNode::getNodeType()
 {
@@ -91,6 +95,21 @@ std::string ASTNode::getNodeType()
             return "FUNCTION";
         case NodeType::IMPLEMENTATION:
             return "IMPLEMENTATION";
+        case NodeType::CLASS_ID:
+            return "CLASS_ID";
+        case NodeType::INHERITANCE_LIST:
+            return "INHERITANCE_LIST";
+        case NodeType::INHERITANCE_ID:
+            return "INHERITANCE_ID";
+        case NodeType::VISIBILITY:
+            return "VISIBILITY";
+        case NodeType::MEMBER_LIST:
+            return "MEMBER_LIST";
+        case NodeType::MEMBER:
+            return "MEMBER";
+        case NodeType::VARIABLE:
+            return "VARIABLE";
+
         default:
             // TODO: throw an exception when this happens
             return "UNKNOWN";
