@@ -275,8 +275,9 @@ void AST::performAction(std::string action, std::string value) {
         ASTNode* right = ASTStack.back(); ASTStack.pop_back();
         ASTNode* op = ASTStack.back(); ASTStack.pop_back();
         ASTNode* left = ASTStack.back(); ASTStack.pop_back();
-        
-        ASTNode* relExpr = makeFamily(NodeType::RELATIONAL_EXPR, left, op, right);
+        op->adoptChildren(left);
+        op->adoptChildren(right);
+        ASTNode* relExpr = makeFamily(NodeType::RELATIONAL_EXPR, op);
         ASTStack.push_back(relExpr);
     }
     else if (action == "_createAssignment") {
@@ -492,6 +493,18 @@ void AST::performAction(std::string action, std::string value) {
         op->setLeftMostChild(left);
         op->adoptChildren(right);
         ASTStack.push_back(makeFamily(NodeType::TERM, op));
+    }
+    else if (action == "_addCondition"){
+        ASTNode* condition = ASTStack.back(); ASTStack.pop_back();
+        ASTStack.push_back(makeFamily(NodeType::CONDITION, condition));
+    }
+    else if(action == "_addEmptyBlock"){
+        ASTStack.push_back(createNode(NodeType::BLOCK, "empty"));
+    }
+    else if(action == "_processArraySize"){
+        ASTNode * type = ASTStack.back(); ASTStack.pop_back();
+        ASTNode * dimension = ASTStack.back(); ASTStack.pop_back();
+        ASTStack.push_back(makeFamily(NodeType::ARRAY_TYPE, type, dimension));
     }
     // Debug output
     printVector(ASTStack);

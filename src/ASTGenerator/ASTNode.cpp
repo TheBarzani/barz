@@ -135,6 +135,8 @@ std::string ASTNode::getNodeType()
         case NodeType::INT:                 return "INTEGER";
         case NodeType::STATEMENTS_LIST:     return "STATEMENTS_LIST";
         case NodeType::IMPLEMENTATION_FUNCTION_LIST: return "IMPLEMENTATION_FUNCTION_LIST";
+        case NodeType::CONDITION:           return "CONDITION";
+        case NodeType::ARRAY_TYPE:          return "ARRAY_TYPE";
         default:
             // TODO: throw an exception when this happens
             return "UNKNOWN";

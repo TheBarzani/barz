@@ -20,8 +20,8 @@ ATTRDECL -> attribute VARDECL _createAttribute .
 LOCALVARDECL -> local VARDECL _createLocalVariable .
 VARDECL -> id _setVariableId colon TYPE ARRAYSIZES semi _createVariable .
 STATEMENT -> FUNCALLORASSIGN semi _createExpressionStatement
-| if lpar RELEXPR rpar then STATBLOCK else STATBLOCK semi _createIfStatement
-| while lpar RELEXPR rpar STATBLOCK semi _createWhileStatement
+| if lpar RELEXPR _addCondition rpar then STATBLOCK else STATBLOCK semi _createIfStatement
+| while lpar RELEXPR _addCondition rpar STATBLOCK semi _createWhileStatement
 | read lpar VARIABLE rpar semi _createReadStatement
 | write lpar EXPR rpar semi _createWriteStatement
 | return lpar EXPR rpar semi _createReturnStatement .
@@ -29,11 +29,11 @@ FUNCALLORASSIGN -> IDORSELF FUNCALLORASSIGN2 .
 FUNCALLORASSIGN2 -> INDICES _processDotAccess FUNCALLORASSIGN3 | lpar APARAMS rpar _createFunctionCall FUNCALLORASSIGN4 .
 FUNCALLORASSIGN3 -> ASSIGNOP EXPR _createAssignment | dot id _pushDotIdentifier FUNCALLORASSIGN2 _processDotAccess.
 FUNCALLORASSIGN4 -> dot id _processFunctionReturn FUNCALLORASSIGN2 | .
-STATBLOCK -> lcurbr STATEMENTS rcurbr _createBlock | STATEMENT _createSingleStatement | .
+STATBLOCK -> lcurbr _addStatementsList STATEMENTS rcurbr _createBlock | STATEMENT _createSingleStatement | _addEmptyBlock .
 STATEMENTS -> STATEMENT _addStatement STATEMENTS | .
 EXPR -> ARITHEXPR EXPR2 _finishExpression .
 EXPR2 -> RELOP ARITHEXPR _createRelationalExpr | .
-RELEXPR -> ARITHEXPR RELOP _setRelop ARITHEXPR _createRelationalExpr .
+RELEXPR -> ARITHEXPR RELOP ARITHEXPR _createRelationalExpr .
 ARITHEXPR -> TERM RIGHTRECARITHEXPR _finishArithExpr .
 RIGHTRECARITHEXPR -> ADDOP TERM _processAddOp RIGHTRECARITHEXPR | .
 SIGN -> plus _pushSign | minus _pushSign .
@@ -68,7 +68,7 @@ FPARAMS -> _createParamList id _setParamId colon TYPE ARRAYSIZES _createParam RE
 REPTFPARAMS1 -> FPARAMSTAIL REPTFPARAMS1 | .
 FPARAMSTAIL -> comma id _setParamId colon TYPE ARRAYSIZES _createParam .
 ASSIGNOP -> assign _setAssignOperator .
-RELOP -> eq _setRelop | neq _setRelop | lt _setRelop | gt _setRelop | lteq _setRelop | gteq _setRelop .
+RELOP -> eq _setRelop | neq _setRelop | lt _setRelop | gt _setRelop | leq _setRelop | geq _setRelop .
 ADDOP -> plus _setAddOp | minus _setAddOp | or _setAddOp .
 MULTOP -> mult _setMultOp | div _setMultOp | and _setMultOp .
 IDORSELF -> id _setIdentifier | self _setSelfIdentifier .
