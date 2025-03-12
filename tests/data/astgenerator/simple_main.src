@@ -1,0 +1,8 @@
+class SIMPLE {
+  private attribute a: float;
+};
+
+function main(myarr: int[], myvar: float) => void
+{
+  local x: int;
+}
