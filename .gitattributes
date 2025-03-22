@@ -1,0 +1,6 @@
+# Exclude HTML files from language statistics
+*.html linguist-documentation
+*.htm linguist-documentation
+
+# Treat CSS as documentation (if you want to exclude it too)
+# *.css linguist-documentation
