@@ -147,6 +147,13 @@ Follow these steps to build and run the `Driver` executable using CMake:
       --table <csv_file>   Specify a custom parsing table CSV file. Default is 'parsing_table.csv'.
       -h, --help           Show this help message.
    ```
+      or 
+   ```bash
+   Usage: ./astdriver [--table parsing_table.csv] file1 [file2 ...]
+   Options:
+      --table <csv_file>   Specify a custom parsing table CSV file. Default is 'attribute_grammar_parsing_table.csv'.
+      -h, --help           Show this help message.
+   ```
 5. **Run the tests**:
    After the build is complete, you can run the tests.
 

@@ -1,0 +1,74 @@
+START -> _createRoot PROG .
+PROG -> CLASSIMPLFUNC _addToProgram PROG | .
+CLASSIMPLFUNC -> CLASSDECL | IMPLDEF | FUNCDEF .
+CLASSDECL -> class id _createClassId _createInheritanceList ISA1 lcurbr _addMemberList VISMEMBERDECL rcurbr semi _createClass .
+VISMEMBERDECL -> VISIBILITY MEMDECL _addMember VISMEMBERDECL | .
+ISA1 -> isa id _addInheritanceId ISA2 | .
+ISA2 -> comma id _addInheritanceId ISA2 | .
+IMPLDEF -> implementation id _createImplementationId lcurbr _createImplementationList IMPLBODY rcurbr _createImplementation .
+IMPLBODY -> FUNCDEF _addImplementationFunction IMPLBODY | .
+FUNCDEF -> FUNCHEAD _addStatementsList FUNCBODY _createFunction .
+VISIBILITY -> public _setVisibility | private _setVisibility .
+MEMDECL -> FUNCDECL | ATTRDECL .
+FUNCDECL -> FUNCHEAD semi _createFunctionDeclaration .
+FUNCHEAD -> function id _createFunctionId lpar FPARAMS rpar arrow RETURNTYPE _createFunctionSignature
+| constructor _setConstructor lpar FPARAMS rpar _createConstructorSignature .
+FUNCBODY -> lcurbr LOCALVARDECLORSTAT2 rcurbr _createFunctionBody .
+LOCALVARDECLORSTAT -> LOCALVARDECL | STATEMENT .
+LOCALVARDECLORSTAT2 -> LOCALVARDECLORSTAT _addBodyStatement LOCALVARDECLORSTAT2 | .
+ATTRDECL -> attribute VARDECL _createAttribute .
+LOCALVARDECL -> local VARDECL _createLocalVariable .
+VARDECL -> id _setVariableId colon TYPE ARRAYSIZES semi _createVariable .
+STATEMENT -> FUNCALLORASSIGN semi _createExpressionStatement
+| if lpar RELEXPR _addCondition rpar then STATBLOCK else STATBLOCK semi _createIfStatement
+| while lpar RELEXPR _addCondition rpar STATBLOCK semi _createWhileStatement
+| read lpar VARIABLE rpar semi _createReadStatement
+| write lpar EXPR rpar semi _createWriteStatement
+| return lpar EXPR rpar semi _createReturnStatement .
+FUNCALLORASSIGN -> IDORSELF FUNCALLORASSIGN2 .
+FUNCALLORASSIGN2 -> INDICES _processDotAccess FUNCALLORASSIGN3 | lpar APARAMS rpar _createFunctionCall FUNCALLORASSIGN4 .
+FUNCALLORASSIGN3 -> ASSIGNOP EXPR _createAssignment | dot id _pushDotIdentifier FUNCALLORASSIGN2 _processDotAccess.
+FUNCALLORASSIGN4 -> dot id _processFunctionReturn FUNCALLORASSIGN2 | .
+STATBLOCK -> lcurbr _addStatementsList STATEMENTS rcurbr _createBlock | STATEMENT _createSingleStatement | _addEmptyBlock .
+STATEMENTS -> STATEMENT _addStatement STATEMENTS | .
+EXPR -> ARITHEXPR EXPR2 _finishExpression .
+EXPR2 -> RELOP ARITHEXPR _createRelationalExpr | .
+RELEXPR -> ARITHEXPR RELOP ARITHEXPR _createRelationalExpr .
+ARITHEXPR -> TERM RIGHTRECARITHEXPR _finishArithExpr .
+RIGHTRECARITHEXPR -> ADDOP TERM _processAddOp RIGHTRECARITHEXPR | .
+SIGN -> plus _pushSign | minus _pushSign .
+TERM -> FACTOR _addTerm RIGHTRECTERM .
+RIGHTRECTERM -> MULTOP FACTOR _processMultOp RIGHTRECTERM | .
+FACTOR -> IDORSELF FACTOR2 REPTVARIABLEORFUNCTIONCALL _finishFactor
+| floatlit _pushFloatLiteral
+| intlit _pushIntLiteral
+| lpar ARITHEXPR rpar _handleParenExpr
+| not FACTOR _createNotExpr
+| SIGN FACTOR _applySign .
+FACTOR2 -> lpar APARAMS rpar _createFunctionCall | INDICES .
+INDICES -> INDICE _addIndex _processArrayAccess INDICES | .
+REPTVARIABLEORFUNCTIONCALL -> IDNEST _processDotAccess REPTVARIABLEORFUNCTIONCALL | .
+VARIABLE -> IDORSELF VARIABLE2 _finishVariable .
+VARIABLE2 -> INDICES REPTVARIABLE | lpar APARAMS rpar _createFunctionCall VARIDNEST .
+REPTVARIABLE -> VARIDNEST _processDotAccess REPTVARIABLE | .
+VARIDNEST -> dot id _pushDotIdentifier VARIDNEST2 .
+VARIDNEST2 -> lpar APARAMS rpar _createFunctionCall VARIDNEST | INDICES .
+INDICE -> lsqbr ARITHEXPR rsqbr _createArrayIndex .
+IDNEST -> dot id _pushDotIdentifier IDNEST2 .
+IDNEST2 -> lpar APARAMS rpar _createFunctionCall | INDICES .
+ARRAYSIZE -> lsqbr ARRAYSIZE2 .
+ARRAYSIZE2 -> intlit _addArrayDimension rsqbr | _addDynamicArrayDimension rsqbr .
+ARRAYSIZES -> ARRAYSIZE _processArraySize ARRAYSIZES | .
+TYPE -> int _setTypeInt | float _setTypeFloat | id _setTypeCustom .
+RETURNTYPE -> TYPE | void _setTypeVoid .
+APARAMS -> _createParamList EXPR _addActualParam REPTAPARAMS1 | _createParamList .
+REPTAPARAMS1 -> APARAMSTAIL REPTAPARAMS1 | .
+APARAMSTAIL -> comma EXPR _addActualParam .
+FPARAMS -> _createParamList id _setParamId colon TYPE ARRAYSIZES _createParam REPTFPARAMS1 | _createParamList .
+REPTFPARAMS1 -> FPARAMSTAIL REPTFPARAMS1 | .
+FPARAMSTAIL -> comma id _setParamId colon TYPE ARRAYSIZES _createParam .
+ASSIGNOP -> assign _setAssignOperator .
+RELOP -> eq _setRelop | neq _setRelop | lt _setRelop | gt _setRelop | leq _setRelop | geq _setRelop .
+ADDOP -> plus _setAddOp | minus _setAddOp | or _setAddOp .
+MULTOP -> mult _setMultOp | div _setMultOp | and _setMultOp .
+IDORSELF -> id _setIdentifier | self _setSelfIdentifier .

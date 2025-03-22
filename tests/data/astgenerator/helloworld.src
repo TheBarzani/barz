@@ -1,0 +1,25 @@
+/* main funtion to test above */
+function error() => void
+  local arr: int[7]; 
+{
+  arr[0] := 64;
+  arr[1] := 34;
+  arr[2] := 25;
+  arr[3] := 12;
+  arr[4] := 22;
+  arr[5] := 11;
+  arr[6] := 90;
+}
+
+// main funtion to test above
+function main() => void
+{
+  local arr: int[7]; 
+  arr[0] := 64;
+  arr[1] := 34;
+  arr[2] := 25;
+  arr[3] := 12;
+  arr[4] := 22;
+  arr[5] := 11;
+  arr[6] := 90;
+}
