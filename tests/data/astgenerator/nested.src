@@ -34,11 +34,11 @@ function main() => void {
   local result: float;
   local i: int;
   
-  calc := calc.build();
+  calc := calc.a.b.c;
   i := 1;
   
   while (i <= 5) {
-    if (i % 2 = 0) 
+    if (i >= 0) 
       then {
         result := calc.add(i);
       }

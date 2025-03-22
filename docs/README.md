@@ -193,3 +193,19 @@ Files:
 4. LL(1) grammar
 
    grammar.LL1.grm
+
+
+# More Specs
+Files:
+
+1. assigment statement
+
+   assignment4.COMP442-6421.paquet.2025.4.pdf
+   
+3. example files
+
+   bubblesort.src                  semantically valid program
+   bubblesort.outsymboltables      symbol table output for bubblesort.src
+   polynomial.src                  semantically valid program
+   polynomial.outsymboltables      symbol table output for polynomial.src
+   polynomialsemanticerrors.src    semantically invalid program
