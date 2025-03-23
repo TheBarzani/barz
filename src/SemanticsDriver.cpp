@@ -69,9 +69,9 @@ int main(int argc, char* argv[]) {
         
         // First parse the file to generate AST
         std::cout << "Parsing file: " << file << " with table: " << tableFile << std::endl;
-        Parser* parser = new Parser(file, tableFile);
+        Parser parser(file, tableFile);
         
-        bool parseSuccess = parser->parse();
+        bool parseSuccess = parser.parse();
         if (!parseSuccess) {
             std::cerr << "Error: Failed to parse " << file << std::endl;
             continue;
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
         
         // Get the AST from the parser
         // Get a reference to the AST - not a copy
-        AST& ast = parser->getAST();
+        AST& ast = parser.getAST();
         // Now get the root from the reference
         ASTNode* root = ast.getRoot();
         // Write the AST to file using the reference
@@ -99,8 +99,8 @@ int main(int argc, char* argv[]) {
         std::string baseName = filePath.stem().string();
         
         // Create output filename with .outsymboltables extension
-        std::string outputFile = outputDir + "/" + baseName + ".outsymboltables";
-        
+        // std::string outputFile = outputDir + "/" + baseName + ".outsymboltables";
+        std::string outputFile = file + ".outsymboltables";
         // Output the symbol table to file
         visitor.outputSymbolTable(outputFile);
         

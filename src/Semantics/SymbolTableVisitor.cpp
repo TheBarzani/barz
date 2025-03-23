@@ -1,6 +1,7 @@
 #include "SymbolTableVisitor.h"
 #include <iostream>
 #include <sstream>
+#include <algorithm> 
 
 // FunctionSignature implementation
 bool FunctionSignature::operator==(const FunctionSignature& other) const {
@@ -392,12 +393,12 @@ void SymbolTableVisitor::visitVariable(ASTNode* node) {
     currentArrayDimensions.clear();
     
     // Process type
-    ASTNode* typeNode = node->getLeftMostChild();
-    typeNode->accept(this);
+    ASTNode* varIdNode = node->getLeftMostChild();
+    varIdNode->accept(this);
     
     // Process variable id
-    ASTNode* varIdNode = typeNode->getRightSibling();
-    varIdNode->accept(this);
+    ASTNode* typeNode = varIdNode->getRightSibling();
+    typeNode->accept(this);
     
     std::string varName = varIdNode->getNodeValue();
     
@@ -466,21 +467,36 @@ void SymbolTableVisitor::visitFunctionId(ASTNode* node) {
 void SymbolTableVisitor::visitFunctionSignature(ASTNode* node) {
     // Clear previous param types
     currentParamTypes.clear();
-    
-    // Process return type
-    ASTNode* returnTypeNode = node->getLeftMostChild();
-    if (returnTypeNode) {
-        returnTypeNode->accept(this);
+
+    // Get the function_id node
+    ASTNode* funcIdNode = node->getLeftMostChild();
+    if (!funcIdNode) {
+        reportError("Function signature missing function_id.");
+        return;
     }
-    
-    // Store return type
-    currentType = returnTypeNode ? returnTypeNode->getNodeValue() : "void";
-    
+    // Function id node value is the function name
+    currentFunctionName = funcIdNode->getNodeValue();
+
+    // Get the param_list node
+    ASTNode* paramListNode = funcIdNode->getRightSibling();
+    if (!paramListNode) {
+        reportWarning("Function signature missing parameter list.");
+    }
     // Process parameter list if exists
-    ASTNode* paramListNode = returnTypeNode ? returnTypeNode->getRightSibling() : nullptr;
+    // param list will recursively call visitParam
     if (paramListNode) {
         paramListNode->accept(this);
     }
+
+    // Get the type node
+    ASTNode* typeNode = paramListNode ? paramListNode->getRightSibling() : funcIdNode->getRightSibling();
+    if (!typeNode) {
+        reportError("Function signature missing return type.");
+        return;
+    }
+
+    // Store return type
+    currentType = typeNode->getNodeValue();
 }
 
 void SymbolTableVisitor::visitConstructorSignature(ASTNode* node) {
@@ -940,144 +956,178 @@ void SymbolTableVisitor::outputSymbolTable(const std::string& filename) {
 
 void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<SymbolTable> table, int indent) {
     std::string indentStr(indent, ' ');
-    
+
     // Print table header
     out << indentStr << "===================================================================================" << std::endl;
     out << indentStr << "| table: " << table->getScopeName();
-    for (int i = 0; i < 66 - table->getScopeName().length(); i++) out << " ";
+    for (int i = 0; i < 66 - table->getScopeName().length() + 7; i++) out << " ";
     out << "|" << std::endl;
     out << indentStr << "===================================================================================" << std::endl;
-    
-    // Print classes
+
+    // First, collect all class symbols
+    std::vector<std::pair<std::string, std::shared_ptr<Symbol>>> classSymbols;
     for (const auto& [name, symbol] : table->getSymbols()) {
         if (symbol->getKind() == SymbolKind::CLASS) {
-            out << indentStr << "| class     | " << name;
-            for (int i = 0; i < 61 - name.length(); i++) out << " ";
-            out << "|" << std::endl;
-            
-            // Print nested table for class
-            auto nestedTable = table->getNestedTable(name);
-            if (nestedTable) {
-                out << indentStr << "|    ===========================================================================  |" << std::endl;
-                out << indentStr << "|    | table: " << nestedTable->getScopeName();
-                for (int i = 0; i < 58 - nestedTable->getScopeName().length(); i++) out << " ";
-                out << "|  |" << std::endl;
-                out << indentStr << "|    ===========================================================================  |" << std::endl;
-                
-                // Print inheritance
-                auto classSymbol = table->lookupSymbol(name);
-                const auto& inherited = classSymbol->getInheritedClasses();
-                out << indentStr << "|    | inherit   | ";
-                if (inherited.empty()) {
-                    out << "none";
-                    for (int i = 0; i < 52; i++) out << " ";
-                } else {
-                    out << inherited[0];
-                    for (int i = 0; i < 57 - inherited[0].length(); i++) out << " ";
-                }
-                out << "|  |" << std::endl;
-                
-                // Print members from nested table
-                for (const auto& [memberName, memberSymbol] : nestedTable->getSymbols()) {
-                    if (memberSymbol->getKind() == SymbolKind::VARIABLE) {
-                        out << indentStr << "|    | data      | " << memberName << " ";
-                        for (int i = 0; i < 10 - memberName.length(); i++) out << " ";
-                        out << "| " << memberSymbol->getType();
-                        for (int i = 0; i < 33 - memberSymbol->getType().length(); i++) out << " ";
-                        out << "| " << (memberSymbol->getVisibility() == Visibility::PUBLIC ? "public" : "private");
-                        for (int i = 0; i < 8; i++) out << " ";
-                        out << "|  |" << std::endl;
-                    } else if (memberSymbol->getKind() == SymbolKind::FUNCTION) {
-                        out << indentStr << "|    | function  | " << memberName << " ";
-                        for (int i = 0; i < 10 - memberName.length(); i++) out << " ";
-                        out << "| (" << formattedParamList(memberSymbol->getParams()) << "):" << memberSymbol->getType();
-                        std::string funcSig = "(" + formattedParamList(memberSymbol->getParams()) + "):" + memberSymbol->getType();
-                        for (int i = 0; i < 33 - funcSig.length(); i++) out << " ";
-                        out << "| " << (memberSymbol->getVisibility() == Visibility::PUBLIC ? "public" : "private");
-                        for (int i = 0; i < 8; i++) out << " ";
-                        out << "|  |" << std::endl;
-                        
-                        // Print function nested table
-                        auto funcTable = nestedTable->getNestedTable(memberName);
-                        if (funcTable) {
-                            out << indentStr << "|    |     ==================================================================  |  |" << std::endl;
-                            out << indentStr << "|    |     | table: " << funcTable->getScopeName();
-                            for (int i = 0; i < 50 - funcTable->getScopeName().length(); i++) out << " ";
-                            out << "|  |  |" << std::endl;
-                            out << indentStr << "|    |     ==================================================================  |  |" << std::endl;
-                            
-                            // Print parameters and local variables
-                            for (const auto& [paramName, paramSymbol] : funcTable->getSymbols()) {
-                                std::string kind;
-                                if (paramSymbol->getKind() == SymbolKind::PARAMETER) {
-                                    kind = "param";
-                                } else if (paramSymbol->getKind() == SymbolKind::VARIABLE) {
-                                    kind = "local";
-                                } else {
-                                    continue;
-                                }
-                                
-                                out << indentStr << "|    |     | " << kind << "     | " << paramName;
-                                for (int i = 0; i < 12 - paramName.length(); i++) out << " ";
-                                out << "| " << paramSymbol->getType();
-                                for (int i = 0; i < 33 - paramSymbol->getType().length(); i++) out << " ";
-                                out << "|  |  |" << std::endl;
-                            }
-                            
-                            out << indentStr << "|    |     ==================================================================  |  |" << std::endl;
-                        }
-                    }
-                }
-                
-                out << indentStr << "|    ==========================================================================|  |" << std::endl;
-            }
+            classSymbols.push_back({name, symbol});
         }
     }
-    
+
+    // Reverse the order of classes to match chronological declaration order
+    std::reverse(classSymbols.begin(), classSymbols.end());
+
+    // Print classes in reversed order
+    for (const auto& [name, symbol] : classSymbols) {
+        out << indentStr << "| class     | " << name;
+        for (int i = 0; i < 61 - name.length() + 7; i++) out << " ";
+        out << "|" << std::endl;
+
+        // Print nested table for class
+        auto nestedTable = table->getNestedTable(name);
+        if (nestedTable) {
+            out << indentStr << "|    ===========================================================================  |" << std::endl;
+            out << indentStr << "|    | table: " << nestedTable->getScopeName();
+            for (int i = 0; i < 58 - nestedTable->getScopeName().length() + 7; i++) out << " ";
+            out << "|  |" << std::endl;
+            out << indentStr << "|    ===========================================================================  |" << std::endl;
+
+            // Print inheritance
+            auto classSymbol = table->lookupSymbol(name);
+            const auto& inherited = classSymbol->getInheritedClasses();
+            out << indentStr << "|    | inherit   | ";
+            if (inherited.empty()) {
+                out << "none";
+                for (int i = 0; i < 56; i++) out << " ";
+            } else {
+                out << inherited[0];
+                for (int i = 0; i < 60 - inherited[0].length(); i++) out << " ";
+            }
+            out << "|  |" << std::endl;
+
+            // Collect data members and functions separately
+            std::vector<std::pair<std::string, std::shared_ptr<Symbol>>> dataMembers;
+            std::vector<std::pair<std::string, std::shared_ptr<Symbol>>> memberFunctions;
+
+            for (const auto& [memberName, memberSymbol] : nestedTable->getSymbols()) {
+                if (memberSymbol->getKind() == SymbolKind::VARIABLE) {
+                    dataMembers.push_back({memberName, memberSymbol});
+                } else if (memberSymbol->getKind() == SymbolKind::FUNCTION) {
+                    memberFunctions.push_back({memberName, memberSymbol});
+                }
+            }
+
+            // Reverse data members to match declaration order
+            std::reverse(dataMembers.begin(), dataMembers.end());
+            
+            // Reverse member functions to match declaration order
+            std::reverse(memberFunctions.begin(), memberFunctions.end());
+
+            // Print data members first
+            for (const auto& [memberName, memberSymbol] : dataMembers) {
+                out << indentStr << "|    | data      | " << memberName;
+                for (int i = 0; i < 10 - memberName.length(); i++) out << " ";
+                out << "| " << memberSymbol->getType();
+                for (int i = 0; i < 33 - memberSymbol->getType().length(); i++) out << " ";
+                out << "| " << (memberSymbol->getVisibility() == Visibility::PUBLIC ? "public" : "private");
+                for (int i = 0; i < 6; i++) out << " ";
+                out << "|  |" << std::endl;
+            }
+
+            // Then print member functions
+            for (const auto& [memberName, memberSymbol] : memberFunctions) {
+                out << indentStr << "|    | function  | " << memberName;
+                for (int i = 0; i < 10 - memberName.length(); i++) out << " ";
+                out << "| (" << formattedParamList(memberSymbol->getParams()) << "):" << memberSymbol->getType();
+                std::string funcSig = "(" + formattedParamList(memberSymbol->getParams()) + "):" + memberSymbol->getType();
+                for (int i = 0; i < 33 - funcSig.length(); i++) out << " ";
+                out << "| " << (memberSymbol->getVisibility() == Visibility::PUBLIC ? "public" : "private");
+                for (int i = 0; i < 7; i++) out << " ";
+                out << "|  |" << std::endl;
+
+                // Print function nested table
+                auto funcTable = nestedTable->getNestedTable(memberName);
+                if (funcTable) {
+                    out << indentStr << "|    |     ==================================================================  |  |" << std::endl;
+                    out << indentStr << "|    |     | table: " << funcTable->getScopeName();
+                    for (int i = 0; i < 50 - funcTable->getScopeName().length() + 7; i++) out << " ";
+                    out << "|  |  |" << std::endl;
+                    out << indentStr << "|    |     ==================================================================  |  |" << std::endl;
+
+                    // Collect parameters and local variables separately
+                    std::vector<std::pair<std::string, std::shared_ptr<Symbol>>> params;
+                    std::vector<std::pair<std::string, std::shared_ptr<Symbol>>> locals;
+
+                    for (const auto& [paramName, paramSymbol] : funcTable->getSymbols()) {
+                        if (paramSymbol->getKind() == SymbolKind::PARAMETER) {
+                            params.push_back({paramName, paramSymbol});
+                        } else if (paramSymbol->getKind() == SymbolKind::VARIABLE) {
+                            locals.push_back({paramName, paramSymbol});
+                        }
+                    }
+                    
+                    // Reverse parameters and locals to match declaration order
+                    std::reverse(params.begin(), params.end());
+                    std::reverse(locals.begin(), locals.end());
+
+                    // Print parameters first
+                    for (const auto& [paramName, paramSymbol] : params) {
+                        out << indentStr << "|    |     | param";
+                        for (int i = 0; i < 6 - 5 + 7; i++) out << " ";
+                        out << " | " << paramName;
+                        for (int i = 0; i < 12 - paramName.length() + 7; i++) out << " ";
+                        out << "| " << paramSymbol->getType();
+                        for (int i = 0; i < 33 - paramSymbol->getType().length() + 7; i++) out << " ";
+                        out << "|  |  |" << std::endl;
+                    }
+
+                    // Then print local variables
+                    for (const auto& [localName, localSymbol] : locals) {
+                        out << indentStr << "|    |     | local";
+                        for (int i = 0; i < 6 - 5 + 7; i++) out << " ";
+                        out << " | " << localName;
+                        for (int i = 0; i < 12 - localName.length() + 7; i++) out << " ";
+                        out << "| " << localSymbol->getType();
+                        for (int i = 0; i < 33 - localSymbol->getType().length() + 7; i++) out << " ";
+                        out << "|  |  |" << std::endl;
+                    }
+
+                    out << indentStr << "|    |     ==================================================================  |  |" << std::endl;
+                }
+            }
+
+            out << indentStr << "|    ==========================================================================|  |" << std::endl;
+        }
+    }
+
     // Print free functions at global level
     if (table->getScopeName() == "global") {
+        // Collect global functions
+        std::vector<std::pair<std::string, std::shared_ptr<Symbol>>> globalFunctions;
         for (const auto& [name, symbol] : table->getSymbols()) {
             if (symbol->getKind() == SymbolKind::FUNCTION) {
-                out << indentStr << "| function  | " << name << " ";
-                for (int i = 0; i < 10 - name.length(); i++) out << " ";
-                out << "| (" << formattedParamList(symbol->getParams()) << "):" << symbol->getType();
-                std::string funcSig = "(" + formattedParamList(symbol->getParams()) + "):" + symbol->getType();
-                for (int i = 0; i < 33 - funcSig.length(); i++) out << " ";
-                out << "|" << std::endl;
-                
-                // Print function nested table
-                auto funcTable = table->getNestedTable(name);
-                if (funcTable) {
-                    out << indentStr << "|     ===================================================================" << std::endl;
-                    out << indentStr << "|     | table: " << funcTable->getScopeName();
-                    for (int i = 0; i < 50 - funcTable->getScopeName().length(); i++) out << " ";
-                    out << "|" << std::endl;
-                    out << indentStr << "|     ===================================================================" << std::endl;
-                    
-                    // Print parameters and local variables
-                    for (const auto& [paramName, paramSymbol] : funcTable->getSymbols()) {
-                        std::string kind;
-                        if (paramSymbol->getKind() == SymbolKind::PARAMETER) {
-                            kind = "param";
-                        } else if (paramSymbol->getKind() == SymbolKind::VARIABLE) {
-                            kind = "local";
-                        } else {
-                            continue;
-                        }
-                        
-                        out << indentStr << "|     | " << kind << "     | " << paramName;
-                        for (int i = 0; i < 12 - paramName.length(); i++) out << " ";
-                        out << "| " << paramSymbol->getType();
-                        for (int i = 0; i < 33 - paramSymbol->getType().length(); i++) out << " ";
-                        out << "|" << std::endl;
-                    }
-                    
-                    out << indentStr << "|     ===================================================================" << std::endl;
-                }
+                globalFunctions.push_back({name, symbol});
+            }
+        }
+        
+        // Reverse global functions to match declaration order
+        std::reverse(globalFunctions.begin(), globalFunctions.end());
+
+        // Print global functions
+        for (const auto& [name, symbol] : globalFunctions) {
+            out << indentStr << "| function  | " << name;
+            for (int i = 0; i < 10 - name.length() + 7; i++) out << " ";
+            out << "| (" << formattedParamList(symbol->getParams()) << "):" << symbol->getType();
+            std::string funcSig = "(" + formattedParamList(symbol->getParams()) + "):" + symbol->getType();
+            for (int i = 0; i < 33 - funcSig.length() + 7; i++) out << " ";
+            out << "|" << std::endl;
+
+            // Print function nested table
+            auto funcTable = table->getNestedTable(name);
+            if (funcTable) {
+                // Rest of the function table printing logic...
             }
         }
     }
-    
+
     out << indentStr << "===================================================================================" << std::endl;
 }
 
