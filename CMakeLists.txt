@@ -25,6 +25,13 @@ add_executable(astdriver
     src/ASTGenerator/ASTNode.cpp    # AST node code
     src/ASTDriver.cpp               # Driver code
 )
+add_executable(semanticanalyzerdriver
+    src/Scanner/Scanner.cpp         # Scanner implementation
+    src/Parser/Parser.cpp           # Parser implementation
+    src/ASTGenerator/AST.cpp        # AST generation code
+    src/ASTGenerator/ASTNode.cpp    # AST node code
+    src/SemanticsDriver.cpp         # Driver code
+)
 
 # Include directories (headers in include/Scanner)
 target_include_directories(lexdriver PRIVATE
@@ -35,14 +42,20 @@ target_include_directories(lexdriver PRIVATE
 target_include_directories(parsedriver PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-# Include CSV file
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/syntactical_analysis/LL1_parsing_table.csv ${CMAKE_BINARY_DIR}/LL1_parsing_table.csv COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/ast_generation/attribute_grammar_parsing_table.csv ${CMAKE_BINARY_DIR}/attribute_grammar_parsing_table.csv COPYONLY)
 
 # Include directories (headers in include/Parser)
 target_include_directories(astdriver PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+
+# Include directories (headers in include/Parser)
+target_include_directories(semanticanalyzerdriver PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+# Include CSV file
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/syntactical_analysis/LL1_parsing_table.csv ${CMAKE_BINARY_DIR}/LL1_parsing_table.csv COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/ast_generation/attribute_grammar_parsing_table.csv ${CMAKE_BINARY_DIR}/attribute_grammar_parsing_table.csv COPYONLY)
 
 # Add the tests directory
 add_subdirectory(tests)

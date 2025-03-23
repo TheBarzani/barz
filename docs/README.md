@@ -209,3 +209,9 @@ Files:
    polynomial.src                  semantically valid program
    polynomial.outsymboltables      symbol table output for polynomial.src
    polynomialsemanticerrors.src    semantically invalid program
+
+NOTE:
+1. ASTNodes should have a new data member of SymbolTable
+2. Multiple phases needed, maybe one for symbol table and another for semantic checking
+3. Semantic actions have to be grouped into traversal passes/phases, AND still be mapped to
+specific nodes. 

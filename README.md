@@ -1,4 +1,4 @@
-# barz
+# BARZ
 Broken Automated Reliable Zipper (BARZ): A bare-bone compiler written in CPP.
 
 # Project Technology Stack
