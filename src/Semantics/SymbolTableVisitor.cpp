@@ -132,9 +132,12 @@ void SymbolTableVisitor::visitProgram(ASTNode* node) {
     globalTable = std::make_shared<SymbolTable>("global");
     currentTable = globalTable;
     
-    // Visit children
-    if (node->getLeftMostChild() != nullptr)
-        node->getLeftMostChild()->accept(this);
+    // Visit all children of the program node
+    ASTNode* currentChild = node->getLeftMostChild();
+    while (currentChild) {
+        currentChild->accept(this);
+        currentChild = currentChild->getRightSibling();
+    }
     
     // Check for function consistency after the whole program is processed
     checkFunctionConsistency();
@@ -241,12 +244,22 @@ void SymbolTableVisitor::visitMemberList(ASTNode* node) {
 }
 
 void SymbolTableVisitor::visitFunction(ASTNode* node) {
-    // Process function id
-    ASTNode* funcIdNode = node->getLeftMostChild();
-    funcIdNode->accept(this);
+    // Check if we're at global scope to ensure proper function naming
+    bool isGlobalScope = (currentTable == globalTable);
     
-    // Process function signature
-    ASTNode* signatureNode = funcIdNode->getRightSibling();
+    // If we're at global scope, make sure currentClassName is empty
+    if (isGlobalScope) {
+        currentClassName = "";
+    }
+    
+    // Process function signature (left child)
+    ASTNode* signatureNode = node->getLeftMostChild();
+    if (!signatureNode) {
+        reportError("Function missing signature.");
+        return;
+    }
+    
+    // Clear param types and process signature
     currentParamTypes.clear();
     signatureNode->accept(this);
     
@@ -255,6 +268,7 @@ void SymbolTableVisitor::visitFunction(ASTNode* node) {
     functionSymbol->setParams(currentParamTypes);
     functionSymbol->setVisibility(currentVisibility);
     functionSymbol->setDeclared(true);
+    functionSymbol->setDefined(true);  // Since this is a function definition, not just declaration
     
     // Check for function overloading
     FunctionSignature sig;
@@ -262,21 +276,21 @@ void SymbolTableVisitor::visitFunction(ASTNode* node) {
     sig.paramTypes = currentParamTypes;
     
     if (currentTable->lookupFunction(sig, true)) {
-        reportError("Multiply declared member function: " + currentClassName + "::" + currentFunctionName);
+        reportError("Multiply declared function: " + currentFunctionName);
         return;
     }
     
     // Check for functions with same name but different signatures (overloading)
     auto overloads = currentTable->lookupFunctions(currentFunctionName, true);
     if (!overloads.empty()) {
-        reportWarning("Function overloading: " + currentClassName + "::" + currentFunctionName);
+        reportWarning("Function overloading: " + currentFunctionName);
     }
     
-    // Add function to current table (class table)
+    // Add function to current table
     currentTable->addSymbol(functionSymbol);
     
     // Create a new table for function scope
-    std::string funcTableName = currentClassName + "::" + currentFunctionName;
+    std::string funcTableName = currentClassName.empty() ? "::" + currentFunctionName : currentClassName + "::" + currentFunctionName;
     auto functionTable = std::make_shared<SymbolTable>(funcTableName, currentTable.get());
     currentTable->addNestedTable(currentFunctionName, functionTable);
     
@@ -284,7 +298,7 @@ void SymbolTableVisitor::visitFunction(ASTNode* node) {
     auto savedTable = currentTable;
     currentTable = functionTable;
     
-    // Process function body if present (declarations don't have body)
+    // Process function body (right child)
     ASTNode* bodyNode = signatureNode->getRightSibling();
     if (bodyNode) {
         bodyNode->accept(this);
@@ -392,15 +406,22 @@ void SymbolTableVisitor::visitVariable(ASTNode* node) {
     // Reset array dimensions
     currentArrayDimensions.clear();
     
-    // Process type
+    // Get the variable id node (first child)
     ASTNode* varIdNode = node->getLeftMostChild();
-    varIdNode->accept(this);
-    
-    // Process variable id
-    ASTNode* typeNode = varIdNode->getRightSibling();
-    typeNode->accept(this);
+    if (!varIdNode) {
+        reportError("Variable declaration missing identifier.");
+        return;
+    }
     
     std::string varName = varIdNode->getNodeValue();
+    
+    // Get the type node (second child)
+    ASTNode* typeNode = varIdNode->getRightSibling();
+    if (!typeNode) {
+        reportError("Variable declaration missing type.");
+        return;
+    }
+    typeNode->accept(this);  // This will set currentType
     
     // Check if variable is already defined in this scope
     if (currentTable->lookupSymbol(varName, true)) {
@@ -431,33 +452,20 @@ void SymbolTableVisitor::visitVariableId(ASTNode* node) {
 }
 
 void SymbolTableVisitor::visitLocalVariable(ASTNode* node) {
-    // Similar to visitVariable but with context for local scope
-    currentArrayDimensions.clear();
-    
-    // Process type
-    ASTNode* typeNode = node->getLeftMostChild();
-    typeNode->accept(this);
-    
-    // Process variable id
-    ASTNode* varIdNode = typeNode->getRightSibling();
-    std::string varName = varIdNode->getNodeValue();
-    
-    // Check if variable is already defined in this local scope
-    if (currentTable->lookupSymbol(varName, true)) {
-        reportError("Multiply declared local variable: " + varName);
+    // LocalVariable only has one child, which is a Variable node
+    ASTNode* variableNode = node->getLeftMostChild();
+    if (!variableNode) {
+        reportError("Local variable declaration missing variable node.");
         return;
     }
     
-    // Create a new symbol for this local variable
-    auto varSymbol = std::make_shared<Symbol>(varName, currentType, SymbolKind::VARIABLE);
+    // Process the variable node
+    // The variable visitor will handle type, name, and array dimensions
+    variableNode->accept(this);
     
-    // Add array dimensions if any
-    for (int dim : currentArrayDimensions) {
-        varSymbol->addArrayDimension(dim);
-    }
-    
-    // Add variable to current function's table
-    currentTable->addSymbol(varSymbol);
+    // The symbol was already added to the symbol table in visitVariable,
+    // but we might want to set any special properties for local variables here
+    // For now, there's nothing special to do
 }
 
 void SymbolTableVisitor::visitFunctionId(ASTNode* node) {
@@ -1114,16 +1122,55 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
         // Print global functions
         for (const auto& [name, symbol] : globalFunctions) {
             out << indentStr << "| function  | " << name;
-            for (int i = 0; i < 10 - name.length() + 7; i++) out << " ";
+            for (int i = 0; i < 10 - name.length()+5; i++) out << " ";
             out << "| (" << formattedParamList(symbol->getParams()) << "):" << symbol->getType();
             std::string funcSig = "(" + formattedParamList(symbol->getParams()) + "):" + symbol->getType();
-            for (int i = 0; i < 33 - funcSig.length() + 7; i++) out << " ";
+            for (int i = 0; i < 33 - funcSig.length() + 18; i++) out << " ";
             out << "|" << std::endl;
 
             // Print function nested table
             auto funcTable = table->getNestedTable(name);
             if (funcTable) {
-                // Rest of the function table printing logic...
+                out << indentStr << "|    ===========================================================================  |" << std::endl;
+                out << indentStr << "|    | table: " << funcTable->getScopeName();
+                for (int i = 0; i < 58 - funcTable->getScopeName().length() + 7; i++) out << " ";
+                out << "|  |" << std::endl;
+                out << indentStr << "|    ===========================================================================  |" << std::endl;
+
+                // Collect parameters and local variables separately
+                std::vector<std::pair<std::string, std::shared_ptr<Symbol>>> params;
+                std::vector<std::pair<std::string, std::shared_ptr<Symbol>>> locals;
+
+                for (const auto& [paramName, paramSymbol] : funcTable->getSymbols()) {
+                    if (paramSymbol->getKind() == SymbolKind::PARAMETER) {
+                        params.push_back({paramName, paramSymbol});
+                    } else if (paramSymbol->getKind() == SymbolKind::VARIABLE) {
+                        locals.push_back({paramName, paramSymbol});
+                    }
+                }
+                
+                // Reverse parameters and locals to match declaration order
+                std::reverse(params.begin(), params.end());
+                std::reverse(locals.begin(), locals.end());
+
+                // Print parameters first
+                for (const auto& [paramName, paramSymbol] : params) {
+                    out << indentStr << "|    | param     | " << paramName;
+                    for (int i = 0; i < 12 - paramName.length() + 7; i++) out << " ";
+                    out << "| " << paramSymbol->getType();
+                    for (int i = 0; i < 33 - paramSymbol->getType().length() + 7; i++) out << " ";
+                    out << "|  |" << std::endl;
+                }
+                // Then print local variables
+                for (const auto& [localName, localSymbol] : locals) {
+                    out << indentStr << "|    | local     | " << localName;
+                    for (int i = 0; i < 10 - localName.length(); i++) out << " ";
+                    out << "| " << localSymbol->getType();
+                    for (int i = 0; i < 48 - localSymbol->getType().length(); i++) out << " ";
+                    out << "|  |" << std::endl;
+                }
+
+                out << indentStr << "|    ===========================================================================  |" << std::endl;
             }
         }
     }
