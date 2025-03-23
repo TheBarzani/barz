@@ -1,155 +1,128 @@
-// ====== struct declarations ====== //
-class POLYNOMIAL {
-	public function evaluate(x: float) => float;
-};
-
-class LINEAR isa POLYNOMIAL {
-	private attribute a: float;
-	private attribute b: float;
-	public  function build(A: float, B: float) => LINEAR;
-	public  function evaluate(x: float) => float;
-};
-
-class QUADRATIC isa POLYNOMIAL {
-	private attribute a: float;
-	private attribute b: float;
-	private attribute c: float;
-	public  function build(A: float, B: float, C: float) => QUADRATIC;
-	public  function evaluate(x: float) => float;
-};
-
-// ====== struct implementations ====== //
-implementation POLYNOMIAL {   
-  function evaluate(x: float) => float
-  {
-    return (0);
-  }
-}
-  
-implementation QUADRATIC { 
-  function evaluate(x: float) => float
-  {
-    local result: float;
-    //Using Horner's method
-    result := a;
-    result := result * x + b;
-    result := result * x + c;
-    return (result);
-  }
-  function build(A: float, B: float, C: float) => QUADRATIC 
-  {
-    local new_function: QUADRATIC ;
-    new_function.a := A;
-    new_function.b := B;
-    new_function.c := C;
-    return (new_function);
-  }
-}
-  
-implementation LINEAR {
-  function build(A: float, B: float) => LINEAR 
-  {
-    local new_function: LINEAR;
-    new_function.a := A;
-    new_function.b := B;
-    return (new_function);
-  }
-  function evaluate(x: float) => float 
-  {
-    local result: float;
-    result := 0.0;
-    result := a * x + b;
-    return (result);
-  }
-} 
-
-// ====== main ====== //
-function main() => void
+/* sort the array */
+function bubbleSort(arr: int[], size: int) => void 
 {
-  local f1: LINEAR;
-  local f2: QUADRATIC;
-  local counter: int;
-  f1 := f1.build(2, 3.5);
-  f2 := f2.build(-2.0, 1.0, 0.0);
-  counter := 1;
-	
-  while(counter <= 10)
-  {
-    write(counter);
-    write(f1.evaluate(counter));
-    write(f2.evaluate(counter));
+  local n: int;
+  local i: int;
+  local j: int;
+  local temp: int; 
+  n := size;
+  i := 0;
+  j := 0;
+  temp := 0;
+  while (i < n-1) { 
+    while (j < n-i-1) {
+      if (arr[j] > arr[j+1]) 
+        then {
+          // swap temp and arr[i]
+          temp := arr[j];
+          arr[j] := arr[j+1];
+          arr[j+1] := temp;
+        } else ;
+        j := j+1;
+      };
+    i := i+1;
   };
 }
+   
+/* print the array */
+function printArray(arr: int[], size: int) => void 
+{
+  local n: int;
+  local i: int; 
+  n := size;
+  i := 0; 
+  while (i<n) { 
+    write(arr[i]);
+      i := i+1;
+  };
+} 
+
+// main funtion to test above
+function main() => void
+{
+  local arr: int[7]; 
+  arr[0] := 64;
+  arr[1] := 34;
+  arr[2] := 25;
+  arr[3] := 12;
+  arr[4] := 22;
+  arr[5] := 11;
+  arr[6] := 90;
+  printarray(arr, 7); 
+  bubbleSort(arr, 7);
+  printarray(arr, 7); 
+}
+
 /*
     classes
     --------------------------------------
-| | no class declaration
+|X| no class declaration
 | | class declaration
-|X| multiple class declarations
-|X| no data member declaration
-|X| data member declaration
-|X| multiple data member declaration
+| | multiple class declarations
+| | no data member declaration
+| | data member declaration
+| | multiple data member declaration
 | | no member function declaration
-|X| member function declaration
-|X| multiple member function declaration
+| | member function declaration
+| | multiple member function declaration
 | | no member
-|X| no inherited class
-|X| one inherited class
+| | no inherited class
+| | one inherited class
 | | multiple inherited classes
-|X| private member specifier
-|X| public member specifier
+| | private member specifier
+| | public member specifier
 
     functions: definitions
     --------------------------------------
 | | no main function definition
 |X| main function definition
-|X| no free function definition
-| | free function definition
-| | multiple free function definitions
-| | no member function definition
-|X| member function definition
-|X| multiple member function definitions
-| | return type: void
+| | no free function definition
+|X| free function definition
+|X| multiple free function definitions
+|X| no member function definition
+| | member function definition
+| | multiple member function definitions
+|X| return type: void
 | | return type: integer
-|X| return type: float
-|X| return type: id
+| | return type: float
+| | return type: id
 | | return type: array (not allowed)
 
     functions: formal parameters
     --------------------------------------
-| | type: integer
-|X| type: float
+|X| type: integer
+| | type: float
 | | type: id
-| | type: 1-dim array 
+|X| type: 1-dim array 
 | | type: n-dim array
 | | type: array (with size)
-| | type: array (without size)
+|X| type: array (without size)
 
     functions: calls
     --------------------------------------
-| | free function call
-|X| member function call
+|X| free function call
+| | member function call
 | | parameters:0
-|X| parameters:1
+| | parameters:1
 |X| parameters:n
-| | array parameter - 1-dim
+|X| array parameter - 1-dim
 | | array parameter - n-dim
 | | array parameter - with size
 | | array parameter - without size
 | | function call as statement
-|X| function call as expression factor
+| | function call as expression factor
 | | expression as parameter
 
     variable declaration
     --------------------------------------
-| | type: integer
+|X| type: integer
 | | type: float
 | | type: string
-|X| type: id
-| | type: 1-dim array 
+| | type: id
+|X| type: 1-dim array 
 | | type: n-dim array
-| | type: array (with size)
-| | type: array (without size)
+|X| type: array (with size)
+| | type: array (without size) (not allowed)
 
     function body: local variable declarations
     --------------------------------------
@@ -162,10 +135,10 @@ function main() => void
 | | no statement
 | | 1 statement
 |X| n statements
-| | if statement
-| | if: empty then or else blocks
+|X| if statement
+|X| if: empty then or else blocks
 | | if: 1-statement then or else blocks
-| | if: n-statements then or else blocks
+|X| if: n-statements then or else blocks
 |X| while statement
 | | while: empty block
 | | while: 1-statement block
@@ -178,8 +151,8 @@ function main() => void
     variable + idnest
     --------------------------------------
 |X| id
-|X| id.id
-|X| id.id(id)
+| | id.id
+| | id.id(id)
 | | id(id).id
 | | id(id).id()
 | | id.id[id]
@@ -194,19 +167,19 @@ function main() => void
 
     expressions
     --------------------------------------
-| | single variable
-| | involving addop
+|X| single variable
+|X| involving addop
 | | involving multop
-| | involving relop
-|X| involving addop + multop
-| | involving multop + relop
+|X| involving relop
+| | involving addop + multop
+|X| involving multop + relop
 | | involving addop + multop + relop
 | | involving parentheses
-| | involving nested parenhteses
+| | involving nested parentheses
 | | involving not
 | | involving sign
-| | involving literals
-|X| involving variable + idnest
+|X| involving literals
+| | involving variable + idnest
 |X| involving function calls
 | | involving all the above in one expression
 */

@@ -231,6 +231,8 @@ private:
     // Error and warning tracking
     std::vector<std::string> errors;
     std::vector<std::string> warnings;
+
+    std::string formatTypeWithDimensions(const std::shared_ptr<Symbol>& symbol) const;
 };
 
 #endif // SYMBOL_TABLE_VISITOR_H

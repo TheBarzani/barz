@@ -246,11 +246,11 @@ void SymbolTableVisitor::visitMemberList(ASTNode* node) {
 void SymbolTableVisitor::visitFunction(ASTNode* node) {
     // Check if we're at global scope to ensure proper function naming
     bool isGlobalScope = (currentTable == globalTable);
-    
     // If we're at global scope, make sure currentClassName is empty
     if (isGlobalScope) {
         currentClassName = "";
     }
+    bool isImplementation = !currentClassName.empty() && currentTable->getScopeName() == currentClassName;
     
     // Process function signature (left child)
     ASTNode* signatureNode = node->getLeftMostChild();
@@ -263,49 +263,109 @@ void SymbolTableVisitor::visitFunction(ASTNode* node) {
     currentParamTypes.clear();
     signatureNode->accept(this);
     
-    // Create function symbol
-    auto functionSymbol = std::make_shared<Symbol>(currentFunctionName, currentType, SymbolKind::FUNCTION);
-    functionSymbol->setParams(currentParamTypes);
-    functionSymbol->setVisibility(currentVisibility);
-    functionSymbol->setDeclared(true);
-    functionSymbol->setDefined(true);  // Since this is a function definition, not just declaration
-    
-    // Check for function overloading
+    // Create function signature for lookup
     FunctionSignature sig;
     sig.name = currentFunctionName;
     sig.paramTypes = currentParamTypes;
     
-    if (currentTable->lookupFunction(sig, true)) {
-        reportError("Multiply declared function: " + currentFunctionName);
-        return;
+    if (isImplementation) {
+        // This is an implementation of a member function
+        // Look up the existing function declaration
+        auto existingFunction = currentTable->lookupFunction(sig, true);
+        if (!existingFunction) {
+            reportError("Implementation of undeclared member function: " + 
+                      currentClassName + "::" + currentFunctionName);
+            return;
+        }
+        
+        // Mark the function as defined
+        existingFunction->setDefined(true);
+        
+        // Create or get the function's symbol table
+        std::string funcTableName = currentClassName + "::" + currentFunctionName;
+        auto functionTable = currentTable->getNestedTable(currentFunctionName);
+        if (!functionTable) {
+            // Create a new table if one doesn't exist yet
+            functionTable = std::make_shared<SymbolTable>(funcTableName, currentTable.get());
+            currentTable->addNestedTable(currentFunctionName, functionTable);
+        }
+        
+        // Process function body with the function table as current
+        auto savedTable = currentTable;
+        currentTable = functionTable;
+        
+        // The function signature should have created the parameter list, but we need to
+        // make sure they're added to the function table. Reprocess param list:
+        ASTNode* paramListNode = signatureNode->getLeftMostChild()->getRightSibling();
+        if (paramListNode && paramListNode->getNodeEnum() == NodeType::PARAM_LIST) {
+            ASTNode* param = paramListNode->getLeftMostChild();
+            while (param) {
+                param->accept(this);
+                param = param->getRightSibling();
+            }
+        }
+        
+        // Process function body (right child)
+        ASTNode* bodyNode = signatureNode->getRightSibling();
+        if (bodyNode) {
+            bodyNode->accept(this);
+        }
+        
+        // Restore current table
+        currentTable = savedTable;
+    } else {
+        // This is a new function declaration/definition
+        
+        // Create function symbol
+        auto functionSymbol = std::make_shared<Symbol>(currentFunctionName, currentType, SymbolKind::FUNCTION);
+        functionSymbol->setParams(currentParamTypes);
+        functionSymbol->setVisibility(currentVisibility);
+        functionSymbol->setDeclared(true);
+        functionSymbol->setDefined(true);  // Since this is a function definition, not just declaration
+        
+        // Check for function overloading
+        if (currentTable->lookupFunction(sig, true)) {
+            reportError("Multiply declared function: " + currentFunctionName);
+            return;
+        }
+        
+        // Check for functions with same name but different signatures (overloading)
+        auto overloads = currentTable->lookupFunctions(currentFunctionName, true);
+        if (!overloads.empty()) {
+            reportWarning("Function overloading: " + currentFunctionName);
+        }
+        
+        // Add function to current table
+        currentTable->addSymbol(functionSymbol);
+        
+        // Create a new table for function scope
+        std::string funcTableName = currentClassName.empty() ? "::" + currentFunctionName : currentClassName + "::" + currentFunctionName;
+        auto functionTable = std::make_shared<SymbolTable>(funcTableName, currentTable.get());
+        currentTable->addNestedTable(currentFunctionName, functionTable);
+        
+        // Add parameters to function table
+        auto savedTable = currentTable;
+        currentTable = functionTable;
+        
+        // Reprocess param list to add parameters to the function table
+        ASTNode* paramListNode = signatureNode->getLeftMostChild()->getRightSibling();
+        if (paramListNode && paramListNode->getNodeEnum() == NodeType::PARAM_LIST) {
+            ASTNode* param = paramListNode->getLeftMostChild();
+            while (param) {
+                param->accept(this);
+                param = param->getRightSibling();
+            }
+        }
+        
+        // Process function body (right child)
+        ASTNode* bodyNode = signatureNode->getRightSibling();
+        if (bodyNode) {
+            bodyNode->accept(this);
+        }
+        
+        // Restore current table
+        currentTable = savedTable;
     }
-    
-    // Check for functions with same name but different signatures (overloading)
-    auto overloads = currentTable->lookupFunctions(currentFunctionName, true);
-    if (!overloads.empty()) {
-        reportWarning("Function overloading: " + currentFunctionName);
-    }
-    
-    // Add function to current table
-    currentTable->addSymbol(functionSymbol);
-    
-    // Create a new table for function scope
-    std::string funcTableName = currentClassName.empty() ? "::" + currentFunctionName : currentClassName + "::" + currentFunctionName;
-    auto functionTable = std::make_shared<SymbolTable>(funcTableName, currentTable.get());
-    currentTable->addNestedTable(currentFunctionName, functionTable);
-    
-    // Add parameters to function table
-    auto savedTable = currentTable;
-    currentTable = functionTable;
-    
-    // Process function body (right child)
-    ASTNode* bodyNode = signatureNode->getRightSibling();
-    if (bodyNode) {
-        bodyNode->accept(this);
-    }
-    
-    // Restore current table
-    currentTable = savedTable;
 }
 
 void SymbolTableVisitor::visitFunctionBody(ASTNode* node) {
@@ -332,55 +392,62 @@ void SymbolTableVisitor::visitFunctionList(ASTNode* node) {
 }
 
 void SymbolTableVisitor::visitImplementationList(ASTNode* node) {
-    // Traverse all implementations in the list
-    ASTNode* child = node->getLeftMostChild();
-    while (child) {
-        child->accept(this);
-        child = child->getRightSibling();
+    // Visit all implementation nodes
+    ASTNode* currentChild = node->getLeftMostChild();
+    while (currentChild) {
+        currentChild->accept(this);
+        currentChild = currentChild->getRightSibling();
     }
+    currentClassName = "";
 }
 
 void SymbolTableVisitor::visitImplementation(ASTNode* node) {
-    // Get implementation id
-    ASTNode* implIdNode = node->getLeftMostChild();
-    implIdNode->accept(this);
+    // Get implementation ID (class name)
+    ASTNode* classIdNode = node->getLeftMostChild();
+    if (!classIdNode) {
+        reportError("Implementation missing class ID.");
+        return;
+    }
     
-    // Find the class this implementation belongs to
-    auto classSymbol = globalTable->lookupSymbol(currentClassName);
+    std::string className = classIdNode->getNodeValue();
+    
+    // Check if the class exists in the global table
+    auto classSymbol = globalTable->lookupSymbol(className);
     if (!classSymbol || classSymbol->getKind() != SymbolKind::CLASS) {
-        reportError("Implementation for undefined class: " + currentClassName);
+        reportError("Implementation of undeclared class: " + className);
         return;
     }
     
-    // Get the class table
-    auto classTable = globalTable->getNestedTable(currentClassName);
+    // Set current class name and table for processing member functions
+    currentClassName = className;
+    
+    // Get the class's symbol table
+    auto classTable = globalTable->getNestedTable(className);
     if (!classTable) {
-        reportError("No symbol table for class: " + currentClassName);
+        reportError("No symbol table found for class: " + className);
         return;
     }
     
-    // Save current table and switch to class table
+    // Save the current table and set it to the class table
     auto savedTable = currentTable;
     currentTable = classTable;
     
-    // Process function implementations
-    ASTNode* funcListNode = implIdNode->getRightSibling();
+    // Process implementation function list (second child)
+    ASTNode* funcListNode = classIdNode->getRightSibling();
     if (funcListNode) {
         funcListNode->accept(this);
     }
     
-    // Restore current table
+    // Restore the current table and class name
     currentTable = savedTable;
-}
-
-void SymbolTableVisitor::visitImplementationId(ASTNode* node) {
-    currentClassName = node->getNodeValue();
+    currentClassName = "";
 }
 
 void SymbolTableVisitor::visitImplementationFunctionList(ASTNode* node) {
-    // Process each function implementation
+    // Visit all function nodes in the implementation
     ASTNode* child = node->getLeftMostChild();
     while (child) {
+        // Each child is a function node
         child->accept(this);
         child = child->getRightSibling();
     }
@@ -535,28 +602,86 @@ void SymbolTableVisitor::visitParam(ASTNode* node) {
     // Reset array dimensions
     currentArrayDimensions.clear();
     
-    // Process type
-    ASTNode* typeNode = node->getLeftMostChild();
-    typeNode->accept(this);
-    
-    // Process param id
-    ASTNode* paramIdNode = typeNode->getRightSibling();
-    paramIdNode->accept(this);
-    std::string paramName = paramIdNode->getNodeValue();
-    
-    // Add to param types list
-    currentParamTypes.push_back(currentType);
-    
-    // Create a new symbol for this parameter
-    auto paramSymbol = std::make_shared<Symbol>(paramName, currentType, SymbolKind::PARAMETER);
-    
-    // Add array dimensions if any
-    for (int dim : currentArrayDimensions) {
-        paramSymbol->addArrayDimension(dim);
+    // Get parameter id (first child)
+    ASTNode* paramIdNode = node->getLeftMostChild();
+    if (!paramIdNode) {
+        reportError("Parameter missing identifier.");
+        return;
     }
     
-    // Add parameter to current function's table
-    currentTable->addSymbol(paramSymbol);
+    std::string paramName = paramIdNode->getNodeValue();
+    
+    // Get parameter type (second child)
+    ASTNode* typeNode = paramIdNode->getRightSibling();
+    if (!typeNode) {
+        reportError("Parameter missing type.");
+        return;
+    }
+    
+    // Check if this is an array type
+    if (typeNode->getNodeEnum() == NodeType::ARRAY_TYPE) {
+        // Handle array type
+        ASTNode* dimNode = typeNode->getLeftMostChild();
+        if (dimNode && dimNode->getNodeEnum() == NodeType::ARRAY_DIMENSION) {
+            // If dimension is "dynamic", use -1 to represent a dynamic array
+            if (dimNode->getNodeValue() == "dynamic") {
+                currentArrayDimensions.push_back(-1);
+            } else {
+                // Try to parse the dimension as an integer
+                try {
+                    int dim = std::stoi(dimNode->getNodeValue());
+                    currentArrayDimensions.push_back(dim);
+                } catch (const std::exception&) {
+                    reportError("Invalid array dimension: " + dimNode->getNodeValue());
+                }
+            }
+        }
+        
+        // Get the base type
+        ASTNode* baseTypeNode = dimNode ? dimNode->getRightSibling() : nullptr;
+        if (baseTypeNode) {
+            // Process base type to set currentType
+            baseTypeNode->accept(this);
+        } else {
+            reportError("Array type missing base type.");
+            return;
+        }
+    } else {
+        // This is a normal (non-array) type
+        typeNode->accept(this);
+    }
+    
+    // Format the type with array dimensions
+    std::string typeWithDimensions = currentType;
+    for (int dim : currentArrayDimensions) {
+        if (dim > 0) {
+            typeWithDimensions += "[" + std::to_string(dim) + "]";
+        } else {
+            typeWithDimensions += "[]"; // For dynamic arrays
+        }
+    }
+    
+    // Add formatted type to currentParamTypes for function signature
+    currentParamTypes.push_back(typeWithDimensions);
+    
+    // Also create a parameter symbol and add it to the current table
+    if (currentTable && currentTable->getScopeName().find("::") != std::string::npos) {
+        auto paramSymbol = std::make_shared<Symbol>(paramName, currentType, SymbolKind::PARAMETER);
+        
+        // Add array dimensions to the parameter symbol
+        for (int dim : currentArrayDimensions) {
+            paramSymbol->addArrayDimension(dim);
+        }
+        
+        // Check if parameter is already defined in this scope
+        if (currentTable->lookupSymbol(paramName, true)) {
+            reportError("Multiply declared parameter: " + paramName);
+            return;
+        }
+        
+        // Add parameter to current table
+        currentTable->addSymbol(paramSymbol);
+    }
 }
 
 void SymbolTableVisitor::visitParamId(ASTNode* node) {
@@ -901,6 +1026,13 @@ void SymbolTableVisitor::visitAttribute(ASTNode* node) {
     }
 }
 
+void SymbolTableVisitor::visitImplementationId(ASTNode* node) {
+    // Get the implementation ID (class name)
+    std::string className = node->getNodeValue();
+    
+    // Set the current class name
+    currentClassName = className;
+}
 
 void SymbolTableVisitor::checkFunctionConsistency() {
     // For each class
@@ -1033,7 +1165,7 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
             for (const auto& [memberName, memberSymbol] : dataMembers) {
                 out << indentStr << "|    | data      | " << memberName;
                 for (int i = 0; i < 10 - memberName.length(); i++) out << " ";
-                out << "| " << memberSymbol->getType();
+                out << "| " << formatTypeWithDimensions(memberSymbol);
                 for (int i = 0; i < 33 - memberSymbol->getType().length(); i++) out << " ";
                 out << "| " << (memberSymbol->getVisibility() == Visibility::PUBLIC ? "public" : "private");
                 for (int i = 0; i < 6; i++) out << " ";
@@ -1048,7 +1180,7 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
                 std::string funcSig = "(" + formattedParamList(memberSymbol->getParams()) + "):" + memberSymbol->getType();
                 for (int i = 0; i < 33 - funcSig.length(); i++) out << " ";
                 out << "| " << (memberSymbol->getVisibility() == Visibility::PUBLIC ? "public" : "private");
-                for (int i = 0; i < 7; i++) out << " ";
+                for (int i = 0; i < 13-(memberSymbol->getVisibility() == Visibility::PUBLIC ? 6 : 7); i++) out << " ";
                 out << "|  |" << std::endl;
 
                 // Print function nested table
@@ -1056,7 +1188,7 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
                 if (funcTable) {
                     out << indentStr << "|    |     ==================================================================  |  |" << std::endl;
                     out << indentStr << "|    |     | table: " << funcTable->getScopeName();
-                    for (int i = 0; i < 50 - funcTable->getScopeName().length() + 7; i++) out << " ";
+                    for (int i = 0; i < 50 - funcTable->getScopeName().length() + 6; i++) out << " ";
                     out << "|  |  |" << std::endl;
                     out << indentStr << "|    |     ==================================================================  |  |" << std::endl;
 
@@ -1079,22 +1211,22 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
                     // Print parameters first
                     for (const auto& [paramName, paramSymbol] : params) {
                         out << indentStr << "|    |     | param";
-                        for (int i = 0; i < 6 - 5 + 7; i++) out << " ";
+                        for (int i = 0; i < 4 ; i++) out << " ";
                         out << " | " << paramName;
-                        for (int i = 0; i < 12 - paramName.length() + 7; i++) out << " ";
-                        out << "| " << paramSymbol->getType();
-                        for (int i = 0; i < 33 - paramSymbol->getType().length() + 7; i++) out << " ";
+                        for (int i = 0; i < 12 - paramName.length(); i++) out << " ";
+                        out << "| " << formatTypeWithDimensions(paramSymbol);
+                        for (int i = 0; i < 37 - formatTypeWithDimensions(paramSymbol).length(); i++) out << " ";
                         out << "|  |  |" << std::endl;
                     }
 
                     // Then print local variables
                     for (const auto& [localName, localSymbol] : locals) {
                         out << indentStr << "|    |     | local";
-                        for (int i = 0; i < 6 - 5 + 7; i++) out << " ";
+                        for (int i = 0; i < 4; i++) out << " ";
                         out << " | " << localName;
-                        for (int i = 0; i < 12 - localName.length() + 7; i++) out << " ";
-                        out << "| " << localSymbol->getType();
-                        for (int i = 0; i < 33 - localSymbol->getType().length() + 7; i++) out << " ";
+                        for (int i = 0; i < 12 - localName.length(); i++) out << " ";
+                        out << "| " << formatTypeWithDimensions(localSymbol);
+                        for (int i = 0; i < 37 - formatTypeWithDimensions(localSymbol).length(); i++) out << " ";
                         out << "|  |  |" << std::endl;
                     }
 
@@ -1121,11 +1253,11 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
 
         // Print global functions
         for (const auto& [name, symbol] : globalFunctions) {
-            out << indentStr << "| function  | " << name;
-            for (int i = 0; i < 10 - name.length()+5; i++) out << " ";
+            out << indentStr << "| function    | " << name;
+            for (int i = 0; i < 10 - name.length() + 7; i++) out << " ";
             out << "| (" << formattedParamList(symbol->getParams()) << "):" << symbol->getType();
             std::string funcSig = "(" + formattedParamList(symbol->getParams()) + "):" + symbol->getType();
-            for (int i = 0; i < 33 - funcSig.length() + 18; i++) out << " ";
+            for (int i = 0; i < 33 - funcSig.length() + 14; i++) out << " ";
             out << "|" << std::endl;
 
             // Print function nested table
@@ -1155,18 +1287,19 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
 
                 // Print parameters first
                 for (const auto& [paramName, paramSymbol] : params) {
-                    out << indentStr << "|    | param     | " << paramName;
-                    for (int i = 0; i < 12 - paramName.length() + 7; i++) out << " ";
-                    out << "| " << paramSymbol->getType();
-                    for (int i = 0; i < 33 - paramSymbol->getType().length() + 7; i++) out << " ";
+                    out << indentStr << "|    | param      | " << paramName;
+                    for (int i = 0; i < 12 - paramName.length() + 5; i++) out << " ";
+                    out << "| " << formatTypeWithDimensions(paramSymbol);
+                    for (int i = 0; i < 33 - formatTypeWithDimensions(paramSymbol).length() + 7; i++) out << " ";
                     out << "|  |" << std::endl;
                 }
+
                 // Then print local variables
                 for (const auto& [localName, localSymbol] : locals) {
-                    out << indentStr << "|    | local     | " << localName;
-                    for (int i = 0; i < 10 - localName.length(); i++) out << " ";
-                    out << "| " << localSymbol->getType();
-                    for (int i = 0; i < 48 - localSymbol->getType().length(); i++) out << " ";
+                    out << indentStr << "|    | local      | " << localName;
+                    for (int i = 0; i < 12 - localName.length() + 5; i++) out << " ";
+                    out << "| " << formatTypeWithDimensions(localSymbol);
+                    for (int i = 0; i < 33 - formatTypeWithDimensions(localSymbol).length() + 7; i++) out << " ";
                     out << "|  |" << std::endl;
                 }
 
@@ -1188,5 +1321,15 @@ std::string SymbolTableVisitor::formattedParamList(const std::vector<std::string
     return ss.str();
 }
 
-// Default implementations for the remaining visitor methods
-// Most simply traverse children or store specific values
+std::string SymbolTableVisitor::formatTypeWithDimensions(const std::shared_ptr<Symbol>& symbol) const {
+    std::string type = symbol->getType();
+    const auto& dimensions = symbol->getArrayDimensions();
+    for (int dim : dimensions) {
+        if (dim > 0) {
+            type += "[" + std::to_string(dim) + "]";
+        } else {
+            type += "[]"; // For arrays without explicit size
+        }
+    }
+    return type;
+}

@@ -1,40 +1,30 @@
 ===================================================================================
 | table: global                                                                   |
 ===================================================================================
-| class     | POLYNOMIAL                                                          |
+| function    | bubbleSort       | (int[], int):void                              |
 |    ===========================================================================  |
-|    | table: POLYNOMIAL                                                       |  |
+|    | table: ::bubbleSort                                                     |  |
 |    ===========================================================================  |
-|    | inherit   | none                                                        |  |
-|    | function  | evaluate  | (float):float                    | public       |  |
-|    ==========================================================================|  |
-| class     | LINEAR                                                              |
+|    | param      | arr              | int[]                                   |  |
+|    | param      | size             | int                                     |  |
+|    | local      | n                | int                                     |  |
+|    | local      | i                | int                                     |  |
+|    | local      | j                | int                                     |  |
+|    | local      | temp             | int                                     |  |
 |    ===========================================================================  |
-|    | table: LINEAR                                                           |  |
+| function    | printArray       | (int[], int):void                              |
 |    ===========================================================================  |
-|    | inherit   | POLYNOMIAL                                                  |  |
-|    | data      | a         | float                            | private      |  |
-|    | data      | b         | float                            | private      |  |
-|    | function  | build     | (float, float):LINEAR            | public       |  |
-|    | function  | evaluate  | (float):float                    | public       |  |
-|    ==========================================================================|  |
-| class     | QUADRATIC                                                           |
+|    | table: ::printArray                                                     |  |
 |    ===========================================================================  |
-|    | table: QUADRATIC                                                        |  |
+|    | param      | arr              | int[]                                   |  |
+|    | param      | size             | int                                     |  |
+|    | local      | n                | int                                     |  |
+|    | local      | i                | int                                     |  |
 |    ===========================================================================  |
-|    | inherit   | POLYNOMIAL                                                  |  |
-|    | data      | a         | float                            | private      |  |
-|    | data      | b         | float                            | private      |  |
-|    | data      | c         | float                            | private      |  |
-|    | function  | build     | (float, float, float):QUADRATIC  | public       |  |
-|    | function  | evaluate  | (float):float                    | public       |  |
-|    ==========================================================================|  |
-| function  | main           | ():void                                            |
+| function    | main             | ():void                                        |
 |    ===========================================================================  |
 |    | table: ::main                                                           |  |
 |    ===========================================================================  |
-|    | local     | f1        | LINEAR                                          |  |
-|    | local     | f2        | QUADRATIC                                       |  |
-|    | local     | counter   | int                                             |  |
+|    | local      | arr              | int[7]                                  |  |
 |    ===========================================================================  |
 ===================================================================================
