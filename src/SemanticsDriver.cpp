@@ -1,16 +1,18 @@
 #include "Semantics/SymbolTableVisitor.h"
-#include "Semantics/SemanticCheckingVisitor.h"
 #include "Parser/Parser.h"
 #include <iostream>
 #include <string>
 #include <vector>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 void printUsage(const std::string& programName) {
     std::cout << "Usage: " << programName << " [options] file1 [file2 ...]\n"
               << "Options:\n"
-              << "  --table <csv_file>   Specify a custom parsing table CSV file. Default is 'attribute_grammar_parsing_table.csv'.\n"
-              << "  --output <dir>       Specify output directory for symbol tables. Default is current directory.\n"
-              << "  -h, --help           Show this help message.\n";
+              << "  -t, --table <csv_file>   Specify a custom parsing table CSV file. Default is 'attribute_grammar_parsing_table.csv'.\n"
+              << "  -o, --output <dir>       Specify output directory for symbol tables. Default is current directory.\n"
+              << "  -h, --help               Show this help message.\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -56,29 +58,53 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // Ensure output directory exists
+    if (!fs::exists(outputDir)) {
+        std::cout << "Creating output directory: " << outputDir << std::endl;
+        fs::create_directories(outputDir);
+    }
+
     for (const auto& file : inputFiles) {
         std::cout << "Processing file: " << file << std::endl;
         
         // First parse the file to generate AST
         std::cout << "Parsing file: " << file << " with table: " << tableFile << std::endl;
-        Parser parser(file, tableFile);
-        auto ast = parser.parse();
+        Parser* parser = new Parser(file, tableFile);
         
-        if (!ast) {
+        bool parseSuccess = parser->parse();
+        if (!parseSuccess) {
             std::cerr << "Error: Failed to parse " << file << std::endl;
             continue;
         }
         
+        // Get the AST from the parser
+        // Get a reference to the AST - not a copy
+        AST& ast = parser->getAST();
+        // Now get the root from the reference
+        ASTNode* root = ast.getRoot();
+        // Write the AST to file using the reference
+        // ast.writeToFile(inputFiles[0] + ".dot");
+
         // Now perform semantic analysis
-        std::cout << "Performing semantic analysis..." << std::endl;
-        // SemanticAnalyzer analyzer(ast, outputDir);
-        if (ast) {
-            std::cout << "Semantic analysis completed successfully." << std::endl;
-            std::cout << "Symbol tables generated in: " << outputDir << std::endl;
-        } else {
-            std::cerr << "Semantic analysis failed with errors." << std::endl;
-        }
+        std::cout << "Generating symbol table..." << std::endl;
         
+        // Create a symbol table visitor and traverse the AST
+        SymbolTableVisitor visitor;
+        root->accept(&visitor);
+
+        std::cout << "Generating symbol table..." << std::endl;
+        
+        // Get the base filename without path and extension
+        fs::path filePath(file);
+        std::string baseName = filePath.stem().string();
+        
+        // Create output filename with .outsymboltables extension
+        std::string outputFile = outputDir + "/" + baseName + ".outsymboltables";
+        
+        // Output the symbol table to file
+        visitor.outputSymbolTable(outputFile);
+        
+        std::cout << "Symbol table generated: " << outputFile << std::endl;
         std::cout << "-------------------------------------------" << std::endl;
     }
 

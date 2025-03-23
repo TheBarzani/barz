@@ -75,6 +75,13 @@ enum class NodeType
 };
 
 /**
+ * @class Visitor
+ * @brief Represents a visitor that traverses an abstract syntax tree (AST).
+ * @note This class is defined in the Visitor.h file. This is just a forward declaration.
+ */
+class Visitor;
+
+/**
  * @class ASTNode
  * @brief Represents a node in an abstract syntax tree (AST).
  */
@@ -204,6 +211,12 @@ public:
      * @return Pointer to the rightmost sibling node.
      */
     ASTNode* makeSiblings(ASTNode* sibling);
+
+    /**
+     * @brief Accepts a visitor.
+     * @param visitor Pointer to the visitor.
+     */
+    void accept(Visitor* visitor);
 };
 
 #endif // ASTNODE_H

@@ -5,7 +5,7 @@ void DD(std::string s){
 }
 
 // Helper function to print contents of a string vector
-void printVector(const std::vector<ASTNode* >& vec) {
+void printVector(std::vector<ASTNode* >& vec) {
     std::cout << "Vector contents: [";
     for (size_t i = 0; i < vec.size(); ++i) {
         std::cout << vec[i]->getNodeType();
@@ -102,6 +102,10 @@ ASTNode* AST::makeFamily(NodeType op, ASTNode* kid) {
     return parent;
 }
 
+ASTNode* AST::getRoot() {
+    return root;
+}
+
 void AST::performAction(std::string action, std::string value) {
     DD("===========================================================");
     std::cout << "Action: " << action << " Value: " << value << std::endl;
@@ -109,12 +113,12 @@ void AST::performAction(std::string action, std::string value) {
 
     // Program Structure Actions
     if (action == "_createRoot") {
-        root = makeFamily(NodeType::PROGRAM,
+        this->root = makeFamily(NodeType::PROGRAM,
             createNode(NodeType::CLASS_LIST, "classList"),
             createNode(NodeType::FUNCTION_LIST, "functionList"),
             createNode(NodeType::IMPLEMENTATION_LIST, "implList")
         );
-        ASTStack.push_back(root);
+        this->ASTStack.push_back(this->root);
     }
     else if (action == "_addToProgram") {
         ASTNode* node = ASTStack.back();
@@ -133,6 +137,7 @@ void AST::performAction(std::string action, std::string value) {
             default:
                 break;
         }
+        this->root = ASTStack.front();
     }
 
     // Class-Related Actions

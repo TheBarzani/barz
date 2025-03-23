@@ -205,3 +205,7 @@ bool Parser::skipErrors() {
     }
     return true;
 }
+
+AST& Parser::getAST(){
+    return ast;
+}

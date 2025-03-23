@@ -30,6 +30,7 @@ add_executable(semanticanalyzerdriver
     src/Parser/Parser.cpp           # Parser implementation
     src/ASTGenerator/AST.cpp        # AST generation code
     src/ASTGenerator/ASTNode.cpp    # AST node code
+    src/Semantics/SymbolTableVisitor.cpp # Symbol Table Generation code
     src/SemanticsDriver.cpp         # Driver code
 )
 

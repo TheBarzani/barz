@@ -1,4 +1,5 @@
 #include "ASTNode.h"
+#include "Semantics/Visitor.h"
 #include <iostream>
 
 int ASTNode::nodeCount = 0;
@@ -208,4 +209,8 @@ ASTNode* ASTNode::makeSiblings(ASTNode* sibling)
     }
     
     return ysibs;
+}
+
+void ASTNode::accept(Visitor* visitor) {
+    visitor->visit(this);
 }

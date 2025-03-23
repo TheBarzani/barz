@@ -89,6 +89,12 @@ public:
      * @return Pointer to the parent node with the child attached.
      */
     ASTNode* makeFamily(NodeType op, ASTNode* kid);
+
+    /**
+     * @brief Gets the root node of the AST.
+     * @return Pointer to the root node of the AST.
+     */
+    ASTNode* getRoot();
 };
 
 #endif // AST_H
