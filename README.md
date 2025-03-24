@@ -1,6 +1,29 @@
 # BARZ
 Broken Automated Reliable Zipper (BARZ): A bare-bone compiler written in CPP.
 
+# TODO
+
+### Necessary
+- [ ] Fix the code for the semantic analysis where the line number and the error messages are correctly outputted
+- [ ] Remove unnecessary semantic actions from the attribute grammer
+- [ ] Optimize the AST tree and eliminate unnecessary nodes with fixes to the node output.
+- [ ] Fix the output directory of the generated files during each phase and the date versioning or overwrite options
+- [ ] Fix the error outputing format of the syntax analysis
+- [ ] Add unit tests for each phase using the gTest framework and fix the testing files structure
+- [ ] Use regex expressions for the lexical analysis part where the regex library is used
+- [ ] Generate a DFA systematically for the lexical analyzer
+
+### Optional
+- [ ] Add and fix comments for Doxygen documentation generation
+- [ ] Transform the Cmake configuration by adding a cmakelist to each package
+- [ ] Json-formatted derivation style for the syntax analysis step
+- [ ] Nicer formatted symbol table output
+- [ ] Implement Travis CI for CI/CD
+- [ ] Fix and format the readMe files
+- [ ] Look into package management
+- [ ] Check if package management/manager is needed
+
+
 # Project Technology Stack
 - **Programming Language:** C++
 - **Build System:** CMake
@@ -8,11 +31,10 @@ Broken Automated Reliable Zipper (BARZ): A bare-bone compiler written in CPP.
 - **Testing Framework:** Gtest
 - **Code Documentation:** Doxygen
 - **Continuous Integration:** Travis CI
-- **Static Analyzers:** TBD
 
-# Project Structure Blueprint
+# Project Structure
 ```
-barz/
+barz/@main
 ├── bin
 │   ├── astdriver
 │   ├── attribute_grammar_parsing_table.csv
