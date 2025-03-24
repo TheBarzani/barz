@@ -5,7 +5,7 @@ void DD(std::string s){
 }
 
 // Helper function to print contents of a string vector
-void printVector(const std::vector<ASTNode* >& vec) {
+void printVector(std::vector<ASTNode* >& vec) {
     std::cout << "Vector contents: [";
     for (size_t i = 0; i < vec.size(); ++i) {
         std::cout << vec[i]->getNodeType();
@@ -26,8 +26,11 @@ AST::~AST() {
     ASTStack.clear();
 }
 
-ASTNode* AST::createNode(NodeType nodeType, std::string nodeValue) {
-    return new ASTNode(nodeType, nodeValue);
+// Update createNode method to set line number
+ASTNode* AST::createNode(NodeType nodeType, std::string nodeValue, int line) {
+    ASTNode* node = new ASTNode(nodeType, nodeValue);
+    node->setLineNumber(line);
+    return node;
 }
 
 void AST::writeToFile(std::string filename) {
@@ -85,7 +88,7 @@ void AST::writeToFile(std::string filename) {
 }
 
 ASTNode* AST::makeFamily(NodeType op, ASTNode* kid1, ASTNode* kid2) {
-    ASTNode* parent = createNode(op, "");
+    ASTNode* parent = createNode(op, "", kid1->getLineNumber());
     parent->adoptChildren(kid1->makeSiblings(kid2));
     return parent;
 }
@@ -97,24 +100,28 @@ ASTNode* AST::makeFamily(NodeType op, ASTNode* kid1, ASTNode* kid2, Args... rest
 }
 
 ASTNode* AST::makeFamily(NodeType op, ASTNode* kid) {
-    ASTNode* parent = createNode(op, "");
+    ASTNode* parent = createNode(op, "",kid->getLineNumber());
     parent->adoptChildren(kid);
     return parent;
 }
 
-void AST::performAction(std::string action, std::string value) {
+ASTNode* AST::getRoot() {
+    return root;
+}
+
+void AST::performAction(std::string action, std::string value, int line) {
     DD("===========================================================");
     std::cout << "Action: " << action << " Value: " << value << std::endl;
     printVector(ASTStack);
 
     // Program Structure Actions
     if (action == "_createRoot") {
-        root = makeFamily(NodeType::PROGRAM,
-            createNode(NodeType::CLASS_LIST, "classList"),
-            createNode(NodeType::FUNCTION_LIST, "functionList"),
-            createNode(NodeType::IMPLEMENTATION_LIST, "implList")
+        this->root = makeFamily(NodeType::PROGRAM,
+            createNode(NodeType::CLASS_LIST, "classList", line),
+            createNode(NodeType::FUNCTION_LIST, "functionList", line),
+            createNode(NodeType::IMPLEMENTATION_LIST, "implList", line)
         );
-        ASTStack.push_back(root);
+        this->ASTStack.push_back(this->root);
     }
     else if (action == "_addToProgram") {
         ASTNode* node = ASTStack.back();
@@ -133,17 +140,18 @@ void AST::performAction(std::string action, std::string value) {
             default:
                 break;
         }
+        this->root = ASTStack.front();
     }
 
     // Class-Related Actions
     else if (action == "_createClassId") {
-        ASTStack.push_back(createNode(NodeType::CLASS_ID, value));
+        ASTStack.push_back(createNode(NodeType::CLASS_ID, value, line));
     }
     else if (action == "_createInheritanceList") {
-        ASTStack.push_back(createNode(NodeType::INHERITANCE_LIST, "inheritanceList"));
+        ASTStack.push_back(createNode(NodeType::INHERITANCE_LIST, "inheritanceList", line));
     }
     else if (action == "_addInheritanceId") {
-        ASTNode* inheritId = createNode(NodeType::INHERITANCE_ID, value);
+        ASTNode* inheritId = createNode(NodeType::INHERITANCE_ID, value, line);
         if (!ASTStack.empty()) {
             ASTStack.back()->adoptChildren(inheritId);
         }
@@ -157,12 +165,12 @@ void AST::performAction(std::string action, std::string value) {
         ASTStack.push_back(classNode);
     }
     else if (action == "_addMemberList") {
-        ASTStack.push_back(createNode(NodeType::MEMBER_LIST, "memberList"));
+        ASTStack.push_back(createNode(NodeType::MEMBER_LIST, "memberList", line));
     }
 
     // Implementation-Related Actions
     else if (action == "_createImplementationId") {
-        ASTStack.push_back(createNode(NodeType::IMPLEMENTATION_ID, value));
+        ASTStack.push_back(createNode(NodeType::IMPLEMENTATION_ID, value, line));
     }
     else if (action == "_addImplementationFunction") {
         ASTNode* function = ASTStack.back();ASTStack.pop_back();
@@ -178,7 +186,7 @@ void AST::performAction(std::string action, std::string value) {
 
     // Function-Related Actions
    else if (action == "_createFunctionId") {
-        ASTStack.push_back(createNode(NodeType::FUNCTION_ID, value));
+        ASTStack.push_back(createNode(NodeType::FUNCTION_ID, value, line));
     }
     else if (action == "_setConstructor") {
         ASTStack.back()->setNodeValue("constructor");
@@ -212,7 +220,7 @@ void AST::performAction(std::string action, std::string value) {
 
     // Member-Related Actions
     else if (action == "_setVisibility") {
-        ASTStack.push_back(createNode(NodeType::VISIBILITY, value));
+        ASTStack.push_back(createNode(NodeType::VISIBILITY, value, line));
     }
     else if (action == "_addMember") {
         ASTNode* member = ASTStack.back(); ASTStack.pop_back();
@@ -230,10 +238,10 @@ void AST::performAction(std::string action, std::string value) {
 
     // Variable and Type Actions
     else if (action == "_setVariableId") {
-        ASTStack.push_back(createNode(NodeType::VARIABLE_ID, value));
+        ASTStack.push_back(createNode(NodeType::VARIABLE_ID, value, line));
     }
     else if (action == "_setVariableType") {
-        ASTStack.push_back(createNode(NodeType::TYPE, value));
+        ASTStack.push_back(createNode(NodeType::TYPE, value, line));
     }
     else if (action == "_createVariable") {
         ASTNode* type = ASTStack.back(); ASTStack.pop_back();
@@ -331,43 +339,43 @@ void AST::performAction(std::string action, std::string value) {
             ASTStack.push_back(returnStatement);
     }
     else if (action == "_setAssignOperator") {
-            ASTNode* assignOp = createNode(NodeType::ASSIGN_OP, value);
+            ASTNode* assignOp = createNode(NodeType::ASSIGN_OP, value, line);
             ASTStack.push_back(assignOp);
     }
     else if (action == "_setRelop") {
-            ASTNode* relop = createNode(NodeType::REL_OP, value);
+            ASTNode* relop = createNode(NodeType::REL_OP, value, line);
             ASTStack.push_back(relop);
     }
     else if (action == "_setAddOp") {
-            ASTNode* addop = createNode(NodeType::ADD_OP, value);
+            ASTNode* addop = createNode(NodeType::ADD_OP, value, line);
             ASTStack.push_back(addop);
     }
     else if (action == "_setMultOp") {
-            ASTNode* multop = createNode(NodeType::MULT_OP, value);
+            ASTNode* multop = createNode(NodeType::MULT_OP, value, line);
             ASTStack.push_back(multop);
     }
     else if (action == "_setIdentifier") {
-            ASTNode* identifier = createNode(NodeType::IDENTIFIER, value);
+            ASTNode* identifier = createNode(NodeType::IDENTIFIER, value, line);
             ASTStack.push_back(identifier);
     }
     else if (action == "_setSelfIdentifier") {
-            ASTNode* selfIdentifier = createNode(NodeType::SELF_IDENTIFIER, "self");
+            ASTNode* selfIdentifier = createNode(NodeType::SELF_IDENTIFIER, "self", line);
             ASTStack.push_back(selfIdentifier);
     }
     else if (action == "_setTypeInt" || action == "_setTypeFloat" || action == "_setTypeCustom" || action == "_setTypeVoid") {
-            ASTNode* typeNode = createNode(NodeType::TYPE, value);
+            ASTNode* typeNode = createNode(NodeType::TYPE, value, line);
             ASTStack.push_back(typeNode);
     }
     else if (action == "_addArrayDimension") {
-            ASTNode* arrayDimension = createNode(NodeType::ARRAY_DIMENSION, value);
+            ASTNode* arrayDimension = createNode(NodeType::ARRAY_DIMENSION, value, line);
             ASTStack.push_back(arrayDimension);
     }
     else if (action == "_addDynamicArrayDimension") {
-            ASTNode* dynamicArrayDimension = createNode(NodeType::ARRAY_DIMENSION, "dynamic");
+            ASTNode* dynamicArrayDimension = createNode(NodeType::ARRAY_DIMENSION, "dynamic", line);
             ASTStack.push_back(dynamicArrayDimension);
     }
     else if (action == "_createParamList") {
-            ASTStack.push_back(createNode(NodeType::PARAM_LIST, "paramList"));
+            ASTStack.push_back(createNode(NodeType::PARAM_LIST, "paramList", line));
     }
     else if (action == "_createParam") {
             ASTNode* param;
@@ -390,7 +398,7 @@ void AST::performAction(std::string action, std::string value) {
             paramList->adoptChildren(param);
     }
     else if (action == "_setParamId"){
-            ASTStack.push_back(createNode(NodeType::PARAM_ID, value));
+            ASTStack.push_back(createNode(NodeType::PARAM_ID, value, line));
     }
     else if (action == "_addActualParam") {
             ASTNode* expr = ASTStack.back(); ASTStack.pop_back();
@@ -410,11 +418,11 @@ void AST::performAction(std::string action, std::string value) {
             ASTStack.push_back(arrayAccess);
     }
     else if (action == "_pushIdentifier") {
-            ASTNode* identifier = createNode(NodeType::IDENTIFIER, value);
+            ASTNode* identifier = createNode(NodeType::IDENTIFIER, value, line);
             ASTStack.push_back(identifier);
     }
     else if (action == "_pushDotIdentifier") {
-            ASTNode* dotIdentifier = createNode(NodeType::DOT_IDENTIFIER, value);
+            ASTNode* dotIdentifier = createNode(NodeType::DOT_IDENTIFIER, value, line);
             ASTStack.push_back(dotIdentifier);
     }
     else if (action ==  "_finishVariable") {
@@ -448,11 +456,11 @@ void AST::performAction(std::string action, std::string value) {
             ASTStack.push_back(exprNode);
     }
     else if (action == "_pushFloatLiteral") {
-            ASTNode* floatNode = createNode(NodeType::FLOAT, value);
+            ASTNode* floatNode = createNode(NodeType::FLOAT, value, line);
             ASTStack.push_back(floatNode);
     }
     else if (action == "_pushIntLiteral") {
-        ASTNode* intNode = createNode(NodeType::INT, value);
+        ASTNode* intNode = createNode(NodeType::INT, value, line);
         ASTStack.push_back(intNode);
     }
     else if (action == "_processDotAccess") {
@@ -473,10 +481,10 @@ void AST::performAction(std::string action, std::string value) {
         ASTStack.back()->adoptChildren(statement); // Add the statement to the block
     }
     else if (action == "_addStatementsList"){
-        ASTStack.push_back(createNode(NodeType::STATEMENTS_LIST, ""));
+        ASTStack.push_back(createNode(NodeType::STATEMENTS_LIST, "", line));
     }
     else if (action == "_createImplementationList"){
-        ASTStack.push_back(createNode(NodeType::IMPLEMENTATION_FUNCTION_LIST,""));
+        ASTStack.push_back(createNode(NodeType::IMPLEMENTATION_FUNCTION_LIST,"", line));
     }
     else if (action == "_processMultOp"){
         ASTNode* right = ASTStack.back(); ASTStack.pop_back();
@@ -499,7 +507,7 @@ void AST::performAction(std::string action, std::string value) {
         ASTStack.push_back(makeFamily(NodeType::CONDITION, condition));
     }
     else if(action == "_addEmptyBlock"){
-        ASTStack.push_back(createNode(NodeType::BLOCK, "empty"));
+        ASTStack.push_back(createNode(NodeType::BLOCK, "empty", line));
     }
     else if(action == "_processArraySize"){
         ASTNode * type = ASTStack.back(); ASTStack.pop_back();

@@ -75,6 +75,13 @@ enum class NodeType
 };
 
 /**
+ * @class Visitor
+ * @brief Represents a visitor that traverses an abstract syntax tree (AST).
+ * @note This class is defined in the Visitor.h file. This is just a forward declaration.
+ */
+class Visitor;
+
+/**
  * @class ASTNode
  * @brief Represents a node in an abstract syntax tree (AST).
  */
@@ -90,6 +97,7 @@ private:
     std::string nodeValue;    ///< Value or content of this AST node.
     int nodeNumber;           ///< Unique number assigned to this node.
     static int nodeCount;     ///< Counter for generating unique node numbers.
+    int lineNumber = 0;       ///< Line number in the source code
 
 public:
     /**
@@ -204,6 +212,24 @@ public:
      * @return Pointer to the rightmost sibling node.
      */
     ASTNode* makeSiblings(ASTNode* sibling);
+
+    /**
+     * @brief Accepts a visitor.
+     * @param visitor Pointer to the visitor.
+     */
+    void accept(Visitor* visitor);
+
+    /**
+     * @brief Gets the line number in the source code.
+     * @return Line number where this node was defined.
+     */
+    int getLineNumber() const;
+
+    /**
+     * @brief Sets the line number for this node.
+     * @param line Line number in source code.
+     */
+    void setLineNumber(int line);
 };
 
 #endif // ASTNODE_H

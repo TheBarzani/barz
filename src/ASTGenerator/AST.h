@@ -41,13 +41,22 @@ public:
      */
     ~AST();
     
+    // /**
+    //  * @brief Creates a new AST node with the specified type and value.
+    //  * @param nodeType The type of node to create.
+    //  * @param nodeValue The value to store in the node.
+    //  * @return Pointer to the newly created ASTNode.
+    //  */
+    // static ASTNode* createNode(NodeType nodeType, std::string nodeValue);
+    
     /**
-     * @brief Creates a new AST node with the specified type and value.
+     * @brief Creates a new AST node with the specified type, value, and line number.
      * @param nodeType The type of node to create.
      * @param nodeValue The value to store in the node.
+     * @param line The line number associated with the node.
      * @return Pointer to the newly created ASTNode.
      */
-    static ASTNode* createNode(NodeType nodeType, std::string nodeValue);
+    ASTNode* createNode(NodeType nodeType, std::string nodeValue, int line = 0);
     
     /**
      * @brief Writes the AST structure to a specified file.
@@ -59,8 +68,9 @@ public:
      * @brief Performs a specified action on the AST.
      * @param action String representing the action to be performed.
      * @param value String representing the value to be used in the action.
+     * @param line The line number associated with the action.
      */
-    void performAction(std::string action, std::string value);
+    void performAction(std::string action, std::string value, int line);
     
     /**
      * @brief Creates a family node structure with a parent and two children.
@@ -89,6 +99,12 @@ public:
      * @return Pointer to the parent node with the child attached.
      */
     ASTNode* makeFamily(NodeType op, ASTNode* kid);
+
+    /**
+     * @brief Gets the root node of the AST.
+     * @return Pointer to the root node of the AST.
+     */
+    ASTNode* getRoot();
 };
 
 #endif // AST_H

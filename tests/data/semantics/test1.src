@@ -1,0 +1,39 @@
+// test1.src - Type checking, expressions, and variable usage
+// This file tests type compatibility, assignment, and expression evaluation
+
+function main() => void
+{
+  // Variable declarations with potential errors
+  local i: integer;
+  local j: integer;
+  local f: float;
+  local b: boolean;
+  
+  // Basic assignments - both valid and invalid
+  i := 5;
+  j := i + 10;
+  f := 3.14;
+  b := true;
+  
+  // Type error: assigning float to integer
+  i := f;
+  
+  // Valid arithmetic operations
+  i := i + j * 2;
+  f := f / 2.0;
+  
+  // Type error: boolean in arithmetic
+  i := i + b;
+  
+  // Valid boolean operations
+  b := i > j;
+  
+  // Type error: comparison between incompatible types
+  b := i > f;
+  
+  // Undeclared variable reference
+  i := undeclaredVar;
+  
+  // Variable redeclaration
+  local i: float;
+}

@@ -1,0 +1,25 @@
+=== Semantic Errors/Warnings for ../tests/data/semantics/test2.src ===
+
+Warning at line 0: Member 'privateMethod' in class 'DerivedClass' shadows inherited member from class 'BaseClass'
+Error at line 0: Error: Undeclared member function definition: undeclaredMethod in class DerivedClass
+Error at line 0: Error: Data member 'publicVar' in class DerivedClass shadows inherited member from class BaseClass
+Error at line 0: Error: Data member 'x' in class Circular shadows inherited member from class Circular
+Warning at line 0: Member 'x' in class 'Circular' shadows inherited member from class 'Circular'
+Warning at line 0: Member 'publicMethod' in class 'DerivedClass' shadows inherited member from class 'BaseClass'
+Warning at line 0: Member 'publicVar' in class 'DerivedClass' shadows inherited member from class 'BaseClass'
+Error at line 4: Error: Circular class dependency detected involving class: Circular
+Error at line 35: Error: Return type mismatch. Expected integer, got int
+Error at line 51: Implementation of undeclared member function: DerivedClass::undeclaredMethod
+Error at line 58: Error: Multiple declared identifier 'base' in function
+Error at line 59: Error: Multiple declared identifier 'derived' in function
+Error at line 60: Error: Multiple declared identifier 'other' in function
+Error at line 64: Error: Cannot access private member: publicVar in class DerivedClass
+Error at line 68: Error: Cannot access private member: privateVar in class BaseClass
+Error at line 69: Error: Undeclared member: privateVar in class DerivedClass
+Error at line 72: Error: Undeclared member:  in class BaseClass
+Error at line 73: Error: Undeclared member:  in class DerivedClass
+Error at line 76: Error: Undeclared member:  in class BaseClass
+Error at line 79: Error: Undeclared member: z in class DerivedClass
+Error at line 82: Error: Multiple declared identifier 'i' in function
+Error at line 83: Error: Dot operator used on non-class type: integer
+Error at line 86: Error: Multiple declared identifier 'invalid' in function

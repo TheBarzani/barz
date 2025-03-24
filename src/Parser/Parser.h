@@ -87,6 +87,12 @@ class Parser {
      * from the input source code.
      */
     Token nextToken();
+
+    /**
+     * @brief Returns the Abstract Syntax Tree.
+     * @return The Abstract Syntax Tree.
+     */
+    AST& getAST();
 };
 
 #endif // PARSER_H

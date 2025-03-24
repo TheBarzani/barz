@@ -1,0 +1,87 @@
+// test2.src - Class inheritance, visibility, and member access
+// This file tests class relationships, method overriding, and member visibility
+
+class BaseClass {
+    public attribute publicVar: integer;
+    private attribute privateVar: float;
+    
+    public function publicMethod() => void;
+    private function privateMethod() => integer;
+};
+
+class DerivedClass isa BaseClass {
+    public attribute newVar: string;
+    private attribute publicVar: boolean;  // Shadowing error
+    
+    public function publicMethod() => void;  // Valid override
+    public function privateMethod() => float;  // Error: changing return type
+};
+
+class Circular isa Circular {  // Circular inheritance error
+    public attribute x: integer;
+};
+
+class Unrelated {
+    public attribute z: float;
+};
+
+implementation BaseClass {
+    function publicMethod() => void {
+        publicVar := 10;
+        privateVar := 3.14;
+    }
+    
+    function privateMethod() => integer {
+        return (42);
+    }
+}
+
+implementation DerivedClass {
+    function publicMethod() => void {
+        publicVar := true;  // Valid access to shadowed member
+        newVar := "Hello";
+        self.publicVar := false;  // Explicit use of 'self'
+    }
+    
+    function privateMethod() => float {
+        return (3.14);  // Return type mismatch with base class
+    }
+    
+    // Undeclared function implementation
+    function undeclaredMethod() => void {
+        newVar := "Error";
+    }
+}
+
+function main() => void
+{
+    local base: BaseClass;
+    local derived: DerivedClass;
+    local other: Unrelated;
+    
+    // Valid public member access
+    base.publicVar := 20;
+    derived.publicVar := false;
+    derived.newVar := "Test";
+    
+    // Invalid private member access
+    base.privateVar := 1.0;
+    derived.privateVar := 2.0;
+    
+    // Valid method calls
+    base.publicMethod();
+    derived.publicMethod();
+    
+    // Invalid method calls - private method
+    base.privateMethod();
+    
+    // Invalid member access on unrelated class
+    derived.z := 3.0;
+    
+    // Invalid member access on non-class type
+    local i: integer;
+    i.value := 10;
+    
+    // Invalid class type usage
+    local invalid: NonExistentClass;
+}
