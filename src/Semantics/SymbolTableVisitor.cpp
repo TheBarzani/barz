@@ -167,7 +167,7 @@ void SymbolTableVisitor::visitClass(ASTNode* node) {
     
     // Check if class is already defined
     if (globalTable->lookupSymbol(currentClassName, true)) {
-        reportError("Multiply declared class: " + currentClassName, node);
+        reportError("Multiple declared class: " + currentClassName, node);
         return;
     }
     
@@ -330,7 +330,7 @@ void SymbolTableVisitor::visitFunction(ASTNode* node) {
         
         // Check for function overloading
         if (currentTable->lookupFunction(sig, true)) {
-            reportError("Multiply declared function: " + currentFunctionName, node);
+            reportError("Multiple declared function: " + currentFunctionName, node);
             return;
         }
         
@@ -498,9 +498,9 @@ void SymbolTableVisitor::visitVariable(ASTNode* node) {
     // Check if variable is already defined in this scope
     if (currentTable->lookupSymbol(varName, true)) {
         if (currentClassName.empty()) {
-            reportError("Multiply declared local variable: " + varName, node);
+            reportError("Multiple declared local variable: " + varName, node);
         } else {
-            reportError("Multiply declared data member: " + varName + " in class " + currentClassName, node);
+            reportError("Multiple declared data member: " + varName + " in class " + currentClassName, node);
         }
         return;
     }
@@ -680,7 +680,7 @@ void SymbolTableVisitor::visitParam(ASTNode* node) {
         
         // Check if parameter is already defined in this scope
         if (currentTable->lookupSymbol(paramName, true)) {
-            reportError("Multiply declared parameter: " + paramName, node);
+            reportError("Multiple declared parameter: " + paramName, node);
             return;
         }
         
@@ -865,7 +865,7 @@ void SymbolTableVisitor::visitFunctionDeclaration(ASTNode* node) {
     sig.paramTypes = currentParamTypes;
 
     if (currentTable->lookupFunction(sig, true)) {
-        reportError("Multiply declared member function: " + currentClassName + "::" + currentFunctionName, node);
+        reportError("Multiple declared member function: " + currentClassName + "::" + currentFunctionName, node);
         return;
     }
 

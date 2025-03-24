@@ -820,7 +820,7 @@ void SemanticCheckingVisitor::visitLocalVariable(ASTNode* node) {
         }
         
         if (isLocalSymbol) {
-            reportError("Multiply declared identifier '" + varName + "' in function", node);
+            reportError("Multiple declared identifier '" + varName + "' in function", node);
         }
     }
     
@@ -1332,7 +1332,7 @@ void SemanticCheckingVisitor::checkDuplicateClassDeclarations() {
     // Report duplicate class declarations
     for (const auto& [className, count] : classCount) {
         if (count > 1) {
-            reportError("Multiply declared class: " + className, nullptr);
+            reportError("Multiple declared class: " + className, nullptr);
         }
     }
 }
@@ -1365,7 +1365,7 @@ void SemanticCheckingVisitor::checkDuplicateFunctionDeclarations() {
                     }
                     
                     if (allSame && symbols[i]->getType() == symbols[j]->getType()) {
-                        reportError("Multiply defined free function: " + funcName, nullptr);
+                        reportError("e defined free function: " + funcName, nullptr);
                     }
                 }
             }
@@ -1389,7 +1389,7 @@ void SemanticCheckingVisitor::checkDuplicateMemberDeclarations(const std::string
     // Report duplicate member declarations
     for (const auto& [memberName, symbols] : memberSymbols) {
         if (symbols.size() > 1) {
-            reportError("Multiply declared identifier '" + memberName + "' in class " + className, nullptr);
+            reportError("Multiple declared identifier '" + memberName + "' in class " + className, nullptr);
         }
     }
 }

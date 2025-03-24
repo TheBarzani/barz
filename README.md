@@ -134,26 +134,37 @@ Follow these steps to build and run the `Driver` executable using CMake:
    ```
 
 4. **Run the executable**:
-   After the build is complete, you can run the executable.
+After the build is complete, you can run the executable.
 
    ```sh
    ./lexdriver <input_file> <output_filename>
    ```
-
    or 
-   ```bash
-   Usage: ./parsedriver [--table parsing_table.csv] file1 [file2 ...]
-   Options:
-      --table <csv_file>   Specify a custom parsing table CSV file. Default is 'parsing_table.csv'.
-      -h, --help           Show this help message.
-   ```
-      or 
-   ```bash
-   Usage: ./astdriver [--table parsing_table.csv] file1 [file2 ...]
-   Options:
-      --table <csv_file>   Specify a custom parsing table CSV file. Default is 'attribute_grammar_parsing_table.csv'.
-      -h, --help           Show this help message.
-   ```
+
+      ```bash
+      Usage: ./parsedriver [--table parsing_table.csv] file1 [file2 ...]
+      Options:
+         --table <csv_file>   Specify a custom parsing table CSV file. Default is 'parsing_table.csv'.
+         -h, --help           Show this help message.
+      ```
+   or 
+
+      ```bash
+      Usage: ./astdriver [--table parsing_table.csv] file1 [file2 ...]
+      Options:
+         --table <csv_file>   Specify a custom parsing table CSV file. Default is 'attribute_grammar_parsing_table.csv'.
+         -h, --help           Show this help message.
+      ```
+   or
+
+      ```bash
+      Usage: ./semanticanalyzerdriver [options] file1 [file2 ...]
+      Options:
+         -t, --table <csv_file>   Specify a custom parsing table CSV file. Default is 'attribute_grammar_parsing_table.csv'.
+         -o, --output <dir>       Specify output directory for symbol tables. Default is current directory.
+         -h, --help               Show this help message.
+      ```
+
 5. **Run the tests**:
    After the build is complete, you can run the tests.
 
