@@ -1,212 +1,87 @@
-// ====== struct declarations ====== //
-class POLYNOMIAL {
-	public function evaluate(x: float) => float;
+// test2.src - Class inheritance, visibility, and member access
+// This file tests class relationships, method overriding, and member visibility
+
+class BaseClass {
+    public attribute publicVar: integer;
+    private attribute privateVar: float;
+    
+    public function publicMethod() => void;
+    private function privateMethod() => integer;
 };
 
-class LINEAR isa POLYNOMIAL {
-	private attribute a: float;
-	private attribute b: float;
-	public  function build(A: float, B: float) => LINEAR;
-	public  function evaluate(x: float) => float;
+class DerivedClass isa BaseClass {
+    public attribute newVar: string;
+    private attribute publicVar: boolean;  // Shadowing error
+    
+    public function publicMethod() => void;  // Valid override
+    public function privateMethod() => float;  // Error: changing return type
 };
 
-class QUADRATIC isa POLYNOMIAL {
-	private attribute a: float;
-	private attribute b: float;
-	private attribute c: float;
-	public  function build(A: float, B: float, C: float) => QUADRATIC;
-	public  function evaluate(x: float) => float;
+class Circular isa Circular {  // Circular inheritance error
+    public attribute x: integer;
 };
 
-// ====== struct implementations ====== //
-implementation POLYNOMIAL {   
-  function evaluate(x: float) => float
-  {
-    return (0);
-  }
+class Unrelated {
+    public attribute z: float;
+};
+
+implementation BaseClass {
+    function publicMethod() => void {
+        publicVar := 10;
+        privateVar := 3.14;
+    }
+    
+    function privateMethod() => integer {
+        return (42);
+    }
 }
-  
-implementation QUADRATIC { 
-  function evaluate(x: float) => float
-  {
-    local result: float;
-    //Using Horner's method
-    result := a;
-    result := result * x + b;
-    result := result * x + c;
-    return (result);
-  }
-  function build(A: float, B: float, C: float) => QUADRATIC 
-  {
-    local new_function: QUADRATIC ;
-    new_function.a := A;
-    new_function.b := B;
-    new_function.c := C;
-    return (new_function);
-  }
-}
-  
-implementation LINEAR {
-  function build(A: float, B: float) => LINEAR 
-  {
-    local new_function: LINEAR;
-    new_function.a := A;
-    new_function.b := B;
-    return (new_function);
-  }
-  function evaluate(x: float) => float 
-  {
-    local result: float;
-    result := 0.0;
-    result := a * x + b;
-    return (result);
-  }
-} 
 
-// ====== main ====== //
+implementation DerivedClass {
+    function publicMethod() => void {
+        publicVar := true;  // Valid access to shadowed member
+        newVar := "Hello";
+        self.publicVar := false;  // Explicit use of 'self'
+    }
+    
+    function privateMethod() => float {
+        return (3.14);  // Return type mismatch with base class
+    }
+    
+    // Undeclared function implementation
+    function undeclaredMethod() => void {
+        newVar := "Error";
+    }
+}
+
 function main() => void
 {
-  local f1: LINEAR;
-  local f2: QUADRATIC;
-  local counter: int;
-  f1 := f1.build(2, 3.5);
-  f2 := f2.build(-2.0, 1.0, 0.0);
-  counter := 1;
-	
-  while(counter <= 10)
-  {
-    write(counter);
-    write(f1.evaluate(counter));
-    write(f2.evaluate(counter));
-  };
+    local base: BaseClass;
+    local derived: DerivedClass;
+    local other: Unrelated;
+    
+    // Valid public member access
+    base.publicVar := 20;
+    derived.publicVar := false;
+    derived.newVar := "Test";
+    
+    // Invalid private member access
+    base.privateVar := 1.0;
+    derived.privateVar := 2.0;
+    
+    // Valid method calls
+    base.publicMethod();
+    derived.publicMethod();
+    
+    // Invalid method calls - private method
+    base.privateMethod();
+    
+    // Invalid member access on unrelated class
+    derived.z := 3.0;
+    
+    // Invalid member access on non-class type
+    local i: integer;
+    i.value := 10;
+    
+    // Invalid class type usage
+    local invalid: NonExistentClass;
 }
-/*
-    classes
-    --------------------------------------
-| | no class declaration
-| | class declaration
-|X| multiple class declarations
-|X| no data member declaration
-|X| data member declaration
-|X| multiple data member declaration
-| | no member function declaration
-|X| member function declaration
-|X| multiple member function declaration
-| | no member
-|X| no inherited class
-|X| one inherited class
-| | multiple inherited classes
-|X| private member specifier
-|X| public member specifier
-
-    functions: definitions
-    --------------------------------------
-| | no main function definition
-|X| main function definition
-|X| no free function definition
-| | free function definition
-| | multiple free function definitions
-| | no member function definition
-|X| member function definition
-|X| multiple member function definitions
-| | return type: void
-| | return type: integer
-|X| return type: float
-|X| return type: id
-| | return type: array (not allowed)
-
-    functions: formal parameters
-    --------------------------------------
-| | type: integer
-|X| type: float
-| | type: id
-| | type: 1-dim array 
-| | type: n-dim array
-| | type: array (with size)
-| | type: array (without size)
-
-    functions: calls
-    --------------------------------------
-| | free function call
-|X| member function call
-| | parameters:0
-|X| parameters:1
-|X| parameters:n
-| | array parameter - 1-dim
-| | array parameter - n-dim
-| | array parameter - with size
-| | array parameter - without size
-| | function call as statement
-|X| function call as expression factor
-| | expression as parameter
-
-    variable declaration
-    --------------------------------------
-| | type: integer
-| | type: float
-| | type: string
-|X| type: id
-| | type: 1-dim array 
-| | type: n-dim array
-| | type: array (with size)
-| | type: array (without size)
-
-    function body: local variable declarations
-    --------------------------------------
-| | no local variable declarations
-|X| local variable declarations
-| | intertwined statements and variable declarations
-
-    function body: statements
-    --------------------------------------
-| | no statement
-| | 1 statement
-|X| n statements
-| | if statement
-| | if: empty then or else blocks
-| | if: 1-statement then or else blocks
-| | if: n-statements then or else blocks
-|X| while statement
-| | while: empty block
-| | while: 1-statement block
-|X| while: n-statement block
-| | read(<variable>) statement
-|X| write(<expr>) statement
-|X| return(<expr>) statement
-|X| assignment statement
-
-    variable + idnest
-    --------------------------------------
-|X| id
-|X| id.id
-|X| id.id(id)
-| | id(id).id
-| | id(id).id()
-| | id.id[id]
-| | id[id].id
-| | id[id].id[id]
-| | id.id[id][id]
-| | id[id][id].id
-| | id[id][id].id[id][id]
-| | id(id).id[id]
-| | id(id).id[id][id]
-| | expression as array index
-
-    expressions
-    --------------------------------------
-| | single variable
-| | involving addop
-| | involving multop
-| | involving relop
-|X| involving addop + multop
-| | involving multop + relop
-| | involving addop + multop + relop
-| | involving parentheses
-| | involving nested parenhteses
-| | involving not
-| | involving sign
-| | involving literals
-|X| involving variable + idnest
-|X| involving function calls
-| | involving all the above in one expression
-*/
