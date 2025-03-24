@@ -31,6 +31,7 @@ add_executable(semanticanalyzerdriver
     src/ASTGenerator/AST.cpp        # AST generation code
     src/ASTGenerator/ASTNode.cpp    # AST node code
     src/Semantics/SymbolTableVisitor.cpp # Symbol Table Generation code
+    src/Semantics/SemanticCheckingVisitor.cpp # Semantics Checking code
     src/SemanticsDriver.cpp         # Driver code
 )
 

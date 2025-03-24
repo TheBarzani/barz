@@ -1,4 +1,5 @@
 #include "Semantics/SymbolTableVisitor.h"
+#include "Semantics/SemanticCheckingVisitor.h"
 #include "Parser/Parser.h"
 #include <iostream>
 #include <string>
@@ -78,33 +79,38 @@ int main(int argc, char* argv[]) {
         }
         
         // Get the AST from the parser
-        // Get a reference to the AST - not a copy
         AST& ast = parser.getAST();
-        // Now get the root from the reference
         ASTNode* root = ast.getRoot();
-        // Write the AST to file using the reference
-        // ast.writeToFile(inputFiles[0] + ".dot");
-
-        // Now perform semantic analysis
+        
+        // Phase 1: Symbol Table Generation
         std::cout << "Generating symbol table..." << std::endl;
+        SymbolTableVisitor symbolTableVisitor;
+        root->accept(&symbolTableVisitor);
         
-        // Create a symbol table visitor and traverse the AST
-        SymbolTableVisitor visitor;
-        root->accept(&visitor);
-
-        std::cout << "Generating symbol table..." << std::endl;
-        
-        // Get the base filename without path and extension
-        fs::path filePath(file);
-        std::string baseName = filePath.stem().string();
-        
-        // Create output filename with .outsymboltables extension
-        // std::string outputFile = outputDir + "/" + baseName + ".outsymboltables";
-        std::string outputFile = file + ".outsymboltables";
         // Output the symbol table to file
-        visitor.outputSymbolTable(outputFile);
-        
+        std::string outputFile = file + ".outsymboltables";
+        symbolTableVisitor.outputSymbolTable(outputFile);
         std::cout << "Symbol table generated: " << outputFile << std::endl;
+        
+        // Phase 2: Semantic Checking
+        std::cout << "Performing semantic checking..." << std::endl;
+        SemanticCheckingVisitor semanticChecker(symbolTableVisitor.getGlobalTable());
+
+        // Import errors from the symbol table visitor
+        semanticChecker.importSymbolTableErrors(symbolTableVisitor);
+
+        // Continue with semantic checking
+        root->accept(&semanticChecker);
+        
+        // Output semantic errors to file
+        semanticChecker.outputErrors(file);
+
+        if (semanticChecker.hasErrors()) {
+            std::cout << "Semantic errors found. See " << file << ".outsemanticerrors for details." << std::endl;
+        } else {
+            std::cout << "No semantic errors found." << std::endl;
+        }
+        
         std::cout << "-------------------------------------------" << std::endl;
     }
 

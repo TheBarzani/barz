@@ -214,3 +214,13 @@ ASTNode* ASTNode::makeSiblings(ASTNode* sibling)
 void ASTNode::accept(Visitor* visitor) {
     visitor->visit(this);
 }
+
+// Implement the new methods
+
+int ASTNode::getLineNumber() const {
+    return lineNumber;
+}
+
+void ASTNode::setLineNumber(int line) {
+    lineNumber = line;
+}

@@ -110,7 +110,7 @@ bool Parser::parse() {
         }
         else {
             // Perform action on the AST for the corresponding semantic attribute rule.
-            ast.performAction(x, currentLexeme);
+            ast.performAction(x, currentLexeme, lookahead.line);
             parseStack.pop();
         }
     }

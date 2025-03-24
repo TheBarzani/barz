@@ -1,0 +1,45 @@
+=== Semantic Errors/Warnings for ../tests/data/semantics/test.src ===
+
+Error at line 0: Error: Undeclared member function definition: build2 in class QUADRATIC
+Error at line 0: Error: Undefined member function: evaluate2 in class POLYNOMIAL
+Warning at line 0: Member 'evaluate' in class 'QUADRATIC' shadows inherited member from class 'POLYNOMIAL'
+Warning at line 0: Member 'evaluate' in class 'LINEAR' shadows inherited member from class 'POLYNOMIAL'
+Error at line 0: No definition for declared member function: POLYNOMIAL::evaluate2
+Error at line 6: Multiply declared class: POLYNOMIAL
+Error at line 13: Multiply declared data member: b in class LINEAR
+Error at line 28: Class C inherits from undefined class: E
+Error at line 52: Error: Multiply declared identifier 'new_functiontion' in function
+Error at line 59: Error: Multiply declared identifier 'result' in function
+Error at line 69: Error: Multiply declared identifier 'result' in function
+Error at line 78: Error: Multiply declared identifier 'new_functiontion' in function
+Error at line 82: Error: Return type mismatch. Expected QUADRATIC, got int
+Error at line 84: Implementation of undeclared member function: QUADRATIC::build2
+Error at line 95: Multiply declared function: f
+Warning at line 96: Function overloading: f
+Error at line 104: Error: Multiply declared identifier 'a' in function
+Error at line 105: Error: Multiply declared identifier 'c' in function
+Error at line 106: Error: Multiply declared identifier 'f1' in function
+Error at line 107: Error: Multiply declared identifier 'f2' in function
+Error at line 108: Error: Multiply declared identifier 'counter' in function
+Error at line 109: Multiply declared local variable: counter
+Error at line 109: Error: Multiply declared identifier 'counter' in function
+Error at line 110: Error: Multiply declared identifier 'i' in function
+Error at line 111: Error: Multiply declared identifier 'j' in function
+Error at line 114: Error: Undeclared member: b in class C
+Error at line 116: Error: Use of undeclared free function: undefined
+Error at line 118: Error: Function f called with wrong number of arguments. Expected 1, got 3
+Error at line 119: Error: Function f called with wrong number of arguments. Expected 1, got 2
+Error at line 120: Error: Use of array with wrong number of dimensions. Expected 2, got 1
+Error at line 121: Error: Use of array with wrong number of dimensions. Expected 2, got 1
+Error at line 121: Error: Array index must be of integer type, got: float
+Error at line 122: Error: Function f3 parameter 1 type mismatch. Expected integer[3][2], got integer[3][2][1]
+Error at line 123: Error: Dot operator used on non-class type: integer
+Error at line 124: Error: 'self' used outside of class context
+Error at line 125: Error: Undeclared member: c in class LINEAR
+Error at line 126: Error: While condition must be boolean or numeric, got: error
+Error at line 126: Error: Condition must be boolean or numeric, got: error
+Warning at line 128: Warning: Writing non-standard type: integer
+Error at line 129: Error: Undeclared member:  in class LINEAR
+Warning at line 129: Warning: Writing non-standard type: error
+Error at line 130: Error: Undeclared member:  in class QUADRATIC
+Warning at line 130: Warning: Writing non-standard type: error

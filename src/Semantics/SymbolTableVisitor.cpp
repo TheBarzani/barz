@@ -117,14 +117,19 @@ SymbolTableVisitor::~SymbolTableVisitor() {
     // Clean up if needed
 }
 
-void SymbolTableVisitor::reportError(const std::string& message) {
-    errors.push_back("Error: " + message);
-    std::cerr << "Error: " << message << std::endl;
+// Implement updated error reporting methods
+void SymbolTableVisitor::reportError(const std::string& message, ASTNode* node) {
+    int line = node ? node->getLineNumber() : 0;
+    errors.push_back({message, line});
+    std::cerr << "Error" << (line > 0 ? " at line " + std::to_string(line) : "") 
+              << ": " << message << std::endl;
 }
 
-void SymbolTableVisitor::reportWarning(const std::string& message) {
-    warnings.push_back("Warning: " + message);
-    std::cout << "Warning: " << message << std::endl;
+void SymbolTableVisitor::reportWarning(const std::string& message, ASTNode* node) {
+    int line = node ? node->getLineNumber() : 0;
+    warnings.push_back({message, line});
+    std::cerr << "Warning" << (line > 0 ? " at line " + std::to_string(line) : "") 
+              << ": " << message << std::endl;
 }
 
 void SymbolTableVisitor::visitProgram(ASTNode* node) {
@@ -162,7 +167,7 @@ void SymbolTableVisitor::visitClass(ASTNode* node) {
     
     // Check if class is already defined
     if (globalTable->lookupSymbol(currentClassName, true)) {
-        reportError("Multiply declared class: " + currentClassName);
+        reportError("Multiply declared class: " + currentClassName, node);
         return;
     }
     
@@ -215,7 +220,7 @@ void SymbolTableVisitor::visitInheritanceId(ASTNode* node) {
     // Check if the inherited class exists
     auto inheritedClassSymbol = globalTable->lookupSymbol(inheritedClass);
     if (!inheritedClassSymbol || inheritedClassSymbol->getKind() != SymbolKind::CLASS) {
-        reportError("Class " + currentClassName + " inherits from undefined class: " + inheritedClass);
+        reportError("Class " + currentClassName + " inherits from undefined class: " + inheritedClass, node);
         return;
     }
     
@@ -255,7 +260,7 @@ void SymbolTableVisitor::visitFunction(ASTNode* node) {
     // Process function signature (left child)
     ASTNode* signatureNode = node->getLeftMostChild();
     if (!signatureNode) {
-        reportError("Function missing signature.");
+        reportError("Function missing signature.", node);
         return;
     }
     
@@ -274,7 +279,7 @@ void SymbolTableVisitor::visitFunction(ASTNode* node) {
         auto existingFunction = currentTable->lookupFunction(sig, true);
         if (!existingFunction) {
             reportError("Implementation of undeclared member function: " + 
-                      currentClassName + "::" + currentFunctionName);
+                      currentClassName + "::" + currentFunctionName, node);
             return;
         }
         
@@ -325,14 +330,14 @@ void SymbolTableVisitor::visitFunction(ASTNode* node) {
         
         // Check for function overloading
         if (currentTable->lookupFunction(sig, true)) {
-            reportError("Multiply declared function: " + currentFunctionName);
+            reportError("Multiply declared function: " + currentFunctionName, node);
             return;
         }
         
         // Check for functions with same name but different signatures (overloading)
         auto overloads = currentTable->lookupFunctions(currentFunctionName, true);
         if (!overloads.empty()) {
-            reportWarning("Function overloading: " + currentFunctionName);
+            reportWarning("Function overloading: " + currentFunctionName, node);
         }
         
         // Add function to current table
@@ -405,7 +410,7 @@ void SymbolTableVisitor::visitImplementation(ASTNode* node) {
     // Get implementation ID (class name)
     ASTNode* classIdNode = node->getLeftMostChild();
     if (!classIdNode) {
-        reportError("Implementation missing class ID.");
+        reportError("Implementation missing class ID.", node);
         return;
     }
     
@@ -414,7 +419,7 @@ void SymbolTableVisitor::visitImplementation(ASTNode* node) {
     // Check if the class exists in the global table
     auto classSymbol = globalTable->lookupSymbol(className);
     if (!classSymbol || classSymbol->getKind() != SymbolKind::CLASS) {
-        reportError("Implementation of undeclared class: " + className);
+        reportError("Implementation of undeclared class: " + className, node);
         return;
     }
     
@@ -424,7 +429,7 @@ void SymbolTableVisitor::visitImplementation(ASTNode* node) {
     // Get the class's symbol table
     auto classTable = globalTable->getNestedTable(className);
     if (!classTable) {
-        reportError("No symbol table found for class: " + className);
+        reportError("No symbol table found for class: " + className, node);
         return;
     }
     
@@ -476,7 +481,7 @@ void SymbolTableVisitor::visitVariable(ASTNode* node) {
     // Get the variable id node (first child)
     ASTNode* varIdNode = node->getLeftMostChild();
     if (!varIdNode) {
-        reportError("Variable declaration missing identifier.");
+        reportError("Variable declaration missing identifier.", node);
         return;
     }
     
@@ -485,7 +490,7 @@ void SymbolTableVisitor::visitVariable(ASTNode* node) {
     // Get the type node (second child)
     ASTNode* typeNode = varIdNode->getRightSibling();
     if (!typeNode) {
-        reportError("Variable declaration missing type.");
+        reportError("Variable declaration missing type.", node);
         return;
     }
     typeNode->accept(this);  // This will set currentType
@@ -493,9 +498,9 @@ void SymbolTableVisitor::visitVariable(ASTNode* node) {
     // Check if variable is already defined in this scope
     if (currentTable->lookupSymbol(varName, true)) {
         if (currentClassName.empty()) {
-            reportError("Multiply declared local variable: " + varName);
+            reportError("Multiply declared local variable: " + varName, node);
         } else {
-            reportError("Multiply declared data member: " + varName + " in class " + currentClassName);
+            reportError("Multiply declared data member: " + varName + " in class " + currentClassName, node);
         }
         return;
     }
@@ -522,7 +527,7 @@ void SymbolTableVisitor::visitLocalVariable(ASTNode* node) {
     // LocalVariable only has one child, which is a Variable node
     ASTNode* variableNode = node->getLeftMostChild();
     if (!variableNode) {
-        reportError("Local variable declaration missing variable node.");
+        reportError("Local variable declaration missing variable node.", node);
         return;
     }
     
@@ -546,7 +551,7 @@ void SymbolTableVisitor::visitFunctionSignature(ASTNode* node) {
     // Get the function_id node
     ASTNode* funcIdNode = node->getLeftMostChild();
     if (!funcIdNode) {
-        reportError("Function signature missing function_id.");
+        reportError("Function signature missing function_id.", node);
         return;
     }
     // Function id node value is the function name
@@ -555,7 +560,7 @@ void SymbolTableVisitor::visitFunctionSignature(ASTNode* node) {
     // Get the param_list node
     ASTNode* paramListNode = funcIdNode->getRightSibling();
     if (!paramListNode) {
-        reportWarning("Function signature missing parameter list.");
+        reportWarning("Function signature missing parameter list.", node);
     }
     // Process parameter list if exists
     // param list will recursively call visitParam
@@ -566,7 +571,7 @@ void SymbolTableVisitor::visitFunctionSignature(ASTNode* node) {
     // Get the type node
     ASTNode* typeNode = paramListNode ? paramListNode->getRightSibling() : funcIdNode->getRightSibling();
     if (!typeNode) {
-        reportError("Function signature missing return type.");
+        reportError("Function signature missing return type.", node);
         return;
     }
 
@@ -605,7 +610,7 @@ void SymbolTableVisitor::visitParam(ASTNode* node) {
     // Get parameter id (first child)
     ASTNode* paramIdNode = node->getLeftMostChild();
     if (!paramIdNode) {
-        reportError("Parameter missing identifier.");
+        reportError("Parameter missing identifier.", node);
         return;
     }
     
@@ -614,7 +619,7 @@ void SymbolTableVisitor::visitParam(ASTNode* node) {
     // Get parameter type (second child)
     ASTNode* typeNode = paramIdNode->getRightSibling();
     if (!typeNode) {
-        reportError("Parameter missing type.");
+        reportError("Parameter missing type.", node);
         return;
     }
     
@@ -632,7 +637,7 @@ void SymbolTableVisitor::visitParam(ASTNode* node) {
                     int dim = std::stoi(dimNode->getNodeValue());
                     currentArrayDimensions.push_back(dim);
                 } catch (const std::exception&) {
-                    reportError("Invalid array dimension: " + dimNode->getNodeValue());
+                    reportError("Invalid array dimension: " + dimNode->getNodeValue(), node);
                 }
             }
         }
@@ -643,7 +648,7 @@ void SymbolTableVisitor::visitParam(ASTNode* node) {
             // Process base type to set currentType
             baseTypeNode->accept(this);
         } else {
-            reportError("Array type missing base type.");
+            reportError("Array type missing base type.", node);
             return;
         }
     } else {
@@ -675,7 +680,7 @@ void SymbolTableVisitor::visitParam(ASTNode* node) {
         
         // Check if parameter is already defined in this scope
         if (currentTable->lookupSymbol(paramName, true)) {
-            reportError("Multiply declared parameter: " + paramName);
+            reportError("Multiply declared parameter: " + paramName, node);
             return;
         }
         
@@ -711,7 +716,7 @@ void SymbolTableVisitor::visitArrayDimension(ASTNode* node) {
     try {
         dim = std::stoi(node->getNodeValue());
     } catch (...) {
-        reportError("Invalid array dimension: " + node->getNodeValue());
+        reportError("Invalid array dimension: " + node->getNodeValue(), node);
     }
     currentArrayDimensions.push_back(dim);
 }
@@ -840,7 +845,7 @@ void SymbolTableVisitor::visitFunctionDeclaration(ASTNode* node) {
     // The only child of a FunctionDeclaration node is the FunctionSignature node
     ASTNode* signatureNode = node->getLeftMostChild();
     if (signatureNode==nullptr) {
-        reportError("Function declaration missing signature.");
+        reportError("Function declaration missing signature.", node);
         return;
     }
 
@@ -860,14 +865,14 @@ void SymbolTableVisitor::visitFunctionDeclaration(ASTNode* node) {
     sig.paramTypes = currentParamTypes;
 
     if (currentTable->lookupFunction(sig, true)) {
-        reportError("Multiply declared member function: " + currentClassName + "::" + currentFunctionName);
+        reportError("Multiply declared member function: " + currentClassName + "::" + currentFunctionName, node);
         return;
     }
 
     // Check for overloads
     auto overloads = currentTable->lookupFunctions(currentFunctionName, true);
     if (!overloads.empty()) {
-        reportWarning("Function overloading: " + currentClassName + "::" + currentFunctionName);
+        reportWarning("Function overloading: " + currentClassName + "::" + currentFunctionName, node);
     }
 
     currentTable->addSymbol(functionSymbol);
@@ -1047,10 +1052,10 @@ void SymbolTableVisitor::checkFunctionConsistency() {
                 continue;
                 
             if (symbol->isDeclared() && !symbol->isDefined()) {
-                reportError("No definition for declared member function: " + className + "::" + name);
+                reportError("No definition for declared member function: " + className + "::" + name, nullptr);
             }
             else if (!symbol->isDeclared() && symbol->isDefined()) {
-                reportError("Definition provided for undeclared member function: " + className + "::" + name);
+                reportError("Definition provided for undeclared member function: " + className + "::" + name, nullptr);
             }
         }
     }
@@ -1076,7 +1081,7 @@ void SymbolTableVisitor::checkShadowedMembers(const std::string& className) {
             auto parentSymbol = parentClassTable->lookupSymbol(name, true);
             if (parentSymbol) {
                 reportWarning("Member '" + name + "' in class '" + className + 
-                              "' shadows inherited member from class '" + parentClassName + "'");
+                              "' shadows inherited member from class '" + parentClassName + "'", nullptr);
             }
         }
     }
@@ -1100,7 +1105,10 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
     // Print table header
     out << indentStr << "===================================================================================" << std::endl;
     out << indentStr << "| table: " << table->getScopeName();
-    for (int i = 0; i < 66 - table->getScopeName().length() + 7; i++) out << " ";
+    int spaces = 66 - table->getScopeName().length() + 7;
+    if (spaces > 0) {
+        for (int i = 0; i < spaces; i++) out << " ";
+    }
     out << "|" << std::endl;
     out << indentStr << "===================================================================================" << std::endl;
 
@@ -1118,7 +1126,10 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
     // Print classes in reversed order
     for (const auto& [name, symbol] : classSymbols) {
         out << indentStr << "| class     | " << name;
-        for (int i = 0; i < 61 - name.length() + 7; i++) out << " ";
+        spaces = 61 - name.length() + 7;
+        if (spaces > 0) {
+            for (int i = 0; i < spaces; i++) out << " ";
+        }
         out << "|" << std::endl;
 
         // Print nested table for class
@@ -1126,7 +1137,10 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
         if (nestedTable) {
             out << indentStr << "|    ===========================================================================  |" << std::endl;
             out << indentStr << "|    | table: " << nestedTable->getScopeName();
-            for (int i = 0; i < 58 - nestedTable->getScopeName().length() + 7; i++) out << " ";
+            spaces = 58 - nestedTable->getScopeName().length() + 7;
+            if (spaces > 0) {
+                for (int i = 0; i < spaces; i++) out << " ";
+            }
             out << "|  |" << std::endl;
             out << indentStr << "|    ===========================================================================  |" << std::endl;
 
@@ -1136,10 +1150,15 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
             out << indentStr << "|    | inherit   | ";
             if (inherited.empty()) {
                 out << "none";
-                for (int i = 0; i < 56; i++) out << " ";
+                if (56 > 0) {  // Using a constant for clarity
+                    for (int i = 0; i < 56; i++) out << " ";
+                }
             } else {
                 out << inherited[0];
-                for (int i = 0; i < 60 - inherited[0].length(); i++) out << " ";
+                spaces = 60 - inherited[0].length();
+                if (spaces > 0) {
+                    for (int i = 0; i < spaces; i++) out << " ";
+                }
             }
             out << "|  |" << std::endl;
 
@@ -1164,23 +1183,40 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
             // Print data members first
             for (const auto& [memberName, memberSymbol] : dataMembers) {
                 out << indentStr << "|    | data      | " << memberName;
-                for (int i = 0; i < 10 - memberName.length(); i++) out << " ";
+                spaces = 10 - memberName.length();
+                if (spaces > 0) {
+                    for (int i = 0; i < spaces; i++) out << " ";
+                }
                 out << "| " << formatTypeWithDimensions(memberSymbol);
-                for (int i = 0; i < 33 - memberSymbol->getType().length(); i++) out << " ";
+                spaces = 33 - memberSymbol->getType().length();
+                if (spaces > 0) {
+                    for (int i = 0; i < spaces; i++) out << " ";
+                }
                 out << "| " << (memberSymbol->getVisibility() == Visibility::PUBLIC ? "public" : "private");
-                for (int i = 0; i < 6; i++) out << " ";
+                if (6 > 0) {  // Using a constant for clarity
+                    for (int i = 0; i < 6; i++) out << " ";
+                }
                 out << "|  |" << std::endl;
             }
 
             // Then print member functions
             for (const auto& [memberName, memberSymbol] : memberFunctions) {
                 out << indentStr << "|    | function  | " << memberName;
-                for (int i = 0; i < 10 - memberName.length(); i++) out << " ";
+                spaces = 10 - memberName.length();
+                if (spaces > 0) {
+                    for (int i = 0; i < spaces; i++) out << " ";
+                }
                 out << "| (" << formattedParamList(memberSymbol->getParams()) << "):" << memberSymbol->getType();
                 std::string funcSig = "(" + formattedParamList(memberSymbol->getParams()) + "):" + memberSymbol->getType();
-                for (int i = 0; i < 33 - funcSig.length(); i++) out << " ";
+                spaces = 33 - funcSig.length();
+                if (spaces > 0) {
+                    for (int i = 0; i < spaces; i++) out << " ";
+                }
                 out << "| " << (memberSymbol->getVisibility() == Visibility::PUBLIC ? "public" : "private");
-                for (int i = 0; i < 13-(memberSymbol->getVisibility() == Visibility::PUBLIC ? 6 : 7); i++) out << " ";
+                spaces = 13-(memberSymbol->getVisibility() == Visibility::PUBLIC ? 6 : 7);
+                if (spaces > 0) {
+                    for (int i = 0; i < spaces; i++) out << " ";
+                }
                 out << "|  |" << std::endl;
 
                 // Print function nested table
@@ -1188,7 +1224,10 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
                 if (funcTable) {
                     out << indentStr << "|    |     ==================================================================  |  |" << std::endl;
                     out << indentStr << "|    |     | table: " << funcTable->getScopeName();
-                    for (int i = 0; i < 50 - funcTable->getScopeName().length() + 6; i++) out << " ";
+                    spaces = 50 - funcTable->getScopeName().length() + 6;
+                    if (spaces > 0) {
+                        for (int i = 0; i < spaces; i++) out << " ";
+                    }
                     out << "|  |  |" << std::endl;
                     out << indentStr << "|    |     ==================================================================  |  |" << std::endl;
 
@@ -1211,22 +1250,38 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
                     // Print parameters first
                     for (const auto& [paramName, paramSymbol] : params) {
                         out << indentStr << "|    |     | param";
-                        for (int i = 0; i < 4 ; i++) out << " ";
+                        if (4 > 0) {  // Using a constant for clarity
+                            for (int i = 0; i < 4; i++) out << " ";
+                        }
                         out << " | " << paramName;
-                        for (int i = 0; i < 12 - paramName.length(); i++) out << " ";
+                        spaces = 12 - paramName.length();
+                        if (spaces > 0) {
+                            for (int i = 0; i < spaces; i++) out << " ";
+                        }
                         out << "| " << formatTypeWithDimensions(paramSymbol);
-                        for (int i = 0; i < 37 - formatTypeWithDimensions(paramSymbol).length(); i++) out << " ";
+                        spaces = 37 - formatTypeWithDimensions(paramSymbol).length();
+                        if (spaces > 0) {
+                            for (int i = 0; i < spaces; i++) out << " ";
+                        }
                         out << "|  |  |" << std::endl;
                     }
 
                     // Then print local variables
                     for (const auto& [localName, localSymbol] : locals) {
                         out << indentStr << "|    |     | local";
-                        for (int i = 0; i < 4; i++) out << " ";
+                        if (4 > 0) {  // Using a constant for clarity
+                            for (int i = 0; i < 4; i++) out << " ";
+                        }
                         out << " | " << localName;
-                        for (int i = 0; i < 12 - localName.length(); i++) out << " ";
+                        spaces = 12 - localName.length();
+                        if (spaces > 0) {
+                            for (int i = 0; i < spaces; i++) out << " ";
+                        }
                         out << "| " << formatTypeWithDimensions(localSymbol);
-                        for (int i = 0; i < 37 - formatTypeWithDimensions(localSymbol).length(); i++) out << " ";
+                        spaces = 37 - formatTypeWithDimensions(localSymbol).length();
+                        if (spaces > 0) {
+                            for (int i = 0; i < spaces; i++) out << " ";
+                        }
                         out << "|  |  |" << std::endl;
                     }
 
@@ -1254,10 +1309,16 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
         // Print global functions
         for (const auto& [name, symbol] : globalFunctions) {
             out << indentStr << "| function    | " << name;
-            for (int i = 0; i < 10 - name.length() + 7; i++) out << " ";
+            spaces = 10 - name.length() + 7;
+            if (spaces > 0) {
+                for (int i = 0; i < spaces; i++) out << " ";
+            }
             out << "| (" << formattedParamList(symbol->getParams()) << "):" << symbol->getType();
             std::string funcSig = "(" + formattedParamList(symbol->getParams()) + "):" + symbol->getType();
-            for (int i = 0; i < 33 - funcSig.length() + 14; i++) out << " ";
+            spaces = 33 - funcSig.length() + 14;
+            if (spaces > 0) {
+                for (int i = 0; i < spaces; i++) out << " ";
+            }
             out << "|" << std::endl;
 
             // Print function nested table
@@ -1265,7 +1326,10 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
             if (funcTable) {
                 out << indentStr << "|    ===========================================================================  |" << std::endl;
                 out << indentStr << "|    | table: " << funcTable->getScopeName();
-                for (int i = 0; i < 58 - funcTable->getScopeName().length() + 7; i++) out << " ";
+                spaces = 58 - funcTable->getScopeName().length() + 7;
+                if (spaces > 0) {
+                    for (int i = 0; i < spaces; i++) out << " ";
+                }
                 out << "|  |" << std::endl;
                 out << indentStr << "|    ===========================================================================  |" << std::endl;
 
@@ -1288,18 +1352,30 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
                 // Print parameters first
                 for (const auto& [paramName, paramSymbol] : params) {
                     out << indentStr << "|    | param      | " << paramName;
-                    for (int i = 0; i < 12 - paramName.length() + 5; i++) out << " ";
+                    spaces = 12 - paramName.length() + 5;
+                    if (spaces > 0) {
+                        for (int i = 0; i < spaces; i++) out << " ";
+                    }
                     out << "| " << formatTypeWithDimensions(paramSymbol);
-                    for (int i = 0; i < 33 - formatTypeWithDimensions(paramSymbol).length() + 7; i++) out << " ";
+                    spaces = 33 - formatTypeWithDimensions(paramSymbol).length() + 7;
+                    if (spaces > 0) {
+                        for (int i = 0; i < spaces; i++) out << " ";
+                    }
                     out << "|  |" << std::endl;
                 }
 
                 // Then print local variables
                 for (const auto& [localName, localSymbol] : locals) {
                     out << indentStr << "|    | local      | " << localName;
-                    for (int i = 0; i < 12 - localName.length() + 5; i++) out << " ";
+                    spaces = 12 - localName.length() + 5;
+                    if (spaces > 0) {
+                        for (int i = 0; i < spaces; i++) out << " ";
+                    }
                     out << "| " << formatTypeWithDimensions(localSymbol);
-                    for (int i = 0; i < 33 - formatTypeWithDimensions(localSymbol).length() + 7; i++) out << " ";
+                    spaces = 33 - formatTypeWithDimensions(localSymbol).length() + 7;
+                    if (spaces > 0) {
+                        for (int i = 0; i < spaces; i++) out << " ";
+                    }
                     out << "|  |" << std::endl;
                 }
 

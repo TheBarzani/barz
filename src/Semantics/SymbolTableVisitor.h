@@ -24,6 +24,12 @@ enum class Visibility {
     PRIVATE
 };
 
+// Error and warning tracking
+struct ErrorInfo {
+    std::string message;
+    int line;
+};
+
 // Represents a function signature (name + parameter types)
 struct FunctionSignature {
     std::string name;
@@ -202,10 +208,22 @@ public:
     void visitCondition(ASTNode* node) override;
     void visitArrayType(ASTNode* node) override;
 
+    /**
+     * @brief Gets all errors reported during symbol table generation
+     * @return Vector of error messages
+     */
+    const std::vector<ErrorInfo>& getErrors() const { return errors; }
+    
+    /**
+     * @brief Gets all warnings reported during symbol table generation
+     * @return Vector of warning messages
+     */
+    const std::vector<ErrorInfo>& getWarnings() const { return warnings; }
+
 private:
     // Helper methods
-    void reportError(const std::string& message);
-    void reportWarning(const std::string& message);
+    void reportError(const std::string& message, ASTNode* node);
+    void reportWarning(const std::string& message, ASTNode* node);
     void writeTableToFile(std::ofstream& out, std::shared_ptr<SymbolTable> table, int indent = 0);
     
     // Check for function declaration/definition consistency
@@ -228,9 +246,8 @@ private:
     std::vector<std::string> currentParamTypes;
     std::vector<int> currentArrayDimensions;
     
-    // Error and warning tracking
-    std::vector<std::string> errors;
-    std::vector<std::string> warnings;
+    std::vector<ErrorInfo> errors;
+    std::vector<ErrorInfo> warnings;
 
     std::string formatTypeWithDimensions(const std::shared_ptr<Symbol>& symbol) const;
 };
