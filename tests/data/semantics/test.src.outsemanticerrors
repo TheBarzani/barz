@@ -1,45 +1,48 @@
 === Semantic Errors/Warnings for ../tests/data/semantics/test.src ===
 
-Error at line 0: Error: Undeclared member function definition: build2 in class QUADRATIC
-Error at line 0: Error: Undefined member function: evaluate2 in class POLYNOMIAL
-Warning at line 0: Member 'evaluate' in class 'QUADRATIC' shadows inherited member from class 'POLYNOMIAL'
-Warning at line 0: Member 'evaluate' in class 'LINEAR' shadows inherited member from class 'POLYNOMIAL'
-Error at line 0: No definition for declared member function: POLYNOMIAL::evaluate2
-Error at line 6: Multiple declared class: POLYNOMIAL
-Error at line 13: Multiple declared data member: b in class LINEAR
-Error at line 28: Class C inherits from undefined class: E
-Error at line 52: Error: Multiple declared identifier 'new_functiontion' in function
-Error at line 59: Error: Multiple declared identifier 'result' in function
-Error at line 69: Error: Multiple declared identifier 'result' in function
-Error at line 78: Error: Multiple declared identifier 'new_functiontion' in function
-Error at line 82: Error: Return type mismatch. Expected QUADRATIC, got int
-Error at line 84: Implementation of undeclared member function: QUADRATIC::build2
-Error at line 95: Multiple declared function: f
-Warning at line 96: Function overloading: f
-Error at line 104: Error: Multiple declared identifier 'a' in function
-Error at line 105: Error: Multiple declared identifier 'c' in function
-Error at line 106: Error: Multiple declared identifier 'f1' in function
-Error at line 107: Error: Multiple declared identifier 'f2' in function
-Error at line 108: Error: Multiple declared identifier 'counter' in function
-Error at line 109: Multiple declared local variable: counter
-Error at line 109: Error: Multiple declared identifier 'counter' in function
-Error at line 110: Error: Multiple declared identifier 'i' in function
-Error at line 111: Error: Multiple declared identifier 'j' in function
-Error at line 114: Error: Undeclared member: b in class C
-Error at line 116: Error: Use of undeclared free function: undefined
-Error at line 118: Error: Function f called with wrong number of arguments. Expected 1, got 3
-Error at line 119: Error: Function f called with wrong number of arguments. Expected 1, got 2
-Error at line 120: Error: Use of array with wrong number of dimensions. Expected 2, got 1
-Error at line 121: Error: Use of array with wrong number of dimensions. Expected 2, got 1
-Error at line 121: Error: Array index must be of integer type, got: float
-Error at line 122: Error: Function f3 parameter 1 type mismatch. Expected integer[3][2], got integer[3][2][1]
-Error at line 123: Error: Dot operator used on non-class type: integer
-Error at line 124: Error: 'self' used outside of class context
-Error at line 125: Error: Undeclared member: c in class LINEAR
-Error at line 126: Error: While condition must be boolean or numeric, got: error
-Error at line 126: Error: Condition must be boolean or numeric, got: error
-Warning at line 128: Warning: Writing non-standard type: integer
-Error at line 129: Error: Undeclared member:  in class LINEAR
-Warning at line 129: Warning: Writing non-standard type: error
-Error at line 130: Error: Undeclared member:  in class QUADRATIC
-Warning at line 130: Warning: Writing non-standard type: error
+Warning at line 4: SymTab Warning: Function overloading: POLYNOMIAL::evaluate
+Error at line 6: SymTab Error: Multiple declared class: POLYNOMIAL
+Error at line 13: SymTab Error: Multiple declared data member: b in class LINEAR
+Warning at line 16: SymTab Warning: Member 'evaluate' in class 'LINEAR' shadows inherited member from class 'POLYNOMIAL'
+Warning at line 25: SymTab Warning: Member 'evaluate' in class 'QUADRATIC' shadows inherited member from class 'POLYNOMIAL'
+Error at line 28: SymTab Error: Class C inherits from undefined class: E
+Error at line 43: SymTab Error: Multiple declared parameter: x
+Error at line 48: SymTab Error: Multiple declared parameter: y
+Error at line 56: SymTab Error: Multiple declared parameter: A
+Error at line 56: SymTab Error: Multiple declared parameter: B
+Error at line 63: SymTab Error: Multiple declared parameter: x
+Error at line 73: SymTab Error: Multiple declared parameter: x
+Error at line 82: SymTab Error: Multiple declared parameter: A
+Error at line 82: SymTab Error: Multiple declared parameter: C
+Error at line 82: SymTab Error: Multiple declared parameter: B
+Error at line 90: SymTab Error: Implementation of undeclared member function: QUADRATIC::build2
+Error at line 104: SymTab Error: Multiple declared function: f
+Warning at line 105: SymTab Warning: Function overloading: f
+Error at line 113: SemCheck Error: Multiple declared identifier 'a' in function
+Error at line 114: SemCheck Error: Multiple declared identifier 'c' in function
+Error at line 115: SemCheck Error: Multiple declared identifier 'f1' in function
+Error at line 116: SemCheck Error: Multiple declared identifier 'f2' in function
+Error at line 117: SemCheck Error: Multiple declared identifier 'counter' in function
+Error at line 118: SemCheck Error: Multiple declared identifier 'counter' in function
+Error at line 118: SymTab Error: Multiple declared identifier 'counter' in function
+Error at line 119: SemCheck Error: Multiple declared identifier 'i' in function
+Error at line 120: SemCheck Error: Multiple declared identifier 'j' in function
+Error at line 123: SemCheck Error: Undeclared member: b in class C
+Error at line 125: SemCheck Error: Use of undeclared free function: undefined
+Error at line 127: SemCheck Error: Function f called with wrong number of arguments. Expected 2, got 3
+Error at line 128: SemCheck Error: Function f parameter 1 type mismatch. Expected integer, got float
+Error at line 128: SemCheck Error: Function f parameter 2 type mismatch. Expected integer, got int
+Error at line 129: SemCheck Error: Use of array with wrong number of dimensions. Expected 2, got 1
+Error at line 130: SemCheck Error: Array index must be of integer type, got: float
+Error at line 130: SemCheck Error: Use of array with wrong number of dimensions. Expected 2, got 1
+Error at line 131: SemCheck Error: Function f3 parameter 1 type mismatch. Expected integer[3][2], got integer[3][2][1]
+Error at line 132: SemCheck Error: Dot operator used on non-class type: integer
+Error at line 133: SemCheck Error: 'self' used outside of class context
+Error at line 134: SemCheck Error: Undeclared member: c in class LINEAR
+Error at line 135: SemCheck Error: Condition must be boolean or numeric, got: error
+Error at line 135: SemCheck Error: While condition must be boolean or numeric, got: error
+Warning at line 137: SemCheck Warning: Writing non-standard type: integer
+Error at line 138: SemCheck Error: Undeclared member:  in class LINEAR
+Warning at line 138: SemCheck Warning: Writing non-standard type: error
+Error at line 139: SemCheck Error: Undeclared member:  in class QUADRATIC
+Warning at line 139: SemCheck Warning: Writing non-standard type: error

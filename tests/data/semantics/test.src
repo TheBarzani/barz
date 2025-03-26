@@ -1,11 +1,11 @@
 // ====== Class declarations ====== //
 class POLYNOMIAL {
 	public function evaluate(x: float) => float;
-	public function evaluate2(x: float) => float;                     // 6.2
+	private function evaluate(y: int) => float;                     // 6.2 x
 };
-class POLYNOMIAL {                                                        // 8.1
+class POLYNOMIAL {                                                        // 8.1 x
 	public function evaluate(x: float) => float;                        
-        public function evaluate(x: int) => integer;                      // 9.2
+  public function evaluate(x: int) => integer;                      // 9.2
 };
 class LINEAR isa POLYNOMIAL {
 	private attribute a: float;
@@ -42,6 +42,12 @@ class E isa D {                                                           // 14.
 implementation POLYNOMIAL {   
   function evaluate(x: float) => float
   {
+    local b: int;
+    return (0);
+  }
+    function evaluate(y: int) => float
+  {
+    local a: int;
     return (0);
   }
 }
@@ -49,10 +55,10 @@ implementation POLYNOMIAL {
 implementation LINEAR {
   function build(A: float, B: float) => LINEAR 
   {
-    local new_functiontion: LINEAR;
-    new_functiontion := A;
-    new_functiontion := B;
-    return (new_functiontion);
+    local new_function: LINEAR;
+    new_function := A;
+    new_function := B;
+    return (new_function);
   }
   function evaluate(x: float) => float 
   {
@@ -75,23 +81,26 @@ implementation QUADRATIC {
   }
   function build(A: float, B: float, C: float) => QUADRATIC 
   {
-    local new_functiontion: QUADRATIC ;
-    new_functiontion.a := A + B * 3;                                       // 10.1
-    new_functiontion.b := B;
-    new_functiontion.c := 1;                                               // 10.2 
+    local new_function: QUADRATIC ;
+    new_function.a := A + B * 3;                                       // 10.1
+    new_function.b := B;
+    new_function.c := 1;                                               // 10.2 
     return (1);                                                           // 10.3
   }
   function build2(A: float, B: float, C: float) => QUADRATIC              // 6.1
   {
-    local new_functiontion: QUADRATIC;
-    new_functiontion.a := A;
-    new_functiontion.b := B;
-    new_functiontion.c := C;
-    return (new_functiontion);
+    local new_function: QUADRATIC;
+    new_function.a := A;
+    new_function.b := B;
+    new_function.c := C;
+    return (new_function);
   }
 }
   
-function f(i: integer) => void {}                                                    
+function f(i: integer) => void 
+{ 
+  local a: int;
+}                                                    
 function f(i: integer) => void {}                                         // 8.2
 function f(i: integer, j: integer) => integer {}                          // 9.1
 
@@ -135,29 +144,29 @@ function main() => void
 1.   |X| global symbol
 2.   |X| class symbol
 3.1  |X| class data member
-3.2  |X| functiontion's local variable
-4.1  |X| free functiontion
-4.2  |X| member functiontion
-6.1  |X| undeclared member functiontion definition
-6.2  |X| undefined member functiontion declaration
+3.2  |X| function's local variable
+4.1  |X| free function
+4.2  |X| member function
+6.1  |X| undeclared member function definition
+6.2  |X| undefined member function declaration
 8.1  |X| multiply declared class
-8.2  |X| multiply defined free functiontion
+8.2  |X| multiply defined free function
 8.3  |X| multiply declared identifier in class
-8.4  |X| multiply declared identifier in functiontion
+8.4  |X| multiply declared identifier in function
 8.5  |X| shadowed inherited data member
-9.1  |X| Overloaded free functiontion
-9.2  |X| Overloaded member functiontion
-9.3  |X| Overridden inherited member functiontion
+9.1  |X| Overloaded free function
+9.2  |X| Overloaded member function
+9.3  |X| Overridden inherited member function
 10.1 |X| Type error in expression
 10.2 |X| Type error in assignment statement 
 10.3 |X| Type error in return statement
 11.1 |X| Undeclared local variable
 11.2 |X| Undeclared data member
-11.3 |X| Undeclared member functiontion
-11.4 |X| Undeclared free functiontion
+11.3 |X| Undeclared member function
+11.4 |X| Undeclared free function
 11.5 |X| Undeclared class
-12.1 |X| functiontion call with wrong number of parameters
-12.2 |X| functiontion call with wrong type of parameters
+12.1 |X| function call with wrong number of parameters
+12.2 |X| function call with wrong type of parameters
 13.1 |X| Use of array with wrong number of dimensions
 13.2 |X| Array index is not an integer
 13.3 |X| Array parameter using wrong number of dimensions

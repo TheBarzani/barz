@@ -56,8 +56,9 @@ void SemanticCheckingVisitor::visitProgram(ASTNode* node) {
     }
     
     // 4. Check for undefined/undeclared member functions
-    checkUndefinedMemberFunctions();
-    checkUndeclaredMemberFunctions();
+    // No need this is taken care by the symbol table visit
+    // checkUndefinedMemberFunctions();
+    // checkUndeclaredMemberFunctions();
 }
 
 // Method to check for circular class dependencies
@@ -1256,7 +1257,7 @@ void SemanticCheckingVisitor::visitArrayType(ASTNode* node) {
 // The error reporting methods
 void SemanticCheckingVisitor::reportError(const std::string& message, ASTNode* node) {
     SemanticError error;
-    error.message = "Error: " + message;
+    error.message = "SemCheck Error: " + message;
     error.line = node ? node->getLineNumber() : 0;
     error.isWarning = false;
     
@@ -1266,7 +1267,7 @@ void SemanticCheckingVisitor::reportError(const std::string& message, ASTNode* n
 
 void SemanticCheckingVisitor::reportWarning(const std::string& message, ASTNode* node) {
     SemanticError error;
-    error.message = "Warning: " + message;
+    error.message = "SemCheck Warning: " + message;
     error.line = node ? node->getLineNumber() : 0;
     error.isWarning = true;
     

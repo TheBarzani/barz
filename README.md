@@ -12,6 +12,7 @@ Broken Automated Reliable Zipper (BARZ): A bare-bone compiler written in CPP.
 - [ ] Add unit tests for each phase using the gTest framework and fix the testing files structure
 - [ ] Use regex expressions for the lexical analysis part where the regex library is used
 - [ ] Generate a DFA systematically for the lexical analyzer
+- [ ] Fix the driver code to process multiple files
 
 ### Optional
 - [ ] Add and fix comments for Doxygen documentation generation

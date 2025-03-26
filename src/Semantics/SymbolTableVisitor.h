@@ -30,6 +30,12 @@ struct ErrorInfo {
     int line;
 };
 
+// For FUNCTION symbols
+struct ParamInfo {
+    std::string name;
+    std::string type;
+};
+
 // Represents a function signature (name + parameter types)
 struct FunctionSignature {
     std::string name;
@@ -63,8 +69,23 @@ public:
     const std::vector<std::string>& getInheritedClasses() const { return inheritedClasses; }
     
     // For FUNCTION symbols
-    void setParams(const std::vector<std::string>& paramTypes) { this->paramTypes = paramTypes; }
-    const std::vector<std::string>& getParams() const { return paramTypes; }
+    void addParam(const std::string& name, const std::string& type) {
+        params.push_back({name, type});
+    }
+    
+    const std::vector<ParamInfo>& getParamInfo() const {
+        return params;
+    }
+    
+    // For backward compatibility
+    std::vector<std::string> getParams() const {
+        std::vector<std::string> types;
+        for (const auto& param : params) {
+            types.push_back(param.type);
+        }
+        return types;
+    }
+    
     bool isDefined() const { return defined; }
     void setDefined(bool def) { defined = def; }
     bool isDeclared() const { return declared; }
@@ -75,6 +96,33 @@ public:
     void addArrayDimension(int dim) { arrayDimensions.push_back(dim); }
     const std::vector<int>& getArrayDimensions() const { return arrayDimensions; }
 
+    void setDeclarationLine(int line) { declarationLine = line; }
+    void setDefinitionLine(int line) { definitionLine = line; }
+    int getDeclarationLine() const { return declarationLine; }
+    int getDefinitionLine() const { return definitionLine; }
+
+    // For backward compatibility - convert types to ParamInfo objects with generated names
+    void setParams(const std::vector<std::string>& paramTypes) {
+        // Clear existing params
+        params.clear();
+        
+        // Convert types to ParamInfo objects with generic parameter names
+        for (size_t i = 0; i < paramTypes.size(); i++) {
+            params.push_back({"param" + std::to_string(i+1), paramTypes[i]});
+        }
+    }
+    
+    // Set params with both names and types
+    void setParams(const std::vector<std::string>& paramNames, const std::vector<std::string>& paramTypes) {
+        // Clear existing params
+        params.clear();
+        
+        // Store name+type pairs
+        for (size_t i = 0; i < paramNames.size() && i < paramTypes.size(); i++) {
+            params.push_back({paramNames[i], paramTypes[i]});
+        }
+    }
+
 private:
     std::string name;
     std::string type;
@@ -84,13 +132,15 @@ private:
     // For CLASS symbols
     std::vector<std::string> inheritedClasses;
     
-    // For FUNCTION symbols
-    std::vector<std::string> paramTypes;
+    std::vector<ParamInfo> params;
     bool defined = false;
     bool declared = false;
     
     // For VARIABLE symbols
     std::vector<int> arrayDimensions;
+
+    int declarationLine = 0;
+    int definitionLine = 0;
 };
 
 // Symbol Table class to represent a single scope's symbols
@@ -128,12 +178,19 @@ public:
     // Get parent table
     SymbolTable* getParent() const { return parent; }
 
+    // Get all functions in this table
+    std::vector<std::pair<FunctionSignature, std::shared_ptr<Symbol>>> getAllFunctions() const;
+
+    void setFunctionSymbol(std::shared_ptr<Symbol> symbol) { functionSymbol = symbol; }
+    std::shared_ptr<Symbol> getFunctionSymbol() const { return functionSymbol; }
+
 private:
     std::string scopeName;
     SymbolTable* parent;
     std::unordered_map<std::string, std::shared_ptr<Symbol>> symbols;
     std::unordered_map<std::string, std::shared_ptr<SymbolTable>> nestedTables;
     std::unordered_map<FunctionSignature, std::shared_ptr<Symbol>> functions;
+    std::shared_ptr<Symbol> functionSymbol = nullptr;  // For function tables
 };
 
 // Symbol Table Visitor implementation
@@ -223,7 +280,9 @@ public:
 private:
     // Helper methods
     void reportError(const std::string& message, ASTNode* node);
+    void reportError(const std::string& message, int line);
     void reportWarning(const std::string& message, ASTNode* node);
+    void reportWarning(const std::string& message, int line);
     void writeTableToFile(std::ofstream& out, std::shared_ptr<SymbolTable> table, int indent = 0);
     
     // Check for function declaration/definition consistency
@@ -233,6 +292,8 @@ private:
     void checkShadowedMembers(const std::string& className);
 
     std::string formattedParamList(const std::vector<std::string>& params);
+    std::string formattedParamListForTableName(const std::vector<std::string>& params);
+    std::string formatFunctionParams(std::shared_ptr<Symbol> funcSymbol);
     
     // Data members
     std::shared_ptr<SymbolTable> globalTable;
@@ -245,11 +306,18 @@ private:
     std::string currentType;
     std::vector<std::string> currentParamTypes;
     std::vector<int> currentArrayDimensions;
+    std::vector<std::string> currentParamNames;
     
     std::vector<ErrorInfo> errors;
     std::vector<ErrorInfo> warnings;
 
     std::string formatTypeWithDimensions(const std::shared_ptr<Symbol>& symbol) const;
+
+    void createFunctionSubtable(std::shared_ptr<SymbolTable> parentTable, 
+                          const std::string& prefix,
+                          const std::string& funcName,
+                          std::shared_ptr<Symbol> funcSymbol);
+    std::string formatParamTypesForTableName(const std::vector<std::string>& paramTypes);
 };
 
 #endif // SYMBOL_TABLE_VISITOR_H
