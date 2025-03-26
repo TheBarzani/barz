@@ -160,6 +160,8 @@ private:
     std::unordered_map<std::string, std::unordered_set<std::string>> declaredFunctions;
 
     std::shared_ptr<Symbol> lookupFunctionCaseInsensitive(const std::string& name);
+
+    void handleMethodCall(const TypeInfo& objType, ASTNode* methodCallNode);
 };
 
 #endif // SEMANTIC_CHECKING_VISITOR_H

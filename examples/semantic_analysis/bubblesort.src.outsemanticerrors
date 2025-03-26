@@ -1,3 +1,0 @@
-=== Semantic Errors/Warnings for ../examples/semantic_analysis/bubblesort.src ===
-
-Error at line 43: SemCheck Error: Multiple declared identifier 'arr' in function

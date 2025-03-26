@@ -2,10 +2,3 @@
 
 Warning at line 10: SymTab Warning: Member 'evaluate' in class 'LINEAR' shadows inherited member from class 'POLYNOMIAL'
 Warning at line 18: SymTab Warning: Member 'evaluate' in class 'QUADRATIC' shadows inherited member from class 'POLYNOMIAL'
-Error at line 69: SemCheck Error: Multiple declared identifier 'f1' in function
-Error at line 70: SemCheck Error: Multiple declared identifier 'f2' in function
-Error at line 71: SemCheck Error: Multiple declared identifier 'counter' in function
-Error at line 79: SemCheck Error: Undeclared member:  in class LINEAR
-Warning at line 79: SemCheck Warning: Writing non-standard type: error
-Error at line 80: SemCheck Error: Undeclared member:  in class QUADRATIC
-Warning at line 80: SemCheck Warning: Writing non-standard type: error

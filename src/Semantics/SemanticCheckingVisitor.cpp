@@ -340,51 +340,145 @@ void SemanticCheckingVisitor::visitArrayAccess(ASTNode* node) {
 void SemanticCheckingVisitor::visitDotIdentifier(ASTNode* node) {
     // Process object
     ASTNode* objNode = node->getLeftMostChild();
-    if (objNode) {
-        objNode->accept(this);
-        TypeInfo objType = currentExprType;
+    if (!objNode) {
+        reportError("Missing object in dot expression", node);
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Process the object/expression on the left side of the dot
+    objNode->accept(this);
+    TypeInfo objType = currentExprType;
+    
+    // Check if this is a class type
+    if (!objType.isClassType) {
+        reportError("Dot operator used on non-class type: " + objType.type, node);
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Process member (right side of the dot)
+    ASTNode* memberNode = objNode->getRightSibling();
+    if (!memberNode) {
+        reportError("Missing member in dot expression", node);
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Handle different types of member access
+    if (memberNode->getNodeEnum() == NodeType::FUNCTION_CALL) {
+        // Method call: object.method()
+        handleMethodCall(objType, memberNode);
+    } 
+    else if (memberNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+        // Nested property access: object.member.subMember
+        memberNode->accept(this);
+        // Type info is already set by the recursive accept call
+    }
+    else {
+        // Simple member access: object.member
+        std::string memberName = memberNode->getNodeValue();
         
-        // Check if this is a class type
-        if (!objType.isClassType) {
-            reportError("Dot operator used on non-class type: " + objType.type, node);
+        // Look up class
+        auto classTable = globalTable->getNestedTable(objType.type);
+        if (!classTable) {
+            reportError("Class not found: " + objType.type, node);
             currentExprType.type = "error";
             return;
         }
         
-        // Process member
-        ASTNode* memberNode = objNode->getRightSibling();
-        if (memberNode) {
-            std::string memberName = memberNode->getNodeValue();
-            
-            // Look up class
-            auto classTable = globalTable->getNestedTable(objType.type);
-            if (!classTable) {
-                reportError("Class not found: " + objType.type, node);
-                currentExprType.type = "error";
-                return;
-            }
-            
-            // Look up member
-            auto memberSymbol = classTable->lookupSymbol(memberName);
-            if (!memberSymbol) {
-                reportError("Undeclared member: " + memberName + " in class " + objType.type, node);
-                currentExprType.type = "error";
-                return;
-            }
-            
-            // Check visibility - only allow access to public members from outside
-            if (memberSymbol->getVisibility() == Visibility::PRIVATE && currentClassName != objType.type) {
-                reportError("Cannot access private member: " + memberName + " in class " + objType.type, node);
-                currentExprType.type = "error";
-                return;
-            }
-            
-            // Set type information
-            currentExprType.type = memberSymbol->getType();
-            currentExprType.dimensions = memberSymbol->getArrayDimensions();
-            currentExprType.isClassType = globalTable->lookupSymbol(currentExprType.type) != nullptr;
+        // Look up member
+        auto memberSymbol = classTable->lookupSymbol(memberName);
+        if (!memberSymbol) {
+            reportError("Undeclared member: " + memberName + " in class " + objType.type, node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Check visibility - only allow access to public members from outside
+        if (memberSymbol->getVisibility() == Visibility::PRIVATE && currentClassName != objType.type) {
+            reportError("Cannot access private member: " + memberName + " in class " + objType.type, node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Set type information
+        currentExprType.type = memberSymbol->getType();
+        currentExprType.dimensions = memberSymbol->getArrayDimensions();
+        currentExprType.isClassType = globalTable->lookupSymbol(currentExprType.type) != nullptr;
+    }
+}
+
+// Add this helper method:
+void SemanticCheckingVisitor::handleMethodCall(const TypeInfo& objType, ASTNode* methodCallNode) {
+    // Get method name
+    ASTNode* methodIdNode = methodCallNode->getLeftMostChild();
+    if (!methodIdNode) {
+        reportError("Missing method name in method call", methodCallNode);
+        currentExprType.type = "error";
+        return;
+    }
+    
+    std::string methodName = methodIdNode->getNodeValue();
+    
+    // Look up class
+    auto classTable = globalTable->getNestedTable(objType.type);
+    if (!classTable) {
+        reportError("Class not found: " + objType.type, methodCallNode);
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Look up method
+    auto methodSymbol = classTable->lookupSymbol(methodName);
+    if (!methodSymbol || methodSymbol->getKind() != SymbolKind::FUNCTION) {
+        reportError("Undeclared method: " + methodName + " in class " + objType.type, methodCallNode);
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Check visibility
+    if (methodSymbol->getVisibility() == Visibility::PRIVATE && currentClassName != objType.type) {
+        reportError("Cannot access private method: " + methodName + " in class " + objType.type, methodCallNode);
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Process arguments
+    std::vector<TypeInfo> argTypes;
+    ASTNode* argsNode = methodIdNode->getRightSibling();
+    if (argsNode) {
+        ASTNode* arg = argsNode->getLeftMostChild();
+        while (arg) {
+            arg->accept(this);
+            argTypes.push_back(currentExprType);
+            arg = arg->getRightSibling();
         }
     }
+    
+    // Check parameter count
+    const auto& paramTypes = methodSymbol->getParams();
+    if (paramTypes.size() != argTypes.size()) {
+        reportError("Method " + methodName + " called with wrong number of arguments. Expected " + 
+                   std::to_string(paramTypes.size()) + ", got " + 
+                   std::to_string(argTypes.size()), methodCallNode);
+    }
+    else {
+        // Check parameter types
+        for (size_t i = 0; i < paramTypes.size(); i++) {
+            TypeInfo paramType = parseTypeString(paramTypes[i]);
+            if (!areTypesCompatible(paramType, argTypes[i])) {
+                reportError("Method " + methodName + " parameter " + std::to_string(i+1) + 
+                           " type mismatch. Expected " + formatTypeInfo(paramType) + 
+                           ", got " + formatTypeInfo(argTypes[i]), methodCallNode);
+            }
+        }
+    }
+    
+    // Set return type
+    currentExprType.type = methodSymbol->getType();
+    currentExprType.dimensions.clear();
+    currentExprType.isClassType = globalTable->lookupSymbol(currentExprType.type) != nullptr;
 }
 
 // Return statement visitor - for checking return types
@@ -830,33 +924,29 @@ void SemanticCheckingVisitor::visitConstructorSignature(ASTNode* node) {
 }
 
 void SemanticCheckingVisitor::visitLocalVariable(ASTNode* node) {
-    // Process variable declaration
-    ASTNode* varNode = node->getLeftMostChild();
-    if (!varNode) return;
+    // // Process variable declaration
+    // ASTNode* varNode = node->getLeftMostChild();
+    // if (!varNode) return;
     
-    // Get variable ID
-    ASTNode* varIdNode = varNode->getLeftMostChild();
-    if (!varIdNode) return;
+    // // Get variable ID
+    // ASTNode* varIdNode = varNode->getLeftMostChild();
+    // if (!varIdNode) return;
     
-    std::string varName = varIdNode->getNodeValue();
+    // std::string varName = varIdNode->getNodeValue();
     
-    // Get type node
-    ASTNode* typeNode = varIdNode->getRightSibling();
-    if (!typeNode) return;
+    // // Get type node
+    // ASTNode* typeNode = varIdNode->getRightSibling();
+    // if (!typeNode) return;
     
-    // Process the declaration normally
-    varNode->accept(this);
+    // // Check for DUPLICATES BEFORE processing the declaration
+    // auto localSymbol = currentTable->lookupSymbol(varName, true); // true = local scope only
     
-    // Check for DUPLICATES ONLY IN THE CURRENT FUNCTION SCOPE
-    // This is the key change - only check the immediate scope
-    auto localSymbol = currentTable->lookupSymbol(varName, true); // true = local scope only
+    // if (localSymbol && localSymbol->getKind() == SymbolKind::VARIABLE) {
+    //     reportError("Multiple declared identifier '" + varName + "' in function", node);
+    // }
     
-    if (localSymbol && localSymbol->getKind() == SymbolKind::VARIABLE) {
-        // Only report error if this isn't a parameter with the same name
-        if (localSymbol->getKind() != SymbolKind::PARAMETER) {
-            reportError("Multiple declared identifier '" + varName + "' in function", node);
-        }
-    }
+    // // Process the declaration normally (which will add it to the symbol table)
+    // varNode->accept(this);
 }
 
 void SemanticCheckingVisitor::visitBlock(ASTNode* node) {
