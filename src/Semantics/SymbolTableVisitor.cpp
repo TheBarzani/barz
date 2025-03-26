@@ -604,6 +604,19 @@ void SymbolTableVisitor::visitLocalVariable(ASTNode* node) {
     currentArrayDimensions.clear();
     typeNode->accept(this);  // Sets currentType and potentially currentArrayDimensions
     
+    // Check if the type is valid (int, float, or defined class)
+    bool validType = (currentType == "int" || currentType == "float");
+    if (!validType) {
+        // Check if it's a defined class
+        auto classSymbol = globalTable->lookupSymbol(currentType);
+        validType = (classSymbol && classSymbol->getKind() == SymbolKind::CLASS);
+        
+        if (!validType) {
+            reportError("Undefined type '" + currentType + "' for variable '" + varName + "'", node);
+            return;
+        }
+    }
+    
     // Check for duplicates in current function scope
     if (currentTable->lookupSymbol(varName, true)) {
         reportError("Multiple declared identifier '" + varName + "' in function", node);

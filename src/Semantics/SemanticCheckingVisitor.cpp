@@ -121,11 +121,8 @@ void SemanticCheckingVisitor::visitAssignment(ASTNode* node) {
         leftNode->accept(this);
         TypeInfo leftType = currentExprType;
         
-        // Process assignment operator
-        ASTNode* opNode = leftNode->getRightSibling();
-        
         // Process right side (expression)
-        ASTNode* rightNode = opNode->getRightSibling();
+        ASTNode* rightNode = leftNode->getRightSibling();
         if (rightNode) {
             rightNode->accept(this);
             TypeInfo rightType = currentExprType;
@@ -526,9 +523,33 @@ void SemanticCheckingVisitor::visitFunction(ASTNode* node) {
         // Set current return type expectation
         expectedReturnType.push_back(currentType);
         
-        // Create or get the function's symbol table
-        std::string funcTableName = currentClassName.empty() ? "::" + currentFunctionName : currentClassName + "::" + currentFunctionName;
-        auto functionTable = currentTable->getNestedTable(currentFunctionName);
+        // Create properly formatted function table name
+        std::string funcTableName;
+        
+        if (currentClassName.empty()) {
+            // Global function
+            funcTableName = currentFunctionName;
+        } else {
+            // Class member function - use qualified name
+            funcTableName = currentFunctionName;
+            
+            // For overloaded functions, we need to include parameter types in the name
+            auto functionSymbol = currentTable->lookupSymbol(currentFunctionName);
+            if (functionSymbol && functionSymbol->getKind() == SymbolKind::FUNCTION) {
+                const auto& params = functionSymbol->getParams();
+                if (!params.empty()) {
+                    // Append parameter types to distinguish overloaded functions
+                    funcTableName += "_";
+                    for (size_t i = 0; i < params.size(); i++) {
+                        if (i > 0) funcTableName += "_";
+                        funcTableName += params[i];
+                    }
+                }
+            }
+        }
+        
+        // Look up function table using the proper name
+        auto functionTable = currentTable->getNestedTable(funcTableName);
         
         if (functionTable) {
             // Save current table and switch to function table
@@ -546,7 +567,9 @@ void SemanticCheckingVisitor::visitFunction(ASTNode* node) {
         }
         
         // Pop return type expectation
-        expectedReturnType.pop_back();
+        if (!expectedReturnType.empty()) {
+            expectedReturnType.pop_back();
+        }
     }
 }
 
@@ -778,6 +801,7 @@ void SemanticCheckingVisitor::visitImplementation(ASTNode* node) {
         // Collect implemented function names for this class
         ASTNode* funcNode = funcListNode->getLeftMostChild();
         while (funcNode) {
+            funcNode->accept(this);
             ASTNode* signatureNode = funcNode->getLeftMostChild();
             if (signatureNode) {
                 ASTNode* funcIdNode = signatureNode->getLeftMostChild();
@@ -1111,11 +1135,101 @@ void SemanticCheckingVisitor::visitRelOp(ASTNode* node) {
 }
 
 void SemanticCheckingVisitor::visitAddOp(ASTNode* node) {
-    // Nothing to check for addition operator itself
+    // Get left operand
+    ASTNode* leftNode = node->getLeftMostChild();
+    if (!leftNode) {
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Process left operand
+    leftNode->accept(this);
+    TypeInfo leftType = currentExprType;
+    
+    // Get right operand
+    ASTNode* rightNode = leftNode->getRightSibling();
+    if (!rightNode) {
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Process right operand
+    rightNode->accept(this);
+    TypeInfo rightType = currentExprType;
+    
+    // Check for numeric types on both sides of addition
+    if (!isNumericType(leftType.type) || !isNumericType(rightType.type)) {
+        reportError("Type error in addition: requires numeric types, got " + 
+                  formatTypeInfo(leftType) + " and " + formatTypeInfo(rightType), node);
+        currentExprType.type = "error"; // Set to error type
+        currentExprType.dimensions.clear();
+        currentExprType.isClassType = false;
+        return; // Stop processing after error
+    }
+    
+    // Check if the types are exactly the same
+    if (leftType.type != rightType.type) {
+        reportError("Type error in addition: operands must have identical types, got " + 
+                  formatTypeInfo(leftType) + " and " + formatTypeInfo(rightType), node);
+        currentExprType.type = "error"; // Set to error type
+        currentExprType.dimensions.clear();
+        currentExprType.isClassType = false;
+        return; // Stop processing after error
+    }
+    
+    // Types are compatible, set result type (same as input types)
+    currentExprType.type = leftType.type;
+    currentExprType.dimensions.clear();
+    currentExprType.isClassType = false;
 }
 
 void SemanticCheckingVisitor::visitMultOp(ASTNode* node) {
-    // Nothing to check for multiplication operator itself
+    // Get left operand
+    ASTNode* leftNode = node->getLeftMostChild();
+    if (!leftNode) {
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Process left operand
+    leftNode->accept(this);
+    TypeInfo leftType = currentExprType;
+    
+    // Get right operand
+    ASTNode* rightNode = leftNode->getRightSibling();
+    if (!rightNode) {
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Process right operand
+    rightNode->accept(this);
+    TypeInfo rightType = currentExprType;
+    
+    // Check for numeric types on both sides of multiplication
+    if (!isNumericType(leftType.type) || !isNumericType(rightType.type)) {
+        reportError("Type error in multiplication: requires numeric types, got " + 
+                  formatTypeInfo(leftType) + " and " + formatTypeInfo(rightType), node);
+        currentExprType.type = "error"; // Set to error type
+        currentExprType.dimensions.clear();
+        currentExprType.isClassType = false;
+        return; // Stop processing after error
+    }
+    
+    // Check if the types are exactly the same
+    if (leftType.type != rightType.type) {
+        reportError("Type error in multiplication: operands must have identical types, got " + 
+                  formatTypeInfo(leftType) + " and " + formatTypeInfo(rightType), node);
+        currentExprType.type = "error"; // Set to error type
+        currentExprType.dimensions.clear();
+        currentExprType.isClassType = false;
+        return; // Stop processing after error
+    }
+    
+    // Types are compatible, set result type (same as input types)
+    currentExprType.type = leftType.type;
+    currentExprType.dimensions.clear();
+    currentExprType.isClassType = false;
 }
 
 void SemanticCheckingVisitor::visitSelfIdentifier(ASTNode* node) {
@@ -1188,30 +1302,35 @@ void SemanticCheckingVisitor::visitFactor(ASTNode* node) {
 
 void SemanticCheckingVisitor::visitTerm(ASTNode* node) {
     // Process first factor
-    ASTNode* firstChild = node->getLeftMostChild();
-    if (firstChild) {
-        firstChild->accept(this);
-        TypeInfo leftType = currentExprType;
-        
-        // Process any additional factors with mult operators
-        ASTNode* current = firstChild->getRightSibling();
-        while (current) {
-            // This is an operator
-            std::string op = current->getNodeValue();
-            
-            // Next should be another factor
-            ASTNode* rightNode = current->getRightSibling();
-            if (rightNode) {
-                rightNode->accept(this);
+    ASTNode* factorNode = node->getLeftMostChild();
+    if (!factorNode) {
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Process the first factor
+    factorNode->accept(this);
+    TypeInfo leftType = currentExprType;
+    
+    // Check for additional factors that might involve multiplication
+    ASTNode* currentNode = factorNode->getRightSibling();
+    while (currentNode) {
+        // Check if this is a multiplication operator
+        if (currentNode->getNodeEnum() == NodeType::MULT_OP) {
+            // Get the right operand
+            ASTNode* rightOperand = currentNode->getRightSibling();
+            if (rightOperand) {
+                // Process right operand
+                rightOperand->accept(this);
                 TypeInfo rightType = currentExprType;
                 
-                // Check type compatibility for multiplication operation
+                // Check for numeric types on both sides of multiplication
                 if (!isNumericType(leftType.type) || !isNumericType(rightType.type)) {
-                    reportError("Multiplication operation requires numeric types, got " + 
-                              leftType.type + " and " + rightType.type, node);
+                    reportError("Type error in multiplication: requires numeric types, got " + 
+                              formatTypeInfo(leftType) + " and " + formatTypeInfo(rightType), currentNode);
                 }
                 
-                // Result is numeric (prefer float if either operand is float)
+                // Result type is float if either operand is float, otherwise int
                 if (leftType.type == "float" || rightType.type == "float") {
                     currentExprType.type = "float";
                 } else {
@@ -1223,41 +1342,51 @@ void SemanticCheckingVisitor::visitTerm(ASTNode* node) {
                 // Update left type for next operation
                 leftType = currentExprType;
                 
-                // Move to next operator
-                current = rightNode->getRightSibling();
+                // Move to next node
+                currentNode = rightOperand->getRightSibling();
             } else {
+                // Missing right operand
+                reportError("Missing right operand for multiplication", currentNode);
                 break;
             }
+        } else {
+            // Not a multiplication operator, move to next node
+            currentNode = currentNode->getRightSibling();
         }
     }
 }
 
 void SemanticCheckingVisitor::visitArithExpr(ASTNode* node) {
     // Process first term
-    ASTNode* firstChild = node->getLeftMostChild();
-    if (firstChild) {
-        firstChild->accept(this);
-        TypeInfo leftType = currentExprType;
-        
-        // Process any additional terms with add operators
-        ASTNode* current = firstChild->getRightSibling();
-        while (current) {
-            // This is an operator
-            std::string op = current->getNodeValue();
-            
-            // Next should be another term
-            ASTNode* rightNode = current->getRightSibling();
-            if (rightNode) {
-                rightNode->accept(this);
+    ASTNode* termNode = node->getLeftMostChild();
+    if (!termNode) {
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Process the first term
+    termNode->accept(this);
+    TypeInfo leftType = currentExprType;
+    
+    // Check for additional terms that might involve addition
+    ASTNode* currentNode = termNode->getRightSibling();
+    while (currentNode) {
+        // Check if this is an addition operator
+        if (currentNode->getNodeEnum() == NodeType::ADD_OP) {
+            // Get the right operand
+            ASTNode* rightOperand = currentNode->getRightSibling();
+            if (rightOperand) {
+                // Process right operand
+                rightOperand->accept(this);
                 TypeInfo rightType = currentExprType;
                 
-                // Check type compatibility for addition operation
+                // Check for numeric types on both sides of addition
                 if (!isNumericType(leftType.type) || !isNumericType(rightType.type)) {
-                    reportError("Addition operation requires numeric types, got " + 
-                              leftType.type + " and " + rightType.type, node);
+                    reportError("Type error in addition: requires numeric types, got " + 
+                              formatTypeInfo(leftType) + " and " + formatTypeInfo(rightType), currentNode);
                 }
                 
-                // Result is numeric (prefer float if either operand is float)
+                // Result type is float if either operand is float, otherwise int
                 if (leftType.type == "float" || rightType.type == "float") {
                     currentExprType.type = "float";
                 } else {
@@ -1269,15 +1398,19 @@ void SemanticCheckingVisitor::visitArithExpr(ASTNode* node) {
                 // Update left type for next operation
                 leftType = currentExprType;
                 
-                // Move to next operator
-                current = rightNode->getRightSibling();
+                // Move to next node
+                currentNode = rightOperand->getRightSibling();
             } else {
+                // Missing right operand
+                reportError("Missing right operand for addition", currentNode);
                 break;
             }
+        } else {
+            // Not an addition operator, move to next node
+            currentNode = currentNode->getRightSibling();
         }
     }
 }
-
 void SemanticCheckingVisitor::visitExpr(ASTNode* node) {
     // Visit the contained expression
     ASTNode* child = node->getLeftMostChild();
