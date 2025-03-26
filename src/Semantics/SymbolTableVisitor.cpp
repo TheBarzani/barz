@@ -720,7 +720,13 @@ void SymbolTableVisitor::visitParam(ASTNode* node) {
     
     // Format the type with array dimensions
     std::string typeWithDimensions = currentType;
-    for (int dim : currentArrayDimensions) {
+    // Reverse array dimensions to ensure correct order in the type string
+    // (innermost dimension should appear first)
+    std::vector<int> reversedDimensions = currentArrayDimensions;
+    std::reverse(reversedDimensions.begin(), reversedDimensions.end());
+
+    // Format the type with array dimensions
+    for (int dim : reversedDimensions) {
         if (dim > 0) {
             typeWithDimensions += "[" + std::to_string(dim) + "]";
         } else {
@@ -1361,7 +1367,15 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
 
                 auto functionTable = nestedTable->getNestedTable(uniqueKey);
                 if (functionTable) {
+                    // Collect and reverse local variables to match declaration order
+                    std::vector<std::pair<std::string, std::shared_ptr<Symbol>>> localVars;
                     for (const auto& [localName, localSymbol] : functionTable->getSymbols()) {
+                        if (localSymbol->getKind() == SymbolKind::VARIABLE) {
+                            localVars.push_back({localName, localSymbol});
+                        }
+                    }
+                    std::reverse(localVars.begin(), localVars.end());
+                    for (const auto& [localName, localSymbol] : localVars) {
                         if (localSymbol->getKind() == SymbolKind::VARIABLE) { // Local variables
                             out << indentStr << "|    |     | local     | " << localName;
                             spaces = 12 - localName.length();
@@ -1451,14 +1465,15 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
                 if (functionTable) {
                     // Print parameters first (existing code)
             
-                    // Print local variables
+                    // Collect and reverse local variables to match declaration order
                     std::vector<std::pair<std::string, std::shared_ptr<Symbol>>> localVars;
                     for (const auto& [name, symbol] : functionTable->getSymbols()) {
                         if (symbol->getKind() == SymbolKind::VARIABLE) {
                             localVars.push_back({name, symbol});
                         }
                     }
-                    
+                    std::reverse(localVars.begin(), localVars.end());
+
                     // Print local variables
                     for (const auto& [localName, localSymbol] : localVars) {
                         out << "|     | local     | " << localName;
@@ -1494,7 +1509,6 @@ std::string SymbolTableVisitor::formattedParamList(const std::vector<std::string
     return ss.str();
 }
 
-// Update formatTypeWithDimensions to handle dynamic arrays
 std::string SymbolTableVisitor::formatTypeWithDimensions(const std::shared_ptr<Symbol>& symbol) const {
     std::string result = symbol->getType();
     
@@ -1505,7 +1519,11 @@ std::string SymbolTableVisitor::formatTypeWithDimensions(const std::shared_ptr<S
     
     // Add array dimensions
     const auto& dims = symbol->getArrayDimensions();
-    for (int dim : dims) {
+    // Reverse dimensions so they appear in the correct order (innermost to outermost)
+    std::vector<int> reversedDims = dims;
+    std::reverse(reversedDims.begin(), reversedDims.end());
+        
+    for (int dim : reversedDims) {
         if (dim == -1) {
             // Special code for dynamic arrays
             result += "[]";
