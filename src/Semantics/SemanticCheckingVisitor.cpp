@@ -150,6 +150,15 @@ void SemanticCheckingVisitor::visitFunctionCall(ASTNode* node) {
     
     std::string funcName = funcIdNode->getNodeValue();
     
+    // Case-insensitive function lookup
+    auto funcSymbol = lookupFunctionCaseInsensitive(funcName);
+    
+    if (!funcSymbol) {
+        reportError("Use of undeclared free function: " + funcName, node);
+        currentExprType.type = "error";
+        return;
+    }
+    
     // Gather parameter types
     std::vector<TypeInfo> paramTypes;
     ASTNode* argsNode = funcIdNode->getRightSibling();
@@ -199,7 +208,6 @@ void SemanticCheckingVisitor::visitFunctionCall(ASTNode* node) {
     }
     
     // Look for free function
-    auto funcSymbol = globalTable->lookupSymbol(funcName);
     if (!funcSymbol || funcSymbol->getKind() != SymbolKind::FUNCTION) {
         reportError("Use of undeclared free function: " + funcName, node);
         currentExprType.type = "error";
@@ -231,6 +239,32 @@ void SemanticCheckingVisitor::visitFunctionCall(ASTNode* node) {
     currentExprType.type = funcSymbol->getType();
     currentExprType.dimensions.clear();
     currentExprType.isClassType = globalTable->lookupSymbol(currentExprType.type) != nullptr;
+}
+
+// Add this helper method:
+std::shared_ptr<Symbol> SemanticCheckingVisitor::lookupFunctionCaseInsensitive(const std::string& name) {
+    // First try exact match
+    auto symbol = globalTable->lookupSymbol(name);
+    if (symbol && symbol->getKind() == SymbolKind::FUNCTION) {
+        return symbol;
+    }
+    
+    // If not found, try case-insensitive match
+    std::string lowerName = name;
+    std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
+    
+    for (const auto& [symName, symbol] : globalTable->getSymbols()) {
+        if (symbol->getKind() == SymbolKind::FUNCTION) {
+            std::string lowerSymName = symName;
+            std::transform(lowerSymName.begin(), lowerSymName.end(), lowerSymName.begin(), ::tolower);
+            
+            if (lowerName == lowerSymName) {
+                return symbol;
+            }
+        }
+    }
+    
+    return nullptr;
 }
 
 // Identifier visitor - for checking identifiers
@@ -806,27 +840,23 @@ void SemanticCheckingVisitor::visitLocalVariable(ASTNode* node) {
     
     std::string varName = varIdNode->getNodeValue();
     
-    // Check if variable is already declared in the current function scope
-    // We need to use the standard lookup and then verify if it's in the current scope
-    auto existingSymbol = currentTable->lookupSymbol(varName);
-    if (existingSymbol) {
-        // Check if this symbol belongs to the current scope (not a parent scope)
-        // We can do this by looking at all local symbols in the current scope
-        bool isLocalSymbol = false;
-        for (const auto& [name, symbol] : currentTable->getSymbols()) {
-            if (name == varName) {
-                isLocalSymbol = true;
-                break;
-            }
-        }
-        
-        if (isLocalSymbol) {
+    // Get type node
+    ASTNode* typeNode = varIdNode->getRightSibling();
+    if (!typeNode) return;
+    
+    // Process the declaration normally
+    varNode->accept(this);
+    
+    // Check for DUPLICATES ONLY IN THE CURRENT FUNCTION SCOPE
+    // This is the key change - only check the immediate scope
+    auto localSymbol = currentTable->lookupSymbol(varName, true); // true = local scope only
+    
+    if (localSymbol && localSymbol->getKind() == SymbolKind::VARIABLE) {
+        // Only report error if this isn't a parameter with the same name
+        if (localSymbol->getKind() != SymbolKind::PARAMETER) {
             reportError("Multiple declared identifier '" + varName + "' in function", node);
         }
     }
-    
-    // Continue with normal processing
-    varNode->accept(this);
 }
 
 void SemanticCheckingVisitor::visitBlock(ASTNode* node) {

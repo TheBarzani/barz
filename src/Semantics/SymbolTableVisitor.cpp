@@ -784,28 +784,26 @@ void SymbolTableVisitor::visitArrayType(ASTNode* node) {
 }
 
 void SymbolTableVisitor::visitArrayDimension(ASTNode* node) {
-    // Check if this is a dynamic array (no dimension value specified)
-    if (!node->getLeftMostChild()) {
-        // Dynamic array - use a special marker like -1
-        currentArrayDimensions.push_back(-1);  // Special code for dynamic arrays
+    std::string dimensionValue = node->getNodeValue();
+    
+    // Check if this is a dynamic array (marked as "dynamic" or empty)
+    if (dimensionValue == "dynamic" || dimensionValue.empty()) {
+        // Dynamic array - use special marker -1
+        currentArrayDimensions.push_back(-1);
         return;
     }
-
-    // Regular array with dimension
-    ASTNode* dimensionNode = node->getLeftMostChild();
-    if (dimensionNode) {
-        // Try to get an integer value for the dimension
-        if (dimensionNode->getNodeEnum() == NodeType::INT) {
-            int dimension = std::stoi(dimensionNode->getNodeValue());
-            if (dimension <= 0) {
-                reportError("Array dimension must be positive.", node);
-            } else {
-                currentArrayDimensions.push_back(dimension);
-            }
+    
+    // For regular arrays with dimension values stored directly in the node
+    try {
+        int dimension = std::stoi(dimensionValue);
+        if (dimension <= 0) {
+            reportError("Array dimension must be positive.", node);
         } else {
-            // Non-constant dimension - mark as dynamic for now
-            currentArrayDimensions.push_back(-1);  // Special code for dynamic arrays
+            currentArrayDimensions.push_back(dimension);
         }
+    } catch (const std::exception&) {
+        reportError("Invalid array dimension: " + dimensionValue, node);
+        currentArrayDimensions.push_back(-1);  // Default to dynamic
     }
 }
 
@@ -1370,8 +1368,9 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
                             if (spaces > 0) {
                                 for (int i = 0; i < spaces; i++) out << " ";
                             }
-                            out << "| " << localSymbol->getType();
-                            spaces = 37 - localSymbol->getType().length();
+                            std::string formattedType = formatTypeWithDimensions(localSymbol);
+                            out << "| " << formattedType;
+                            spaces = 37 - formattedType.length();
                             if (spaces > 0) {
                                 for (int i = 0; i < spaces; i++) out << " ";
                             }
@@ -1467,8 +1466,9 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
                         if (spaces > 0) {
                             for (int i = 0; i < spaces; i++) out << " ";
                         }
-                        out << "| " << formatTypeWithDimensions(localSymbol);
-                        spaces = 45 - formatTypeWithDimensions(localSymbol).length();
+                        std::string formattedType = formatTypeWithDimensions(localSymbol);
+                        out << "| " << formattedType;
+                        spaces = 45 - formattedType.length();
                         if (spaces > 0) {
                             for (int i = 0; i < spaces; i++) out << " ";
                         }

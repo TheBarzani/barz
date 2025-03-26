@@ -1,5 +1,3 @@
 === Semantic Errors/Warnings for ../examples/semantic_analysis/bubblesort.src ===
 
 Error at line 43: SemCheck Error: Multiple declared identifier 'arr' in function
-Error at line 51: SemCheck Error: Use of undeclared free function: printarray
-Error at line 53: SemCheck Error: Use of undeclared free function: printarray

@@ -158,6 +158,8 @@ private:
 
     // Map to store declaration function names for each class
     std::unordered_map<std::string, std::unordered_set<std::string>> declaredFunctions;
+
+    std::shared_ptr<Symbol> lookupFunctionCaseInsensitive(const std::string& name);
 };
 
 #endif // SEMANTIC_CHECKING_VISITOR_H
