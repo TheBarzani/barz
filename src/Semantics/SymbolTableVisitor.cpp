@@ -709,34 +709,10 @@ void SymbolTableVisitor::visitParam(ASTNode* node) {
         return;
     }
     
-    // Check if this is an array type
+    // Process type node and array dimensions
     if (typeNode->getNodeEnum() == NodeType::ARRAY_TYPE) {
         // Handle array type
-        ASTNode* dimNode = typeNode->getLeftMostChild();
-        if (dimNode && dimNode->getNodeEnum() == NodeType::ARRAY_DIMENSION) {
-            // If dimension is "dynamic", use -1 to represent a dynamic array
-            if (dimNode->getNodeValue() == "dynamic") {
-                currentArrayDimensions.push_back(-1);
-            } else {
-                // Try to parse the dimension as an integer
-                try {
-                    int dim = std::stoi(dimNode->getNodeValue());
-                    currentArrayDimensions.push_back(dim);
-                } catch (const std::exception&) {
-                    reportError("Invalid array dimension: " + dimNode->getNodeValue(), node);
-                }
-            }
-        }
-        
-        // Get the base type
-        ASTNode* baseTypeNode = dimNode ? dimNode->getRightSibling() : nullptr;
-        if (baseTypeNode) {
-            // Process base type to set currentType
-            baseTypeNode->accept(this);
-        } else {
-            reportError("Array type missing base type.", node);
-            return;
-        }
+        typeNode->accept(this);
     } else {
         // This is a normal (non-array) type
         typeNode->accept(this);
@@ -755,16 +731,27 @@ void SymbolTableVisitor::visitParam(ASTNode* node) {
     // Add formatted type to currentParamTypes for function signature
     currentParamTypes.push_back(typeWithDimensions);
     
-    // Also create a parameter symbol and add it to the current table
-    if (currentTable && currentTable->getScopeName().find("::") != std::string::npos) {
-        auto paramSymbol = std::make_shared<Symbol>(paramName, currentType, SymbolKind::PARAMETER);
+    // Check if we're in a function implementation
+    bool isImplementation = false;
+    if (currentTable && !currentClassName.empty() && 
+        currentTable->getScopeName().find("::") != std::string::npos) {
+        auto parentTable = currentTable->getParent();
+        if (parentTable && parentTable->getScopeName() == currentClassName) {
+            isImplementation = true;
+        }
+    }
+    
+    // Only add parameter to symbol table if not in implementation
+    if (!isImplementation && currentTable && currentTable->getScopeName().find("::") != std::string::npos) {
+        // Use typeWithDimensions instead of just currentType for the symbol
+        auto paramSymbol = std::make_shared<Symbol>(paramName, typeWithDimensions, SymbolKind::PARAMETER);
         
-        // Add array dimensions to the parameter symbol
+        // Add array dimensions to the parameter symbol for internal representation
         for (int dim : currentArrayDimensions) {
             paramSymbol->addArrayDimension(dim);
         }
         
-        // Check if parameter is already defined in this scope
+        // Check for duplicate parameter
         if (currentTable->lookupSymbol(paramName, true)) {
             reportError("Multiple declared parameter: " + paramName, node);
             return;
@@ -797,14 +784,29 @@ void SymbolTableVisitor::visitArrayType(ASTNode* node) {
 }
 
 void SymbolTableVisitor::visitArrayDimension(ASTNode* node) {
-    // Store the array dimension
-    int dim = 0;
-    try {
-        dim = std::stoi(node->getNodeValue());
-    } catch (...) {
-        reportError("Invalid array dimension: " + node->getNodeValue(), node);
+    // Check if this is a dynamic array (no dimension value specified)
+    if (!node->getLeftMostChild()) {
+        // Dynamic array - use a special marker like -1
+        currentArrayDimensions.push_back(-1);  // Special code for dynamic arrays
+        return;
     }
-    currentArrayDimensions.push_back(dim);
+
+    // Regular array with dimension
+    ASTNode* dimensionNode = node->getLeftMostChild();
+    if (dimensionNode) {
+        // Try to get an integer value for the dimension
+        if (dimensionNode->getNodeEnum() == NodeType::INT) {
+            int dimension = std::stoi(dimensionNode->getNodeValue());
+            if (dimension <= 0) {
+                reportError("Array dimension must be positive.", node);
+            } else {
+                currentArrayDimensions.push_back(dimension);
+            }
+        } else {
+            // Non-constant dimension - mark as dynamic for now
+            currentArrayDimensions.push_back(-1);  // Special code for dynamic arrays
+        }
+    }
 }
 
 void SymbolTableVisitor::visitBlock(ASTNode* node) {
@@ -1492,17 +1494,27 @@ std::string SymbolTableVisitor::formattedParamList(const std::vector<std::string
     return ss.str();
 }
 
+// Update formatTypeWithDimensions to handle dynamic arrays
 std::string SymbolTableVisitor::formatTypeWithDimensions(const std::shared_ptr<Symbol>& symbol) const {
-    std::string type = symbol->getType();
-    const auto& dimensions = symbol->getArrayDimensions();
-    for (int dim : dimensions) {
-        if (dim > 0) {
-            type += "[" + std::to_string(dim) + "]";
+    std::string result = symbol->getType();
+    
+    // If the type already has array notations, return as is
+    if (result.find('[') != std::string::npos) {
+        return result;
+    }
+    
+    // Add array dimensions
+    const auto& dims = symbol->getArrayDimensions();
+    for (int dim : dims) {
+        if (dim == -1) {
+            // Special code for dynamic arrays
+            result += "[]";
         } else {
-            type += "[]"; // For arrays without explicit size
+            result += "[" + std::to_string(dim) + "]";
         }
     }
-    return type;
+    
+    return result;
 }
 
 // Add this helper method:

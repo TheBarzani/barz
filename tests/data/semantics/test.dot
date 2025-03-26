@@ -50,7 +50,7 @@ digraph AST {
   node46 [label="PARAMATER |  "];
   node44 [label="PARAM_ID | x "];
   node45 [label="TYPE | int "];
-  node47 [label="TYPE | integer "];
+  node47 [label="TYPE | int "];
   node97 [label="CLASS |  "];
   node52 [label="CLASS_ID | LINEAR "];
   node53 [label="INHERITANCE_LIST | inheritanceList "];
@@ -100,7 +100,7 @@ digraph AST {
   node146 [label="CLASS |  "];
   node98 [label="CLASS_ID | QUADRATIC "];
   node99 [label="INHERITANCE_LIST | inheritanceList "];
-  node100 [label="INHERITANCE_ID | POLYNOMIAL "];
+  node100 [label="INHERITANCE_ID | LINEAR "];
   node101 [label="MEMBER_LIST | memberList "];
   node107 [label="MEMBER |  "];
   node102 [label="VISIBILITY | private "];

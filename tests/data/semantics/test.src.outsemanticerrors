@@ -4,17 +4,11 @@ Warning at line 4: SymTab Warning: Function overloading: POLYNOMIAL::evaluate
 Error at line 6: SymTab Error: Multiple declared class: POLYNOMIAL
 Error at line 13: SymTab Error: Multiple declared data member: b in class LINEAR
 Warning at line 16: SymTab Warning: Member 'evaluate' in class 'LINEAR' shadows inherited member from class 'POLYNOMIAL'
-Warning at line 25: SymTab Warning: Member 'evaluate' in class 'QUADRATIC' shadows inherited member from class 'POLYNOMIAL'
+Warning at line 20: SymTab Warning: Member 'a' in class 'QUADRATIC' shadows inherited member from class 'LINEAR'
+Warning at line 21: SymTab Warning: Member 'b' in class 'QUADRATIC' shadows inherited member from class 'LINEAR'
+Warning at line 24: SymTab Warning: Member 'build' in class 'QUADRATIC' shadows inherited member from class 'LINEAR'
+Warning at line 25: SymTab Warning: Member 'evaluate' in class 'QUADRATIC' shadows inherited member from class 'LINEAR'
 Error at line 28: SymTab Error: Class C inherits from undefined class: E
-Error at line 43: SymTab Error: Multiple declared parameter: x
-Error at line 48: SymTab Error: Multiple declared parameter: y
-Error at line 56: SymTab Error: Multiple declared parameter: A
-Error at line 56: SymTab Error: Multiple declared parameter: B
-Error at line 63: SymTab Error: Multiple declared parameter: x
-Error at line 73: SymTab Error: Multiple declared parameter: x
-Error at line 82: SymTab Error: Multiple declared parameter: A
-Error at line 82: SymTab Error: Multiple declared parameter: C
-Error at line 82: SymTab Error: Multiple declared parameter: B
 Error at line 90: SymTab Error: Implementation of undeclared member function: QUADRATIC::build2
 Error at line 104: SymTab Error: Multiple declared function: f
 Warning at line 105: SymTab Warning: Function overloading: f
@@ -23,8 +17,8 @@ Error at line 114: SemCheck Error: Multiple declared identifier 'c' in function
 Error at line 115: SemCheck Error: Multiple declared identifier 'f1' in function
 Error at line 116: SemCheck Error: Multiple declared identifier 'f2' in function
 Error at line 117: SemCheck Error: Multiple declared identifier 'counter' in function
-Error at line 118: SemCheck Error: Multiple declared identifier 'counter' in function
 Error at line 118: SymTab Error: Multiple declared identifier 'counter' in function
+Error at line 118: SemCheck Error: Multiple declared identifier 'counter' in function
 Error at line 119: SemCheck Error: Multiple declared identifier 'i' in function
 Error at line 120: SemCheck Error: Multiple declared identifier 'j' in function
 Error at line 123: SemCheck Error: Undeclared member: b in class C
@@ -33,8 +27,8 @@ Error at line 127: SemCheck Error: Function f called with wrong number of argume
 Error at line 128: SemCheck Error: Function f parameter 1 type mismatch. Expected integer, got float
 Error at line 128: SemCheck Error: Function f parameter 2 type mismatch. Expected integer, got int
 Error at line 129: SemCheck Error: Use of array with wrong number of dimensions. Expected 2, got 1
-Error at line 130: SemCheck Error: Array index must be of integer type, got: float
 Error at line 130: SemCheck Error: Use of array with wrong number of dimensions. Expected 2, got 1
+Error at line 130: SemCheck Error: Array index must be of integer type, got: float
 Error at line 131: SemCheck Error: Function f3 parameter 1 type mismatch. Expected integer[3][2], got integer[3][2][1]
 Error at line 132: SemCheck Error: Dot operator used on non-class type: integer
 Error at line 133: SemCheck Error: 'self' used outside of class context

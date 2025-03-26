@@ -46,14 +46,14 @@ void SemanticCheckingVisitor::visitProgram(ASTNode* node) {
     checkDuplicateClassDeclarations();
     checkDuplicateFunctionDeclarations();
     
-    // 3. Check for duplicate members in each class
-    for (const auto& [className, _] : globalTable->getNestedTables()) {
-        auto classSymbol = globalTable->lookupSymbol(className);
-        if (classSymbol && classSymbol->getKind() == SymbolKind::CLASS) {
-            checkDuplicateMemberDeclarations(className);
-            checkShadowedInheritedMembers(className);
-        }
-    }
+    // // 3. Check for duplicate members in each class
+    // for (const auto& [className, _] : globalTable->getNestedTables()) {
+    //     auto classSymbol = globalTable->lookupSymbol(className);
+    //     if (classSymbol && classSymbol->getKind() == SymbolKind::CLASS) {
+    //         checkDuplicateMemberDeclarations(className);
+    //         checkShadowedInheritedMembers(className);
+    //     }
+    // }
     
     // 4. Check for undefined/undeclared member functions
     // No need this is taken care by the symbol table visit
