@@ -132,6 +132,11 @@ void SemanticCheckingVisitor::visitAssignment(ASTNode* node) {
                 reportError("Type mismatch in assignment. Left side is " + formatTypeInfo(leftType) + 
                             " but right side is " + formatTypeInfo(rightType), node);
             }
+            
+            // Special case for int -> float coercion - emit a warning instead of error
+            if (leftType.type == "float" && rightType.type == "int") {
+                reportWarning("Implicit conversion from int to float in assignment", node);
+            }
         }
     }
 }
@@ -268,8 +273,42 @@ std::shared_ptr<Symbol> SemanticCheckingVisitor::lookupFunctionCaseInsensitive(c
 void SemanticCheckingVisitor::visitIdentifier(ASTNode* node) {
     std::string idName = node->getNodeValue();
     
-    // Look for identifier in current scope and parent scopes
+    // First look for identifier in current function scope
     auto symbol = currentTable->lookupSymbol(idName);
+    
+    // If not found in function scope but we're in a class implementation,
+    // check for class members (implicit self access)
+    if (!symbol && !currentClassName.empty()) {
+        auto classTable = globalTable->getNestedTable(currentClassName);
+        if (classTable) {
+            // Look for the member in this class
+            symbol = classTable->lookupSymbol(idName);
+            
+            // If not found, check parent classes for inherited members
+            if (!symbol) {
+                auto classSymbol = globalTable->lookupSymbol(currentClassName);
+                if (classSymbol && classSymbol->getKind() == SymbolKind::CLASS) {
+                    const auto& inheritedClasses = classSymbol->getInheritedClasses();
+                    for (const auto& parentClass : inheritedClasses) {
+                        auto parentTable = globalTable->getNestedTable(parentClass);
+                        if (parentTable) {
+                            symbol = parentTable->lookupSymbol(idName);
+                            if (symbol) break;
+                        }
+                    }
+                }
+            }
+            
+            if (symbol && symbol->getKind() == SymbolKind::VARIABLE) {
+                // Found as class member - implicitly use "self"
+                currentExprType.type = symbol->getType();
+                currentExprType.dimensions = symbol->getArrayDimensions();
+                currentExprType.isClassType = globalTable->lookupSymbol(currentExprType.type) != nullptr;
+                return;
+            }
+        }
+    }
+    
     if (!symbol) {
         reportError("Use of undeclared variable: " + idName, node);
         currentExprType.type = "error";
@@ -335,15 +374,50 @@ void SemanticCheckingVisitor::visitArrayAccess(ASTNode* node) {
 
 // Dot operator visitor - for checking member access
 void SemanticCheckingVisitor::visitDotIdentifier(ASTNode* node) {
-    // Process object
+    // Check if the node itself contains the member name (direct member access in class context)
+    std::string memberName = node->getNodeValue();
+    if (!memberName.empty() && !currentClassName.empty()) {
+        // This is a direct member access within a class method (implicit self)
+        auto classTable = globalTable->getNestedTable(currentClassName);
+        if (classTable) {
+            auto memberSymbol = classTable->lookupSymbol(memberName);
+            
+            // If not found, check parent classes for inherited members
+            if (!memberSymbol) {
+                auto classSymbol = globalTable->lookupSymbol(currentClassName);
+                if (classSymbol && classSymbol->getKind() == SymbolKind::CLASS) {
+                    const auto& inheritedClasses = classSymbol->getInheritedClasses();
+                    for (const auto& parentClass : inheritedClasses) {
+                        auto parentTable = globalTable->getNestedTable(parentClass);
+                        if (parentTable) {
+                            memberSymbol = parentTable->lookupSymbol(memberName);
+                            if (memberSymbol) break;
+                        }
+                    }
+                }
+            }
+            
+            if (memberSymbol && memberSymbol->getKind() == SymbolKind::VARIABLE) {
+                // Found as class member - implicitly use "self"
+                currentExprType.type = memberSymbol->getType();
+                currentExprType.dimensions = memberSymbol->getArrayDimensions();
+                currentExprType.isClassType = globalTable->lookupSymbol(currentExprType.type) != nullptr;
+                return;
+            }
+        }
+    }
+    
+    // Process object (if not direct member access)
     ASTNode* objNode = node->getLeftMostChild();
     if (!objNode) {
+        // If we reached here, we couldn't handle it as a direct member
+        // and there's no left child, so it's an error
         reportError("Missing object in dot expression", node);
         currentExprType.type = "error";
         return;
     }
     
-    // Process the object/expression on the left side of the dot
+    // Regular dot notation processing continues...
     objNode->accept(this);
     TypeInfo objType = currentExprType;
     
@@ -580,9 +654,9 @@ bool SemanticCheckingVisitor::areTypesCompatible(const TypeInfo& type1, const Ty
     // Basic type compatibility
     if (type1.type != type2.type) {
         // Special case: numeric types can be compatible in some contexts
-        if (isNumericType(type1.type) && isNumericType(type2.type)) {
-            return true;
-        }
+        // if (isNumericType(type1.type) && isNumericType(type2.type)) {
+        //     return true;
+        // }
         return false;
     }
     

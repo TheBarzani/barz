@@ -2,3 +2,8 @@
 
 Warning at line 10: SymTab Warning: Member 'evaluate' in class 'LINEAR' shadows inherited member from class 'POLYNOMIAL'
 Warning at line 18: SymTab Warning: Member 'evaluate' in class 'QUADRATIC' shadows inherited member from class 'POLYNOMIAL'
+Error at line 25: SemCheck Error: Return type mismatch. Expected float, got int
+Error at line 25: SemCheck Error: Return type mismatch. Expected float, got int
+Error at line 72: SemCheck Error: Method build parameter 1 type mismatch. Expected float, got int
+Error at line 79: SemCheck Error: Method evaluate parameter 1 type mismatch. Expected float, got int
+Error at line 80: SemCheck Error: Method evaluate parameter 1 type mismatch. Expected float, got int

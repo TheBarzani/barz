@@ -1,0 +1,57 @@
+=== Semantic Errors/Warnings for ../examples/semantic_analysis/polynomialsemanticerrors.src ===
+
+Warning at line 4: SymTab Warning: Function overloading: POLYNOMIAL::evaluate
+Error at line 6: SymTab Error: Multiple declared class: POLYNOMIAL
+Error at line 13: SymTab Error: Multiple declared data member: b in class LINEAR
+Warning at line 16: SymTab Warning: Member 'evaluate' in class 'LINEAR' shadows inherited member from class 'POLYNOMIAL'
+Warning at line 20: SymTab Warning: Member 'a' in class 'QUADRATIC' shadows inherited member from class 'LINEAR'
+Warning at line 21: SymTab Warning: Member 'b' in class 'QUADRATIC' shadows inherited member from class 'LINEAR'
+Warning at line 24: SymTab Warning: Member 'build' in class 'QUADRATIC' shadows inherited member from class 'LINEAR'
+Warning at line 25: SymTab Warning: Member 'evaluate' in class 'QUADRATIC' shadows inherited member from class 'LINEAR'
+Error at line 28: SymTab Error: Class C inherits from undefined class: E
+Error at line 59: SemCheck Error: Type mismatch in assignment. Left side is LINEAR but right side is float
+Error at line 59: SemCheck Error: Type mismatch in assignment. Left side is LINEAR but right side is float
+Error at line 60: SemCheck Error: Type mismatch in assignment. Left side is LINEAR but right side is float
+Error at line 60: SemCheck Error: Type mismatch in assignment. Left side is LINEAR but right side is float
+Error at line 86: SemCheck Error: Type error in addition: requires numeric types, got float and error
+Error at line 86: SemCheck Error: Type error in multiplication: operands must have identical types, got float and int
+Error at line 86: SemCheck Error: Missing object in dot expression
+Error at line 86: SemCheck Error: Type error in addition: requires numeric types, got float and error
+Error at line 86: SemCheck Error: Type error in multiplication: operands must have identical types, got float and int
+Error at line 86: SemCheck Error: Missing object in dot expression
+Error at line 87: SemCheck Error: Type mismatch in assignment. Left side is error but right side is float
+Error at line 87: SemCheck Error: Missing object in dot expression
+Error at line 87: SemCheck Error: Type mismatch in assignment. Left side is error but right side is float
+Error at line 87: SemCheck Error: Missing object in dot expression
+Error at line 88: SemCheck Error: Missing object in dot expression
+Error at line 88: SemCheck Error: Type mismatch in assignment. Left side is error but right side is int
+Error at line 88: SemCheck Error: Missing object in dot expression
+Error at line 88: SemCheck Error: Type mismatch in assignment. Left side is error but right side is int
+Error at line 89: SemCheck Error: Return type mismatch. Expected QUADRATIC, got int
+Error at line 89: SemCheck Error: Return type mismatch. Expected QUADRATIC, got int
+Error at line 91: SymTab Error: Implementation of undeclared member function: QUADRATIC::build2
+Error at line 105: SymTab Error: Multiple declared function: f
+Warning at line 106: SymTab Warning: Function overloading: f
+Error at line 114: SymTab Error: Undefined type 'a' for variable 'a'
+Error at line 119: SymTab Error: Multiple declared identifier 'counter' in function
+Error at line 124: SemCheck Error: Type error in multiplication: operands must have identical types, got int and float
+Error at line 124: SemCheck Error: Type mismatch in assignment. Left side is int but right side is error
+Error at line 127: SemCheck Error: Missing object in dot expression
+Error at line 127: SemCheck Error: Type mismatch in assignment. Left side is error but right side is int
+Error at line 128: SemCheck Error: Cannot access private method: f in class C
+Error at line 128: SemCheck Error: Type mismatch in assignment. Left side is int but right side is error
+Error at line 129: SemCheck Error: Use of undeclared free function: undefined
+Error at line 130: SemCheck Error: Use of undeclared variable: a
+Error at line 130: SemCheck Error: Type mismatch in assignment. Left side is int but right side is error
+Error at line 131: SemCheck Error: Function f called with wrong number of arguments. Expected 2, got 3
+Error at line 133: SemCheck Error: Use of array with wrong number of dimensions. Expected 2, got 1
+Error at line 133: SemCheck Error: Type mismatch in assignment. Left side is int[2] but right side is int
+Error at line 134: SemCheck Error: Use of array with wrong number of dimensions. Expected 2, got 1
+Error at line 134: SemCheck Error: Array index must be of integer type, got: float
+Error at line 135: SemCheck Error: Function f3 parameter 1 type mismatch. Expected int[2][3], got int[3][2][1]
+Error at line 136: SemCheck Error: Dot operator used on non-class type: int
+Error at line 136: SemCheck Error: Type mismatch in assignment. Left side is error but right side is int
+Error at line 137: SemCheck Error: Type mismatch in assignment. Left side is error but right side is int
+Error at line 137: SemCheck Error: 'self' used outside of class context
+Error at line 138: SemCheck Error: Type mismatch in assignment. Left side is error but right side is int
+Error at line 138: SemCheck Error: Missing object in dot expression
