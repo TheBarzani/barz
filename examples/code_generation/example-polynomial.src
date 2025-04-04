@@ -1,0 +1,132 @@
+/*
+1.1  Allocate memory for basic types (integer, float).
+1.2  Allocate memory for arrays of basic types.
+1.3  Allocate memory for objects.
+1.4  Allocate memory for arrays of objects.
+2.1  Branch to a function’s code block, execute the code block, branch back to the calling function.
+2.2  Pass parameters as local values to the function’s code block.
+2.3  Upon execution of a return statement, pass the return value back to the calling function.
+2.4  Call to member functions that can use their object’s data members.
+3.1 Assignment statement: assignment of the resulting value of an expression to a variable, independently of what is the expression to the right of the assignment operator.
+3.2 Conditional statement: implementation of a branching mechanism.
+3.3 Loop statement: implementation of a branching mechanism.
+3.4 Input/output statement: Moon machine keyboard input/console output
+4.1. For arrays of basic types (integer and float), access to an array’s elements.
+4.2. For arrays of objects, access to an array’s element’s data members.
+4.3. For objects, access to members of basic types.
+4.4. For objects, access to members of array or object types.
+5.1. Computing the value of an entire complex expression.
+5.2. Expression involving an array factor whose indexes are themselves expressions.
+5.3. Expression involving an object factor referring to object members.
+*/
+
+// Assignment 5 coverage:
+//      -------------
+//      | YES | NO  |
+//      ------------- 
+// 1.1: |  X  |     |
+// 1.2: |  X  |     |
+// 1.3: |  X  |     |
+// 1.4: |     |  X  |
+// 2.1: |  X  |     |
+// 2.2: |  X  |     |
+// 2.3: |  X  |     |
+// 2.4: |  X  |     |
+// 3.1: |  X  |     |
+// 3.2: |  X  |     |
+// 3.3: |  X  |     |
+// 3.4: |  X  |     |
+// 4.1: |     |  X  |
+// 4.2: |     |  X  |
+// 4.3: |  X  |     |
+// 4.4: |  X  |     |
+// 5.1: |  X  |     |
+// 5.2: |     |  X  |
+// 5.3: |  X  |     |
+//      -------------
+
+// ====== struct declarations ====== //
+class POLYNOMIAL {
+  public function evaluate (x: float) => float;                    
+};
+
+class LINEAR isa POLYNOMIAL {
+  private attribute a: float;
+  private attribute b: float;
+  public  function build(A: float, B: float) => LINEAR;
+  public  function evaluate(x: float) => float;
+};
+
+class QUADRATIC isa POLYNOMIAL {
+  private attribute a: float;
+  private attribute b: float;
+  private attribute c: float;
+  public  build(A: float, B: float, C: float) => QUADRATIC;
+  public  function evaluate(x: float) => float;
+};
+
+// ====== member function implementations ====== //  
+implementation POLYNOMIAL {
+  function evaluate(x: float) => float                              // 2.1, 2.2
+  {
+    return (0.0);                                                   // 2.3
+  }
+}
+
+implementation QUADRATIC { 
+  function evaluate(x: float) => float
+  {
+    local result: float;                                            // 1.1
+    //Using Horner's method
+    result := a;                                                    // 3.1       
+    result := result * x + b;                                       // 3.1, 5.1
+    result := result * x + c;                                       // 3.1, 5.1
+    return (result);                                                // 2.3
+  }
+
+  function build(A: float, B: float, C: float) => QUADRATIC         // 2.1, 2.2
+  {
+    local new_function: QUADRATIC ;                                 // 1.1
+    new_function.a := A;                                            // 3.1, 5.3
+    new_function.b := B;                                            // 3.1, 5.3
+    new_function.c := C;                                            // 3.1, 5.3
+    return (new_function);
+  }
+}
+
+implementation LINEAR {
+  function build(A: float, B: float) => LINEAR                      // 2.1, 2.2
+  {
+    local new_function: LINEAR;                                     // 1.1
+    new_function.a := A;                                            // 3.1, 5.3
+    new_function.b := B;                                            // 3.1, 5.3
+    return (new_function);
+  }
+
+  function evaluate(x: float) => float                              // 2.1, 2.2
+  {
+    local result: float;                                            // 1.1
+    result := 0.0;                                                  // 3.1
+    result := a * x + b;                                            // 3.1, 5.1
+    return (result);                                                // 2.3
+  }
+}
+ 
+// ====== main ====== //
+function main() => void                                             // 2.1, 2.2
+{
+  local f1: LINEAR;                                                 // 1.3, 2.1, 2.2, 2.4
+  local f2: QUADRATIC;                                              // 1.3, 2.1, 2.2, 2.4
+  local counter: int;                                               // 1.1
+  f1 := f1.build(2, 3.5);
+  f2 := f2.build(-2.0, 1.0, 0.0);
+  counter := 1;                                                     // 3.1
+	
+  while(counter <= 10)                                              // 3.3, 5.1 
+  {
+    write(counter);                                                 // 3.4
+    write(f1.evaluate(counter));                                    // 3.4, 2.1, 2.2, 2.4
+    write(f2.evaluate(counter));                                    // 3.4, 2.1, 2.2, 2.4
+    counter = counter + 1;                                          // 3.1
+  };
+}

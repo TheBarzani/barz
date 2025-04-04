@@ -215,3 +215,22 @@ NOTE:
 2. Multiple phases needed, maybe one for symbol table and another for semantic checking
 3. Semantic actions have to be grouped into traversal passes/phases, AND still be mapped to
 specific nodes. 
+
+# code gen specs
+Files:
+
+1. assigment statement
+
+   assignment5.COMP442-6421.paquet.2025.4.pdf
+
+2. example programs: sample programs that demonstrate how your test cases should be documented. 
+   Note that these are not to be considered as complete in terms of test case coverage.  
+
+   example-bubblesort.src 
+   example-polynomial.src
+   example-simplemain.src
+
+3. moon virtual processor: implementation code, documentation and sample code
+
+   moon/
+   
