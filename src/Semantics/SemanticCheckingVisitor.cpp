@@ -480,6 +480,76 @@ void SemanticCheckingVisitor::visitDotIdentifier(ASTNode* node) {
     }
 }
 
+void SemanticCheckingVisitor::visitDotAccess(ASTNode* node) {
+    // Get the left part (object) and right part (member/method)
+    ASTNode* objNode = node->getLeftMostChild();
+    ASTNode* memberOrMethodNode = objNode ? objNode->getRightSibling() : nullptr;
+    
+    if (!objNode || !memberOrMethodNode) {
+        reportError("Invalid dot access expression", node);
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Process object to get its type
+    objNode->accept(this);
+    TypeInfo objType = currentExprType;
+    
+    // Check if this is a class type
+    if (!objType.isClassType) {
+        reportError("Dot operator used on non-class type: " + objType.type, node);
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Different handling based on member node type
+    if (memberOrMethodNode->getNodeEnum() == NodeType::FUNCTION_CALL) {
+        // Method call: object.method() - directly use our method handling logic
+        handleMethodCall(objType, memberOrMethodNode);
+    } 
+    else if (memberOrMethodNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+        // Property access: object.member or object.member.submember
+        memberOrMethodNode->accept(this);
+        // Type is already set by the accept call
+    }
+    else if (memberOrMethodNode->getNodeEnum() == NodeType::IDENTIFIER) {
+        // Simple member access: object.member
+        std::string memberName = memberOrMethodNode->getNodeValue();
+        
+        // Look up class
+        auto classTable = globalTable->getNestedTable(objType.type);
+        if (!classTable) {
+            reportError("Class not found: " + objType.type, node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Look up member
+        auto memberSymbol = classTable->lookupSymbol(memberName);
+        if (!memberSymbol) {
+            reportError("Undeclared member: " + memberName + " in class " + objType.type, node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Check visibility - only allow access to public members from outside
+        if (memberSymbol->getVisibility() == Visibility::PRIVATE && currentClassName != objType.type) {
+            reportError("Cannot access private member: " + memberName + " in class " + objType.type, node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Set type information
+        currentExprType.type = memberSymbol->getType();
+        currentExprType.dimensions = memberSymbol->getArrayDimensions();
+        currentExprType.isClassType = globalTable->lookupSymbol(currentExprType.type) != nullptr;
+    }
+    else {
+        reportError("Invalid member expression in dot access", node);
+        currentExprType.type = "error";
+    }
+}
+
 // Add this helper method:
 void SemanticCheckingVisitor::handleMethodCall(const TypeInfo& objType, ASTNode* methodCallNode) {
     // Get method name

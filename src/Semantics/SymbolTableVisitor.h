@@ -167,6 +167,9 @@ public:
     // Add a symbol to this table
     bool addSymbol(std::shared_ptr<Symbol> symbol);
     
+    // Remove a symbol from this table
+    bool removeSymbol(const std::string& name);
+
     // Lookup a symbol in this table (or parent tables if not found)
     std::shared_ptr<Symbol> lookupSymbol(const std::string& name, bool localOnly = false);
     
@@ -297,6 +300,7 @@ public:
     void visitFunctionCall(ASTNode* node) override;
     void visitArrayAccess(ASTNode* node) override;
     void visitDotIdentifier(ASTNode* node) override;
+    void visitDotAccess(ASTNode* node) override; // Add new method for DOT_ACCESS
     void visitFactor(ASTNode* node) override;
     void visitTerm(ASTNode* node) override;
     void visitArithExpr(ASTNode* node) override;

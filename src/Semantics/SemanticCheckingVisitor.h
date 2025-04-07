@@ -74,6 +74,7 @@ public:
     void visitFunctionCall(ASTNode* node) override;
     void visitArrayAccess(ASTNode* node) override;
     void visitDotIdentifier(ASTNode* node) override;
+    void visitDotAccess(ASTNode* node) override;
     void visitFactor(ASTNode* node) override;
     void visitTerm(ASTNode* node) override;
     void visitArithExpr(ASTNode* node) override;

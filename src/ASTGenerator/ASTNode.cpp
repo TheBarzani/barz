@@ -138,6 +138,7 @@ std::string ASTNode::getNodeType()
         case NodeType::IMPLEMENTATION_FUNCTION_LIST: return "IMPLEMENTATION_FUNCTION_LIST";
         case NodeType::CONDITION:           return "CONDITION";
         case NodeType::ARRAY_TYPE:          return "ARRAY_TYPE";
+        case NodeType::DOT_ACCESS:          return "DOT_ACCESS";
         default:
             // TODO: throw an exception when this happens
             return "UNKNOWN";

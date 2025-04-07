@@ -76,6 +76,8 @@ implementation POLYNOMIAL {
 implementation LINEAR {
   function build(A: float, B: float) => LINEAR                      // 2.1, 2.2
   {
+    local c : int;
+    c := 1+1;
     local new_function: LINEAR;                                     // 1.1
     new_function.a := A;                                            // 3.1, 5.3
     new_function.b := B;                                            // 3.1, 5.3

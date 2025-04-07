@@ -140,6 +140,25 @@ std::vector<std::pair<FunctionSignature, std::shared_ptr<Symbol>>> SymbolTable::
     return result;
 }
 
+bool SymbolTable::removeSymbol(const std::string& name) {
+    // First check if the symbol exists
+    auto it = symbols.find(name);
+    if (it == symbols.end()) {
+        return false; // Symbol not found
+    }
+    
+    // Remove from the symbols map
+    symbols.erase(it);
+    
+    // Remove from the insertion order vector
+    auto orderIt = std::find(symbolInsertionOrder.begin(), symbolInsertionOrder.end(), name);
+    if (orderIt != symbolInsertionOrder.end()) {
+        symbolInsertionOrder.erase(orderIt);
+    }
+    
+    return true;
+}
+
 // SymbolTableVisitor implementation
 SymbolTableVisitor::SymbolTableVisitor() {
     // Initialize with empty tables and state
@@ -1025,6 +1044,20 @@ void SymbolTableVisitor::visitFunctionCall(ASTNode* node) {
 }
 
 void SymbolTableVisitor::visitDotIdentifier(ASTNode* node) {
+    // // Process object
+    // ASTNode* objNode = node->getLeftMostChild();
+    // if (objNode) {
+    //     objNode->accept(this);
+    // }
+    
+    // // Process member
+    // ASTNode* memberNode = objNode ? objNode->getRightSibling() : nullptr;
+    // if (memberNode) {
+    //     memberNode->accept(this);
+    // }
+}
+
+void SymbolTableVisitor::visitDotAccess(ASTNode* node) {
     // Process object
     ASTNode* objNode = node->getLeftMostChild();
     if (objNode) {

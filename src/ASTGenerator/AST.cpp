@@ -452,34 +452,34 @@ void AST::performAction(std::string action, std::string value, int line) {
         // }
     }
     else if (action == "_finishArithExpr") {
-        // For handling the completion of an arithmetic expression node
-        ASTNode* term = ASTStack.back(); ASTStack.pop_back();
+        // // For handling the completion of an arithmetic expression node
+        // ASTNode* term = ASTStack.back(); ASTStack.pop_back();
         
-        // If term is a literal or operator, don't wrap it
-        if (term->getNodeEnum() == NodeType::INT || 
-            term->getNodeEnum() == NodeType::FLOAT || 
-            term->getNodeEnum() == NodeType::ADD_OP || 
-            term->getNodeEnum() == NodeType::MULT_OP) {
-            ASTStack.push_back(term);
-        } else {
-            ASTNode* arithExprNode = makeFamily(NodeType::ARITH_EXPR, term);
-            ASTStack.push_back(arithExprNode);
-        }
+        // // If term is a literal or operator, don't wrap it
+        // if (term->getNodeEnum() == NodeType::INT || 
+        //     term->getNodeEnum() == NodeType::FLOAT || 
+        //     term->getNodeEnum() == NodeType::ADD_OP || 
+        //     term->getNodeEnum() == NodeType::MULT_OP) {
+        //     ASTStack.push_back(term);
+        // } else {
+        //     ASTNode* arithExprNode = makeFamily(NodeType::ARITH_EXPR, term);
+        //     ASTStack.push_back(arithExprNode);
+        // }
     }
     else if (action == "_finishExpression") {
-        // For handling the completion of an expression node
-        ASTNode* arithExpr = ASTStack.back(); ASTStack.pop_back();
+        // // For handling the completion of an expression node
+        // ASTNode* arithExpr = ASTStack.back(); ASTStack.pop_back();
         
-        // If arithExpr is a literal or operator, don't wrap it
-        if (arithExpr->getNodeEnum() == NodeType::INT || 
-            arithExpr->getNodeEnum() == NodeType::FLOAT || 
-            arithExpr->getNodeEnum() == NodeType::ADD_OP || 
-            arithExpr->getNodeEnum() == NodeType::MULT_OP) {
-            ASTStack.push_back(arithExpr);
-        } else {
-            ASTNode* exprNode = makeFamily(NodeType::EXPR, arithExpr);
-            ASTStack.push_back(exprNode);
-        }
+        // // If arithExpr is a literal or operator, don't wrap it
+        // if (arithExpr->getNodeEnum() == NodeType::INT || 
+        //     arithExpr->getNodeEnum() == NodeType::FLOAT || 
+        //     arithExpr->getNodeEnum() == NodeType::ADD_OP || 
+        //     arithExpr->getNodeEnum() == NodeType::MULT_OP) {
+        //     ASTStack.push_back(arithExpr);
+        // } else {
+        //     ASTNode* exprNode = makeFamily(NodeType::EXPR, arithExpr);
+        //     ASTStack.push_back(exprNode);
+        // }
     }
     else if (action == "_processDotAccess") {
         if (ASTStack.back()->getNodeEnum() != NodeType::DOT_IDENTIFIER && ASTStack.back()->getNodeEnum() != NodeType::FUNCTION_CALL) {
@@ -489,7 +489,7 @@ void AST::performAction(std::string action, std::string value, int line) {
         ASTNode* left = ASTStack.back(); ASTStack.pop_back(); // Get the left-hand side
 
         // Create a new node to represent the dot access (e.g., DOT_ACCESS)
-        ASTNode* dotAccess = makeFamily(NodeType::DOT_IDENTIFIER, left, identifier);
+        ASTNode* dotAccess = makeFamily(NodeType::DOT_ACCESS, left, identifier);
 
         ASTStack.push_back(dotAccess); // Push the result onto the stack
     }

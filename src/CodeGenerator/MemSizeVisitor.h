@@ -77,6 +77,7 @@ public:
     void visitSelfIdentifier(ASTNode* node) override;
     void visitFunctionCall(ASTNode* node) override;
     void visitDotIdentifier(ASTNode* node) override;
+    void visitDotAccess(ASTNode* node) override; // Add new method for DOT_ACCESS
     void visitArrayAccess(ASTNode* node) override;
     void visitRelationalExpr(ASTNode* node) override;
     void visitExpr(ASTNode* node) override;

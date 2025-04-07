@@ -71,7 +71,8 @@ enum class NodeType
     STATEMENTS_LIST,
     IMPLEMENTATION_FUNCTION_LIST,
     CONDITION,
-    ARRAY_TYPE
+    ARRAY_TYPE,
+    DOT_ACCESS
 };
 
 /**

@@ -57,6 +57,7 @@ public:
     virtual void visitFunctionCall(ASTNode* node) = 0;
     virtual void visitArrayAccess(ASTNode* node) = 0;
     virtual void visitDotIdentifier(ASTNode* node) = 0;
+    virtual void visitDotAccess(ASTNode* node) = 0; // Add new method for DOT_ACCESS
     virtual void visitFactor(ASTNode* node) = 0;
     virtual void visitTerm(ASTNode* node) = 0;
     virtual void visitArithExpr(ASTNode* node) = 0;
@@ -119,6 +120,7 @@ public:
             case NodeType::FUNCTION_CALL: visitFunctionCall(node); break;
             case NodeType::ARRAY_ACCESS: visitArrayAccess(node); break;
             case NodeType::DOT_IDENTIFIER: visitDotIdentifier(node); break;
+            case NodeType::DOT_ACCESS: visitDotAccess(node); break; // Add new case for DOT_ACCESS
             case NodeType::FACTOR: visitFactor(node); break;
             case NodeType::TERM: visitTerm(node); break;
             case NodeType::ARITH_EXPR: visitArithExpr(node); break;
