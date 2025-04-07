@@ -123,6 +123,20 @@ public:
         }
     }
 
+    // Set a metadata value
+    void setMetadata(const std::string& key, const std::string& value) {
+        metadata[key] = value;
+    }
+    
+    // Get a metadata value
+    std::string getMetadata(const std::string& key) const {
+        auto it = metadata.find(key);
+        if (it != metadata.end()) {
+            return it->second;
+        }
+        return ""; // Return empty string if key not found
+    }
+
 private:
     std::string name;
     std::string type;
@@ -141,6 +155,8 @@ private:
 
     int declarationLine = 0;
     int definitionLine = 0;
+
+    std::unordered_map<std::string, std::string> metadata;
 };
 
 // Symbol Table class to represent a single scope's symbols
@@ -184,6 +200,20 @@ public:
     void setFunctionSymbol(std::shared_ptr<Symbol> symbol) { functionSymbol = symbol; }
     std::shared_ptr<Symbol> getFunctionSymbol() const { return functionSymbol; }
 
+    // Set a metadata value
+    void setMetadata(const std::string& key, const std::string& value) {
+        metadata[key] = value;
+    }
+    
+    // Get a metadata value
+    std::string getMetadata(const std::string& key) const {
+        auto it = metadata.find(key);
+        if (it != metadata.end()) {
+            return it->second;
+        }
+        return ""; // Return empty string if key not found
+    }
+
 private:
     std::string scopeName;
     SymbolTable* parent;
@@ -191,6 +221,7 @@ private:
     std::unordered_map<std::string, std::shared_ptr<SymbolTable>> nestedTables;
     std::unordered_map<FunctionSignature, std::shared_ptr<Symbol>> functions;
     std::shared_ptr<Symbol> functionSymbol = nullptr;  // For function tables
+    std::unordered_map<std::string, std::string> metadata;
 };
 
 // Symbol Table Visitor implementation

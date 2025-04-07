@@ -45,6 +45,7 @@ add_executable(codegendriver
     src/ASTGenerator/ASTNode.cpp    # AST node code
     src/Semantics/SymbolTableVisitor.cpp # Symbol Table Generation code
     src/Semantics/SemanticCheckingVisitor.cpp # Semantics Checking code
+    src/CodeGenerator/MemSizeVisitor.cpp # Memory size calculation code
     src/CodeGenDriver.cpp         # Driver code
 )
 

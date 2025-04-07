@@ -234,3 +234,14 @@ Files:
 
    moon/
    
+NOTE: 
+1. Use a phase to determine the memory allocation requirements (updates the symbol table)
+- Allocate memory for primitive types and then allocate for objects
+2. Use another phase for code generation
+- Do global/free functions before member functions
+- Implement the green ones first
+- Look into multi-dimensional arrays
+- Check semantic errors when out of bound indexes are used
+- Use temporary results memory allocation using a unique label generator
+- Use register pool allocation strategy 
+- Go back into the lexical specifications for making sure that everything is implemented.

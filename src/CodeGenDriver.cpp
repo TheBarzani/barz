@@ -1,7 +1,7 @@
 #include "Semantics/SymbolTableVisitor.h"
 #include "Semantics/SemanticCheckingVisitor.h"
+#include "CodeGenerator/MemSizeVisitor.h"
 #include "Parser/Parser.h"
-#include "CodeGenerator/MoonCodeGenerator.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -88,8 +88,7 @@ int main(int argc, char* argv[]) {
     root->accept(&symbolTableVisitor);
 
     // Output the symbol table to file
-    // std::string symbolTableFile = fs::path(outputDir) / (fs::path(inputFile).stem().string() + ".outsymboltables");
-    std::string symbolTableFile = inputFile+ ".outsymboltables";
+    std::string symbolTableFile = inputFile + ".outsymboltables";
     symbolTableVisitor.outputSymbolTable(symbolTableFile);
     std::cout << "Symbol table generated: " << symbolTableFile << std::endl;
 
@@ -104,8 +103,7 @@ int main(int argc, char* argv[]) {
     root->accept(&semanticChecker);
 
     // Output semantic errors to file
-    // std::string semanticErrorsFile = fs::path(outputDir) / (fs::path(inputFile).stem().string() + ".outsemanticerrors");
-    std::string semanticErrorsFile = inputFile ;
+    std::string semanticErrorsFile = inputFile;
     semanticChecker.outputErrors(semanticErrorsFile);
 
     if (semanticChecker.hasErrors()) {
@@ -115,7 +113,22 @@ int main(int argc, char* argv[]) {
         std::cout << "No semantic errors found." << std::endl;
     }
 
-    // Phase 3: Code Generation
+    // Phase 3: Memory Size Calculation
+    std::cout << "Calculating memory sizes and offsets..." << std::endl;
+    MemSizeVisitor memSizeVisitor(symbolTableVisitor.getGlobalTable());
+    
+    // Process the AST to identify temporary variables and expressions
+    memSizeVisitor.processAST(root);
+    
+    // Calculate memory sizes and offsets for all symbols
+    memSizeVisitor.calculateMemorySizes();
+    
+    // Output the updated symbol table with memory sizes
+    std::string sizeSymbolTableFile = inputFile + ".sizesymboltable";
+    memSizeVisitor.outputSymbolTable(sizeSymbolTableFile);
+    std::cout << "Memory-sized symbol table generated: " << sizeSymbolTableFile << std::endl;
+
+    // Phase 4: Code Generation (commented out for now)
     // std::cout << "Generating MOON machine code..." << std::endl;
     // MoonCodeGenerator codeGenerator(symbolTableVisitor.getGlobalTable());
     // root->accept(&codeGenerator);

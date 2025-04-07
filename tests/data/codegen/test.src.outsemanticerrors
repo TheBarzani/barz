@@ -1,0 +1,4 @@
+=== Semantic Errors/Warnings for ../tests/data/codegen/test.src ===
+
+Warning at line 10: SymTab Warning: Member 'evaluate' in class 'LINEAR' shadows inherited member from class 'POLYNOMIAL'
+Warning at line 18: SymTab Warning: Member 'evaluate' in class 'QUADRATIC' shadows inherited member from class 'POLYNOMIAL'
