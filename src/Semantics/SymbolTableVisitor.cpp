@@ -584,7 +584,7 @@ void SymbolTableVisitor::visitVariableId(ASTNode* node) {
 
 void SymbolTableVisitor::visitLocalVariable(ASTNode* node) {
     // Get the variable node
-    ASTNode* variableNode = node->getLeftMostChild();
+    ASTNode* variableNode = node;
     if (!variableNode) {
         reportError("Local variable declaration missing variable node.", node);
         return;
