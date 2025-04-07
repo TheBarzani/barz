@@ -293,7 +293,7 @@ digraph AST {
   node331 [label="WHILE_STATEMENT |  "];
   node306 [label="CONDITION |  "];
   node305 [label="RELATIONAL_EXPR |  "];
-  node303 [label="REL_OP | <= "];
+  node303 [label="REL_OP | \<= "];
   node302 [label="IDENTIFIER | counter "];
   node304 [label="INTEGER | 10 "];
   node330 [label="BLOCK |  "];

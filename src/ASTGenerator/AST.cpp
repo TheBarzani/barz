@@ -16,6 +16,25 @@ void printVector(std::vector<ASTNode* >& vec) {
     std::cout << "]" << std::endl;
 }
 
+// Add this helper function to escape special characters in DOT labels
+std::string escapeForDot(const std::string& str) {
+    std::string result;
+    for (char c : str) {
+        switch (c) {
+            case '"':  result += "\\\""; break;
+            case '\\': result += "\\\\"; break;
+            case '<':  result += "\\<"; break;
+            case '>':  result += "\\>"; break;
+            case '{':  result += "\\{"; break;
+            case '}':  result += "\\}"; break;
+            case '|':  result += "\\|"; break;
+            case '&':  result += "\\&"; break;
+            default:   result += c;
+        }
+    }
+    return result;
+}
+
 AST::AST() : root(nullptr) {
     // Initialize empty AST
 }
@@ -52,8 +71,8 @@ void AST::writeToFile(std::string filename) {
             
             // Create this node
             out << "  node" << node->getNodeNumber() << " [label=\""
-                << node->getNodeType() << " | "
-                << node->getNodeValue() << " \"];\n";
+                << escapeForDot(node->getNodeType()) << " | "
+                << escapeForDot(node->getNodeValue()) << " \"];\n";
             
             // Process left child and right siblings
             self(node->getLeftMostChild(), out, self);
