@@ -55,6 +55,11 @@ bool SymbolTable::addSymbol(std::shared_ptr<Symbol> symbol) {
         // Replace in the symbols map or add if not exists
         symbols[name] = symbol;
         
+        // Track insertion order
+        if (std::find(symbolInsertionOrder.begin(), symbolInsertionOrder.end(), name) == symbolInsertionOrder.end()) {
+            symbolInsertionOrder.push_back(name);
+        }
+        
         return true;
     }
     
@@ -65,6 +70,8 @@ bool SymbolTable::addSymbol(std::shared_ptr<Symbol> symbol) {
     
     // Add to symbols map
     symbols[name] = symbol;
+    // Track insertion order
+    symbolInsertionOrder.push_back(name);
     return true;
 }
 

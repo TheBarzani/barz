@@ -214,6 +214,21 @@ public:
         return ""; // Return empty string if key not found
     }
 
+    std::vector<std::pair<std::string, std::shared_ptr<Symbol>>> getSymbolsInOrder() const {
+        std::vector<std::pair<std::string, std::shared_ptr<Symbol>>> orderedSymbols;
+        for (const auto& name : symbolInsertionOrder) {
+            auto it = symbols.find(name);
+            if (it != symbols.end()) {
+                orderedSymbols.push_back(*it);
+            }
+        }
+        return orderedSymbols;
+    }
+
+    const std::vector<std::string>& getSymbolInsertionOrder() const {
+        return symbolInsertionOrder;
+    }
+
 private:
     std::string scopeName;
     SymbolTable* parent;
@@ -222,6 +237,7 @@ private:
     std::unordered_map<FunctionSignature, std::shared_ptr<Symbol>> functions;
     std::shared_ptr<Symbol> functionSymbol = nullptr;  // For function tables
     std::unordered_map<std::string, std::string> metadata;
+    std::vector<std::string> symbolInsertionOrder; // To maintain insertion order
 };
 
 // Symbol Table Visitor implementation
