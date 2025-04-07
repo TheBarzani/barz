@@ -139,35 +139,51 @@ int MemSizeVisitor::getTypeSize(const std::string& type) {
     return TypeSize::POINTER_SIZE;
 }
 
-// Fixed calculateTableOffsets to preserve declaration order of all non-parameters
 void MemSizeVisitor::calculateTableOffsets(std::shared_ptr<SymbolTable> table) {
     if (!table) return;
     
-    int currentOffset = 0;
+    // Determine if this is a function table
+    auto funcSymbol = table->getFunctionSymbol();
+    int initialOffset = 0;
     
-    // First process parameters - they still need special handling for offset 0
+    // For function tables, reserve space for return value and jump register
+    if (funcSymbol && funcSymbol->getKind() == SymbolKind::FUNCTION) {
+        // Get return type size
+        std::string returnType = funcSymbol->getType();
+        if (returnType != "void") {
+            initialOffset -= getTypeSize(returnType);  // Space for return value
+        }
+        initialOffset -= 4;  // Space for jump register (return address)
+    }
+    
+    // Start parameters after the return value and jump register space
+    int paramOffset = initialOffset;
+    
+    // First process parameters with proper sequential offsets
+    std::vector<std::shared_ptr<Symbol>> parameters;
     for (const auto& symbolName : table->getSymbolInsertionOrder()) {
         auto symbol = table->lookupSymbol(symbolName, true);
         if (symbol && symbol->getKind() == SymbolKind::PARAMETER) {
-            // Handle parameters as before
-            int size = getTypeSize(symbol->getType());
-            setSymbolSize(symbol, size);
-            
-            if (currentOffset == 0) {
-                // First parameter at offset 0
-                setSymbolOffset(symbol, 0);
-            } else {
-                // Subsequent parameters have negative offsets
-                currentOffset -= 8; // Parameters are 8-byte aligned
-                setSymbolOffset(symbol, currentOffset);
-            }
+            parameters.push_back(symbol);
         }
     }
     
+    // Parameters start at the initial offset
+    for (size_t i = 0; i < parameters.size(); i++) {
+        auto param = parameters[i];
+        int size = getTypeSize(param->getType());
+        setSymbolSize(param, size);
+        
+            paramOffset -= size; 
+            setSymbolOffset(param, paramOffset);
+
+    }
+    
     // Then process non-parameters in exact insertion order
-    if (currentOffset == 0) {
-        // If we only have parameter 0, start local vars at -8
-        currentOffset = -8;
+    int currentOffset = paramOffset;
+    if (currentOffset == initialOffset && parameters.empty()) {
+        // If we have no parameters, start local vars after initial offset
+        currentOffset = initialOffset;
     }
     
     for (const auto& symbolName : table->getSymbolInsertionOrder()) {
@@ -724,7 +740,6 @@ DEFAULT_VISITOR_METHOD(ImplementationList)
 DEFAULT_VISITOR_METHOD(Member)
 DEFAULT_VISITOR_METHOD(Variable)
 DEFAULT_VISITOR_METHOD(VariableId)
-// DEFAULT_VISITOR_METHOD(LocalVariable)
 DEFAULT_VISITOR_METHOD(FunctionId)
 DEFAULT_VISITOR_METHOD(FunctionSignature)
 DEFAULT_VISITOR_METHOD(ConstructorSignature)
