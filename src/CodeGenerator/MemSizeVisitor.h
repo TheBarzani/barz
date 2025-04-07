@@ -94,8 +94,8 @@ public:
 
 private:
     // Symbol table and tracking
-    std::shared_ptr<SymbolTable> symbolTable;
     std::shared_ptr<SymbolTable> currentTable;
+    std::shared_ptr<SymbolTable> symbolTable;
     
     // Context information
     std::string currentType;
@@ -104,8 +104,8 @@ private:
     std::string currentOperator;
     
     // Expression handling
-    std::stack<std::string> expressionTypes;
     int tempVarCounter;
+    std::stack<std::string> expressionTypes;
     
     // Helper methods
     int getTypeSize(const std::string& type);

@@ -333,7 +333,11 @@ void MemSizeVisitor::visitFunction(ASTNode* node) {
     ASTNode* funcIdNode = signatureNode->getLeftMostChild();
     if (!funcIdNode) return;
     
-    currentFunctionName = funcIdNode->getNodeValue();
+    // Reset temp variable counter for each function
+    // tempVarCounter = 1;
+    
+    std::string funcName = funcIdNode->getNodeValue();
+    currentFunctionName = funcName;
     
     // Get param types to build complete function key
     std::vector<std::string> paramTypes;
@@ -349,8 +353,44 @@ void MemSizeVisitor::visitFunction(ASTNode* node) {
         }
     }
     
-    // Build function table key (same logic as in SymbolTableVisitor)
-    std::string tableKey = currentFunctionName;
+    // Check if this is a class method based on parent nodes
+    bool isClassMethod = false;
+    std::string className = "";
+    
+    // Check parent structure to determine if it's a member function
+    ASTNode* parentNode = node->getParent();
+    if (parentNode && parentNode->getNodeEnum() == NodeType::IMPLEMENTATION_FUNCTION_LIST) {
+        // Part of implementation function list - it's a class method
+        ASTNode* grandParent = parentNode->getParent();
+        if (grandParent && grandParent->getNodeEnum() == NodeType::IMPLEMENTATION) {
+            // Get class name from implementation ID
+            ASTNode* implIdNode = grandParent->getLeftMostChild();
+            if (implIdNode && implIdNode->getNodeEnum() == NodeType::IMPLEMENTATION_ID) {
+                className = implIdNode->getNodeValue();
+                isClassMethod = true;
+            }
+        }
+    } else if (parentNode && parentNode->getNodeEnum() == NodeType::MEMBER) {
+        // Direct member of class - it's a class method declaration
+        isClassMethod = true;
+        
+        // Find containing class by traversing up
+        ASTNode* memberListNode = parentNode->getParent();
+        if (memberListNode && memberListNode->getNodeEnum() == NodeType::MEMBER_LIST) {
+            ASTNode* classNode = memberListNode->getParent();
+            if (classNode && classNode->getNodeEnum() == NodeType::CLASS) {
+                ASTNode* classIdNode = classNode->getLeftMostChild();
+                if (classIdNode && classIdNode->getNodeEnum() == NodeType::CLASS_ID) {
+                    className = classIdNode->getNodeValue();
+                }
+            }
+        }
+    }
+    
+    // Build table key based on whether it's a class method
+    std::string tableKey = funcName;
+    
+    // Add parameter types if any
     if (!paramTypes.empty()) {
         tableKey += "_";
         for (size_t i = 0; i < paramTypes.size(); i++) {
@@ -359,9 +399,10 @@ void MemSizeVisitor::visitFunction(ASTNode* node) {
         }
     }
     
-    // Find function table
+    // Find function/method table
     auto prevTable = currentTable;
     auto funcTable = currentTable->getNestedTable(tableKey);
+    
     if (funcTable) {
         currentTable = funcTable;
     }
@@ -409,25 +450,78 @@ void MemSizeVisitor::visitAssignment(ASTNode* node) {
 }
 
 void MemSizeVisitor::visitFunctionCall(ASTNode* node) {
-    // Generate a return value temp var if needed
+    // First check if this is a member function call (e.g., obj.func())
     ASTNode* funcIdNode = node->getLeftMostChild();
-    if (funcIdNode) {
-        std::string funcName = funcIdNode->getNodeValue();
-        auto funcSymbols = symbolTable->lookupFunctions(funcName);
-        
-        if (!funcSymbols.empty()) {
-            std::string returnType = funcSymbols[0]->getType();
-            if (returnType != "void") {
-                createTempVar(returnType, "retval");
+    if (!funcIdNode) return;
+    
+    std::string funcName = funcIdNode->getNodeValue();
+    bool isMemberFunction = false;
+    std::string className = "";
+    
+    // Check if this is a dot identifier (member access)
+    if (funcIdNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+        // Get the class name from the left child
+        ASTNode* objNode = funcIdNode->getLeftMostChild();
+        if (objNode) {
+            // Find the type of the object
+            std::string objName = objNode->getNodeValue();
+            auto objSymbol = currentTable->lookupSymbol(objName);
+            if (objSymbol) {
+                className = objSymbol->getType();
+                isMemberFunction = true;
+                
+                // Extract the actual function name (right of the dot)
+                ASTNode* memberNode = objNode->getRightSibling();
+                if (memberNode) {
+                    funcName = memberNode->getNodeValue();
+                }
             }
         }
-        
-        // Process arguments - might generate temp vars
-        ASTNode* argListNode = funcIdNode->getRightSibling();
-        if (argListNode) {
-            argListNode->accept(this);
+    }
+    
+    // Save current table for restoration later
+    auto prevTable = currentTable;
+    
+    // If this is a member function, switch to appropriate class scope
+    if (isMemberFunction && !className.empty()) {
+        // Find the class table
+        auto classTable = symbolTable->getNestedTable(className);
+        if (classTable) {
+            // Try different format options for the method table key
+            std::vector<std::string> possibleKeys = {
+                className + "::" + funcName,       // Standard format: CLASS::method
+                funcName + "_" + className,         // Alternate format: method_CLASS
+                funcName                           // Just the method name within class
+            };
+            
+            // Try each key format
+            for (const auto& key : possibleKeys) {
+                auto methodTable = classTable->getNestedTable(key);
+                if (methodTable) {
+                    currentTable = methodTable;
+                    break;
+                }
+            }
         }
     }
+    
+    // Generate return value temp var in the appropriate scope
+    auto funcSymbols = currentTable->lookupFunctions(funcName, false); // Include parent scopes
+    if (!funcSymbols.empty()) {
+        std::string returnType = funcSymbols[0]->getType();
+        if (returnType != "void") {
+            createTempVar(returnType, "retval");
+        }
+    }
+    
+    // Process arguments in the appropriate scope
+    ASTNode* argListNode = funcIdNode->getRightSibling();
+    if (argListNode) {
+        argListNode->accept(this);
+    }
+    
+    // Restore original scope
+    currentTable = prevTable;
 }
 
 void MemSizeVisitor::visitRelationalExpr(ASTNode* node) {
@@ -552,6 +646,41 @@ void MemSizeVisitor::visitMultOp(ASTNode* node) {
     createTempVar("int", "tempvar");  // Adjust type as needed
 }
 
+void MemSizeVisitor::visitImplementation(ASTNode* node) {
+    // This handles a class implementation section
+    // Get class ID node
+    ASTNode* implIdNode = node->getLeftMostChild();
+    if (!implIdNode || implIdNode->getNodeEnum() != NodeType::IMPLEMENTATION_ID) return;
+    
+    // Get class name
+    std::string className = implIdNode->getNodeValue();
+    
+    // Find class table
+    auto classTable = symbolTable->getNestedTable(className);
+    if (!classTable) return;
+    
+    // Save current table and switch to class table for method implementations
+    auto prevTable = currentTable;
+    currentTable = classTable;
+    
+    // Process implementation function list (methods)
+    ASTNode* implFuncListNode = implIdNode->getRightSibling();
+    if (implFuncListNode) {
+        implFuncListNode->accept(this);
+    }
+    
+    // Restore previous table
+    currentTable = prevTable;
+}
+
+void MemSizeVisitor::visitImplementationFunctionList(ASTNode* node) {
+    // Process each method implementation
+    ASTNode* child = node->getLeftMostChild();
+    while (child) {
+        child->accept(this);
+        child = child->getRightSibling();
+    }
+}
 
 // For simplicity, I'm just implementing the main visitor methods
 // All other visitor methods would just traverse the AST without special handling
@@ -578,8 +707,8 @@ DEFAULT_VISITOR_METHOD(FunctionBody)
 DEFAULT_VISITOR_METHOD(Empty)
 DEFAULT_VISITOR_METHOD(FunctionList)
 DEFAULT_VISITOR_METHOD(ImplementationList)
-DEFAULT_VISITOR_METHOD(Implementation)
-DEFAULT_VISITOR_METHOD(ImplementationFunctionList)
+// DEFAULT_VISITOR_METHOD(Implementation)
+// DEFAULT_VISITOR_METHOD(ImplementationFunctionList)
 DEFAULT_VISITOR_METHOD(Member)
 DEFAULT_VISITOR_METHOD(Variable)
 DEFAULT_VISITOR_METHOD(VariableId)

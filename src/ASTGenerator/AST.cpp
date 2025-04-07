@@ -118,8 +118,8 @@ void AST::performAction(std::string action, std::string value, int line) {
     if (action == "_createRoot") {
         this->root = makeFamily(NodeType::PROGRAM,
             createNode(NodeType::CLASS_LIST, "classList", line),
-            createNode(NodeType::FUNCTION_LIST, "functionList", line),
-            createNode(NodeType::IMPLEMENTATION_LIST, "implList", line)
+            createNode(NodeType::IMPLEMENTATION_LIST, "implList", line),
+            createNode(NodeType::FUNCTION_LIST, "functionList", line)
         );
         this->ASTStack.push_back(this->root);
     }
@@ -131,10 +131,10 @@ void AST::performAction(std::string action, std::string value, int line) {
             case NodeType::CLASS:
                 root->getLeftMostChild()->adoptChildren(node);
                 break;
-            case NodeType::FUNCTION:
+            case NodeType::IMPLEMENTATION:
                 root->getLeftMostChild()->getRightSibling()->adoptChildren(node);
                 break;
-            case NodeType::IMPLEMENTATION:
+            case NodeType::FUNCTION:
                 root->getLeftMostChild()->getRightSibling()->getRightSibling()->adoptChildren(node);
                 break;
             default:
