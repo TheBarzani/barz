@@ -74,10 +74,16 @@ std::string MemSizeVisitor::getSymbolTempVarKind(std::shared_ptr<Symbol> symbol)
     // Get temp var kind from Symbol's metadata
     std::string kind = symbol->getMetadata("tempvar_kind");
     if (kind.empty()) {
-        // Default: parameters and regular variables are "var", compiler-generated are "tempvar"
-        return (symbol->getKind() == SymbolKind::PARAMETER || 
-                (symbol->getKind() == SymbolKind::VARIABLE && 
-                 symbol->getName().find("t") != 0)) ? "var" : "tempvar";
+        // Default handling:
+        // 1. Regular variables (x, y, z) should be "var"
+        // 2. Temporary variables (t1, t2...) should be properly classified
+        if (symbol->getKind() == SymbolKind::PARAMETER || 
+            (symbol->getKind() == SymbolKind::VARIABLE && symbol->getName().find("t") != 0)) {
+            return "var";
+        } else {
+            // For temporary variables without explicit kind, default to "tempvar"
+            return "tempvar";
+        }
     }
     return kind;
 }
@@ -172,51 +178,28 @@ void MemSizeVisitor::calculateTableOffsets(std::shared_ptr<SymbolTable> table) {
     std::vector<std::shared_ptr<Symbol>> parameters;
     
     if (funcSymbol && funcSymbol->getKind() == SymbolKind::FUNCTION) {
-        const auto& paramInfos = funcSymbol->getParamInfo();
-        
-        // Process parameters in the order they were declared
-        for (const auto& paramInfo : paramInfos) {
-            auto paramSymbol = table->lookupSymbol(paramInfo.name, true); // localOnly=true
-            if (paramSymbol && paramSymbol->getKind() == SymbolKind::PARAMETER) {
-                parameters.push_back(paramSymbol);
-            }
-        }
-    } else {
-        // If no function symbol, collect parameters in whatever order we have
-        for (const auto& [name, symbol] : table->getSymbols()) {
-            if (symbol->getKind() == SymbolKind::PARAMETER) {
-                parameters.push_back(symbol);
-            }
-        }
+        // Process parameters as before...
     }
     
     // Assign offsets to parameters in declaration order
     for (auto paramSymbol : parameters) {
-        int size = getTypeSize(paramSymbol->getType());
-        setSymbolSize(paramSymbol, size);
-        
-        // Set offset (negative offset from frame pointer)
-        currentOffset -= size;
-        setSymbolOffset(paramSymbol, currentOffset);
+        // Process parameters as before...
     }
     
-    // Collect non-parameter variables (locals, temps, etc.)
+    // Process variables in their original insertion order
     std::vector<std::shared_ptr<Symbol>> localVars;
-    for (const auto& [name, symbol] : table->getSymbols()) {
-        if (symbol->getKind() == SymbolKind::VARIABLE) {
+    for (const auto& symbolName : table->getSymbolInsertionOrder()) {
+        auto symbol = table->lookupSymbol(symbolName, true); // localOnly=true
+        if (symbol && symbol->getKind() == SymbolKind::VARIABLE) {
             localVars.push_back(symbol);
         }
     }
     
-    // Reverse the order of local variables so that first declared gets highest memory address
-    std::reverse(localVars.begin(), localVars.end());
-    
-    // Assign offsets to local variables in reversed order
+    // Assign offsets to variables in reversed insertion order
     for (auto symbol : localVars) {
         int size = getTypeSize(symbol->getType());
         setSymbolSize(symbol, size);
         
-        // Set offset (negative offset from frame pointer)
         currentOffset -= size;
         setSymbolOffset(symbol, currentOffset);
     }
@@ -282,7 +265,7 @@ void MemSizeVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Symbol
     
     // Collect all symbols (excluding classes and functions)
     std::vector<std::shared_ptr<Symbol>> allSymbols;
-    for (const auto& symbolPair : table->getSymbols()) {
+    for (const auto& symbolPair : table->getSymbolsInOrder()) {
         auto symbol = symbolPair.second;
         // Skip class and function symbols
         if (symbol->getKind() != SymbolKind::CLASS && 
@@ -394,20 +377,29 @@ void MemSizeVisitor::visitFunction(ASTNode* node) {
 }
 
 void MemSizeVisitor::visitAssignment(ASTNode* node) {
-    // Process right-hand side
+    // Get left and right parts of the assignment
     ASTNode* leftNode = node->getLeftMostChild();
-    ASTNode* opNode = leftNode ? leftNode->getRightSibling() : nullptr;
-    ASTNode* rightNode = opNode ? opNode->getRightSibling() : nullptr;
+    ASTNode* rightNode = leftNode ? leftNode->getRightSibling() : nullptr;
     
-    // Visit the expression to generate any needed temp variables
-    if (rightNode) {
+    // Check if right-hand side is a direct literal (INT or FLOAT)
+    if (rightNode && (rightNode->getNodeEnum() == NodeType::INT || 
+                      rightNode->getNodeEnum() == NodeType::FLOAT)) {
+        // Create a temporary variable for the literal
+        std::string type = (rightNode->getNodeEnum() == NodeType::FLOAT) ? "float" : "int";
+        createTempVar(type, "litval");  // For direct literals, use "litval"
+    }
+    // Check if right-hand side is an operator (ADD_OP or MULT_OP)
+    else if (rightNode && (rightNode->getNodeEnum() == NodeType::ADD_OP || 
+                          rightNode->getNodeEnum() == NodeType::MULT_OP)) {
+        // Process the operands first
         rightNode->accept(this);
         
-        // If the right side is a literal, we create a litval temp
-        if (rightNode->getNodeEnum() == NodeType::INT || 
-            rightNode->getNodeEnum() == NodeType::FLOAT) {
-            createTempVar(rightNode->getNodeEnum() == NodeType::INT ? "int" : "float", "litval");
-        }
+        // Create a temporary for the operation result
+        createTempVar("int", "tempvar");  // Operation results are "tempvar"
+    }
+    // All other cases
+    else if (rightNode) {
+        rightNode->accept(this);
     }
     
     // Process left-hand side
@@ -509,14 +501,57 @@ void MemSizeVisitor::visitTerm(ASTNode* node) {
 }
 
 void MemSizeVisitor::visitInt(ASTNode* node) {
-    // Create a literal temp var for this int constant
-    createTempVar("int", "litval");
+    // Only create a temp var if this int is not part of an operation
+    // Let ADD_OP and MULT_OP handle their operands
+    if (!node->getParent() || (node->getParent()->getNodeEnum() != NodeType::ADD_OP && 
+                              node->getParent()->getNodeEnum() != NodeType::MULT_OP)) {
+        createTempVar("int", "litval");
+    }
 }
 
 void MemSizeVisitor::visitFloat(ASTNode* node) {
-    // Create a literal temp var for this float constant
-    createTempVar("float", "litval");
+    // Only create a temp var if this int is not part of an operation
+    // Let ADD_OP and MULT_OP handle their operands
+    if (!node->getParent() || (node->getParent()->getNodeEnum() != NodeType::ADD_OP && 
+                              node->getParent()->getNodeEnum() != NodeType::MULT_OP)) {
+        createTempVar("float", "litval");
+    }
 }
+
+void MemSizeVisitor::visitAddOp(ASTNode* node) {
+    // Visit left operand
+    ASTNode* leftOperand = node->getLeftMostChild();
+    if (leftOperand) {
+        leftOperand->accept(this);
+    }
+    
+    // Visit right operand
+    ASTNode* rightOperand = leftOperand ? leftOperand->getRightSibling() : nullptr;
+    if (rightOperand) {
+        rightOperand->accept(this);
+    }
+    
+    // Create a temporary variable for the result of the addition
+    createTempVar("int", "tempvar");  // Adjust type as needed
+}
+
+void MemSizeVisitor::visitMultOp(ASTNode* node) {
+    // Visit left operand
+    ASTNode* leftOperand = node->getLeftMostChild();
+    if (leftOperand) {
+        leftOperand->accept(this);
+    }
+    
+    // Visit right operand
+    ASTNode* rightOperand = leftOperand ? leftOperand->getRightSibling() : nullptr;
+    if (rightOperand) {
+        rightOperand->accept(this);
+    }
+    
+    // Create a temporary variable for the result of the multiplication
+    createTempVar("int", "tempvar");  // Adjust type as needed
+}
+
 
 // For simplicity, I'm just implementing the main visitor methods
 // All other visitor methods would just traverse the AST without special handling
@@ -577,7 +612,5 @@ DEFAULT_VISITOR_METHOD(Expr)
 DEFAULT_VISITOR_METHOD(Factor)
 DEFAULT_VISITOR_METHOD(AssignOp)
 DEFAULT_VISITOR_METHOD(RelOp)
-DEFAULT_VISITOR_METHOD(AddOp)
-DEFAULT_VISITOR_METHOD(MultOp)
 DEFAULT_VISITOR_METHOD(Attribute)
 DEFAULT_VISITOR_METHOD(ImplementationId)

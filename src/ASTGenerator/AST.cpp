@@ -510,7 +510,7 @@ void AST::performAction(std::string action, std::string value, int line) {
         ASTNode* left = ASTStack.back(); ASTStack.pop_back();
         
         // Directly connect operands to the operator node  
-        op->setLeftMostChild(left);
+        op->adoptChildren(left);
         op->adoptChildren(right);
         
         // Don't wrap in TERM, push the op node directly
@@ -522,7 +522,7 @@ void AST::performAction(std::string action, std::string value, int line) {
         ASTNode* left = ASTStack.back(); ASTStack.pop_back();
         
         // Directly connect operands to the operator node
-        op->setLeftMostChild(left);
+        op->adoptChildren(left);
         op->adoptChildren(right);
         
         // Don't wrap in TERM, push the op node directly
