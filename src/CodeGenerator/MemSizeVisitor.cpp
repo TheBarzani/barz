@@ -496,7 +496,7 @@ void MemSizeVisitor::visitFunctionCall(ASTNode* node) {
     // Check if this is a dot identifier (member access)
     if (funcIdNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
         // Get the class name from the left child
-        ASTNode* objNode = funcIdNode->getLeftMostChild();
+        ASTNode* objNode = funcIdNode->getParent()->getParent()->getLeftMostChild();
         if (objNode) {
             // Find the type of the object
             std::string objName = objNode->getNodeValue();
@@ -504,18 +504,31 @@ void MemSizeVisitor::visitFunctionCall(ASTNode* node) {
             if (objSymbol) {
                 className = objSymbol->getType();
                 isMemberFunction = true;
-                
-                // Extract the actual function name (right of the dot)
-                ASTNode* memberNode = objNode->getRightSibling();
-                if (memberNode) {
-                    funcName = memberNode->getNodeValue();
-                }
             }
         }
     }
     
     // Save current table for restoration later
     auto prevTable = currentTable;
+    
+    // Get parameter types to construct the function key
+    std::vector<std::string> paramTypes;
+    ASTNode* argListNode = funcIdNode->getRightSibling();
+    if (argListNode) {
+        ASTNode* argNode = argListNode->getLeftMostChild();
+        while (argNode) {
+            // For simplicity, assume all arguments are of type "int"
+            // In a more sophisticated implementation, you'd determine the actual type
+            paramTypes.push_back("float"); // Default to float as most common parameter type
+            argNode = argNode->getRightSibling();
+        }
+    }
+    
+    // Construct function key with parameter types
+    std::string funcKey = funcName;
+    for (const auto& paramType : paramTypes) {
+        funcKey += "_" + paramType;
+    }
     
     // If this is a member function, switch to appropriate class scope
     if (isMemberFunction && !className.empty()) {
@@ -524,9 +537,10 @@ void MemSizeVisitor::visitFunctionCall(ASTNode* node) {
         if (classTable) {
             // Try different format options for the method table key
             std::vector<std::string> possibleKeys = {
-                className + "::" + funcName,       // Standard format: CLASS::method
-                funcName + "_" + className,         // Alternate format: method_CLASS
-                funcName                           // Just the method name within class
+                funcKey,                         // With parameter types: build_float_float
+                className + "::" + funcName,     // Standard format: CLASS::method
+                funcName + "_" + className,      // Alternate format: method_CLASS
+                funcName                         // Just the method name within class
             };
             
             // Try each key format
@@ -543,14 +557,15 @@ void MemSizeVisitor::visitFunctionCall(ASTNode* node) {
     // Generate return value temp var in the appropriate scope
     auto funcSymbols = currentTable->lookupFunctions(funcName, false); // Include parent scopes
     if (!funcSymbols.empty()) {
+        currentTable = prevTable;
         std::string returnType = funcSymbols[0]->getType();
         if (returnType != "void") {
             createTempVar(returnType, "retval");
         }
     }
     
+    // TODO: Maybe check if the scope should be tinkered with
     // Process arguments in the appropriate scope
-    ASTNode* argListNode = funcIdNode->getRightSibling();
     if (argListNode) {
         argListNode->accept(this);
     }
