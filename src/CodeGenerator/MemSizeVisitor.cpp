@@ -114,11 +114,35 @@ int MemSizeVisitor::getTypeSize(const std::string& type) {
     if (type == "float") return TypeSize::FLOAT_SIZE;
     if (type == "void") return TypeSize::VOID_SIZE;
     
-    // Check for arrays (unchanged)
+    // Check for arrays
     size_t bracketPos = type.find('[');
     if (bracketPos != std::string::npos) {
-        // Array handling code unchanged
-        // ...
+        // Extract the dimension and base type
+        std::string baseType = type.substr(0, bracketPos);
+        
+        // Extract dimension size between [ and ]
+        size_t closeBracketPos = type.find(']', bracketPos);
+        if (closeBracketPos == std::string::npos) {
+            return TypeSize::POINTER_SIZE; // Malformed array type
+        }
+        
+        std::string dimStr = type.substr(bracketPos + 1, closeBracketPos - bracketPos - 1);
+        int dimension = 1; // Default to 1 if no size specified
+        
+        if (!dimStr.empty()) {
+            try {
+                dimension = std::stoi(dimStr);
+            } catch (const std::exception&) {
+                // If not a number, default to 1
+                dimension = 1;
+            }
+        }
+        
+        // Calculate base element size (which could be another array)
+        int elementSize = getTypeSize(baseType);
+        
+        // Total size is element size multiplied by dimension
+        return elementSize * dimension;
     }
     
     // Check for user-defined classes
@@ -171,15 +195,22 @@ void MemSizeVisitor::calculateTableOffsets(std::shared_ptr<SymbolTable> table) {
     // Parameters start at the initial offset
     for (size_t i = 0; i < parameters.size(); i++) {
         auto param = parameters[i];
-        int size = getTypeSize(param->getType());
-        setSymbolSize(param, size);
         
-            paramOffset -= size; 
-            setSymbolOffset(param, paramOffset);
-
+        // Calculate size based on type and array dimensions
+        int size = getTypeSize(param->getType());
+        if (param->isArray()) {
+            // For arrays, multiply base size by all dimensions
+            for (int dim : param->getArrayDimensions()) {
+                size *= dim;
+            }
+        }
+        
+        setSymbolSize(param, size);
+        paramOffset -= size; 
+        setSymbolOffset(param, paramOffset);
     }
     
-    // Then process non-parameters in exact insertion order
+    // Process non-parameters in exact insertion order
     int currentOffset = paramOffset;
     if (currentOffset == initialOffset && parameters.empty()) {
         // If we have no parameters, start local vars after initial offset
@@ -189,15 +220,20 @@ void MemSizeVisitor::calculateTableOffsets(std::shared_ptr<SymbolTable> table) {
     for (const auto& symbolName : table->getSymbolInsertionOrder()) {
         auto symbol = table->lookupSymbol(symbolName, true);
         if (symbol && symbol->getKind() == SymbolKind::VARIABLE) {
-            // Handle variables (local vars and tempvars) in insertion order
+            // Calculate size based on type and array dimensions
             int size = getTypeSize(symbol->getType());
+            if (symbol->isArray()) {
+                // For arrays, multiply base size by all dimensions
+                for (int dim : symbol->getArrayDimensions()) {
+                    size *= dim;
+                }
+            }
+            
             setSymbolSize(symbol, size);
             
-            // Calculate offset
-            currentOffset -= size;
-            // Ensure alignment if needed
-            int alignment = 4;
-            currentOffset = (currentOffset / alignment) * alignment;
+            // Calculate offset with proper alignment
+            int alignment = (size >= 8 || symbol->isArray()) ? 8 : 4;
+            currentOffset = ((currentOffset - size) / alignment) * alignment;
             setSymbolOffset(symbol, currentOffset);
         }
     }
@@ -702,15 +738,86 @@ void MemSizeVisitor::visitLocalVariable(ASTNode* node) {
             currentTable->removeSymbol(varName);
             currentTable->addSymbol(varSymbol);
         }
-        
-        // Visit any child nodes (array dimensions, etc.)
-        ASTNode* child = typeNode->getRightSibling();
-        while (child) {
-            child->accept(this);
-            child = child->getRightSibling();
+        if(typeNode->getNodeEnum() == NodeType::ARRAY_TYPE){
+            typeNode->accept(this); // Visit array type node to calculate size
         }
     }
 }
+
+// void MemSizeVisitor::visitArrayType(ASTNode* node) {
+//     // An ArrayType node has:
+//     // - Left child: dimension (could be a number or an expression)
+//     // - Right child: the base type (could be another ArrayType for multi-dimensional arrays)
+    
+//     // Process dimension
+//     ASTNode* dimNode = node->getLeftMostChild();
+//     int dimension = 1; // Default dimension if not specified
+    
+//     if (dimNode) {
+//         // If the dimension is a direct integer literal, use that value
+//         if (dimNode->getNodeEnum() == NodeType::ARRAY_DIMENSION) {
+//             try {
+//                 dimension = std::stoi(dimNode->getNodeValue());
+//             } catch (const std::exception&) {
+//                 // If conversion fails, default to 1
+//                 dimension = 1;
+//             }
+//         } 
+//         else {
+//             // For non-constant dimensions, we still need to visit the node
+//             // but we'll use a default size of 1 or determined elsewhere
+//             dimNode->accept(this);
+//         }
+//     }
+    
+//     // Process base type to get element type info
+//     ASTNode* typeNode = dimNode ? dimNode->getRightSibling() : nullptr;
+//     std::string baseType = "int"; // Default base type
+    
+//     if (typeNode) {
+//         if (typeNode->getNodeEnum() == NodeType::TYPE) {
+//             baseType = typeNode->getNodeValue();
+//         }
+        
+//         // Process the type node (could be another array type for multidimensional arrays)
+//         typeNode->accept(this);
+//     }
+    
+//     // For array declarations in local variables, the parent node should be LOCAL_VARIABLE
+//     // and we should store the array dimension information on the symbol
+//     ASTNode* ancestorNode = node->getParent();
+//     while (ancestorNode && ancestorNode->getNodeEnum() != NodeType::LOCAL_VARIABLE &&
+//            ancestorNode->getNodeEnum() != NodeType::VARIABLE) {
+//         ancestorNode = ancestorNode->getParent();
+//     }
+    
+//     if (ancestorNode && 
+//         (ancestorNode->getNodeEnum() == NodeType::LOCAL_VARIABLE || 
+//          ancestorNode->getNodeEnum() == NodeType::VARIABLE)) {
+//         // This is part of a variable declaration - find the variable name
+//         ASTNode* varIdNode = ancestorNode->getLeftMostChild();
+//         if (varIdNode) {
+//             std::string varName = varIdNode->getNodeValue();
+//             auto varSymbol = currentTable->lookupSymbol(varName, true); // localOnly=true
+            
+//             if (varSymbol) {
+//                 // Update the symbol's type to include array notation
+//                 std::string currentType = varSymbol->getType();
+//                 if (currentType.find('[') == std::string::npos) {
+//                     // Not already an array type, make it one
+//                     varSymbol->setMetadata("original_type", currentType); // Save original type
+//                     std::string newType = currentType + "[" + std::to_string(dimension) + "]";
+//                     // We can't directly change the type in Symbol, but we can store it in metadata
+//                     varSymbol->setMetadata("array_type", newType);
+//                 }
+                
+//                 // Recalculate size based on dimensions
+//                 int newSize = getTypeSize(baseType) * dimension;
+//                 setSymbolSize(varSymbol, newSize);
+//             }
+//         }
+//     }
+// }
 
 // For simplicity, I'm just implementing the main visitor methods
 // All other visitor methods would just traverse the AST without special handling
