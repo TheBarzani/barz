@@ -22,113 +22,36 @@
 
 // Assignment 5 coverage:
 //      -------------
-//      | YES | NO  |
+//      | IMP |  P  |
 //      ------------- 
-// 1.1: |  X  |     |
-// 1.2: |  X  |     |
-// 1.3: |  X  |     |
-// 1.4: |     |  X  |
-// 2.1: |  X  |     |
-// 2.2: |  X  |     |
-// 2.3: |  X  |     |
-// 2.4: |  X  |     |
-// 3.1: |  X  |     |
-// 3.2: |  X  |     |
-// 3.3: |  X  |     |
-// 3.4: |  X  |     |
-// 4.1: |     |  X  |
-// 4.2: |     |  X  |
-// 4.3: |  X  |     |
-// 4.4: |  X  |     |
-// 5.1: |  X  |     |
-// 5.2: |     |  X  |
-// 5.3: |  X  |     |
+// 1.1: |  X  | 1.0 |
+// 1.2: |     | 0.5 |
+// 1.3: |     | 0.5 |
+// 1.4: |     | 0.5 |
+// 2.1: |     | 1.0 |
+// 2.2: |     | 1.0 |
+// 2.3: |     | 1.0 |
+// 2.4: |     | 1.0 |
+// 3.1: |  X  | 1.5 |
+// 3.2: |     | 1.0 |
+// 3.3: |     | 1.0 |
+// 3.4: |  X  | 2.0 |
+// 4.1: |     | 1.0 |
+// 4.2: |     | 1.0 | 
+// 4.3: |     | 1.0 | 
+// 4.4: |     | 1.0 |
+// 5.1: |     | 2.0 |
+// 5.2: |     | 1.0 |
+// 5.3: |     | 1.0 |
 //      -------------
 
-// ====== struct declarations ====== //
-class POLYNOMIAL {
-  public function evaluate (x: float) => float;                    
-};
-
-class LINEAR isa POLYNOMIAL {
-  private attribute a: float;
-  private attribute b: float;
-  public  function build(A: float, B: float) => LINEAR;
-  public  function evaluate(x: float) => float;
-};
-
-class QUADRATIC isa POLYNOMIAL {
-  private attribute a: float;
-  private attribute b: float;
-  private attribute c: float;
-  public  function build(A: float, B: float, C: float) => QUADRATIC;
-  public  function evaluate(x: float) => float;
-};
-
-// ====== member function implementations ====== //  
-implementation POLYNOMIAL {
-  function evaluate(x: float) => float                              // 2.1, 2.2
-  {
-    return (0.0);                                                   // 2.3
-  }
-}
-
-implementation LINEAR {
-  function build(A: float, B: float) => LINEAR                      // 2.1, 2.2
-  {
-    local c : int;
-    c := 1+1;
-    local new_function: LINEAR;                                     // 1.1
-    new_function.a := A;                                            // 3.1, 5.3
-    new_function.b := B;                                            // 3.1, 5.3
-    return (new_function);
-  }
-
-  function evaluate(x: float) => float                              // 2.1, 2.2
-  {
-    local result: float;                                            // 1.1
-    result := 0.0;                                                  // 3.1
-    result := a * x + b;                                            // 3.1, 5.1
-    return (result);                                                // 2.3
-  }
-}
- 
-implementation QUADRATIC { 
-  function evaluate(x: float) => float
-  {
-    local result: float;                                            // 1.1
-    result := a;                                                    // 3.1       
-    result := result * x + b;                                       // 3.1, 5.1
-    result := result * x + c;                                       // 3.1, 5.1
-    return (result);                                                // 2.3
-  }
-
-  function build(A: float, B: float, C: float) => QUADRATIC         // 2.1, 2.2
-  {
-    local new_function: QUADRATIC ;                                 // 1.1
-    new_function.a := A;                                            // 3.1, 5.3
-    new_function.b := B;                                            // 3.1, 5.3
-    new_function.c := C;                                            // 3.1, 5.3
-    return (new_function);
-  }
-}
-
-// ====== main ====== //
-function main() => void                                             // 2.1, 2.2
+function main() => void  
 {
-  local arr: int[2][3][5];
-  local f1: LINEAR;                                                 // 1.3, 2.1, 2.2, 2.4
-  local f2: QUADRATIC;                                              // 1.3, 2.1, 2.2, 2.4
-  local counter: int;                                               // 1.1
-  f1 := f1.build(2.0, 3.5);
-  f2 := f2.build(-2.0, 1.0, 0.0);
-  counter := 1;                                                     // 3.1
-	
-  while(counter <= 10)                                              // 3.3, 5.1 
-  {
-    write(counter);                                                 // 3.4
-    write(f1.evaluate(1.0));                                    // 3.4, 2.1, 2.2, 2.4
-    write(f2.evaluate(1.0));                                    // 3.4, 2.1, 2.2, 2.4
-    counter := counter + 1;                                          // 3.1
-  };
+  local x: int;                                    // 1.1
+  local y: int;                                    // 1.1
+  x := 69;
+  y := 70;
+  write(x);
+  read(y);                                         // 3.4	
+  write(y);                                   // 3.4 
 }

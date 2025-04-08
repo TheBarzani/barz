@@ -245,3 +245,22 @@ NOTE:
 - Use temporary results memory allocation using a unique label generator
 - Use register pool allocation strategy 
 - Go back into the lexical specifications for making sure that everything is implemented.
+
+## Code generation: suggested sequence
+**Suggested sequence:** ​
+
+- variable declarations (integers first)​
+- assignment statement​
+- read and write statements​
+- expressions (one operator at a time)​
+- conditional statement​
+- loop statement​
+
+**Tricky parts:** ​
+
+- function calls​
+- expressions involving arrays and classes (offset calculation)​
+- floating point numbers (non-native in Moon)​
+- function call stack​
+- expressions involving access to object members (offset calculations)​
+- calls to member functions (access to object’s data members) 
