@@ -31,6 +31,11 @@ putstr1   lb    r2,0(r1)      % ch := B[i]
           j     putstr1
 putstr2   jr    r15
 
+% Output a newline character to stdout
+putnl     addi  r1,r0,10      % ASCII 10 = newline
+          putc  r1            % Output the newline
+          jr    r15           % Return
+
 % Read a string from stdin.  Read until CR (ASCII 13) but do not store
 % the CR.
 % Entry: -8(r14) -> buffer.
