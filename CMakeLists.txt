@@ -46,6 +46,7 @@ add_executable(codegendriver
     src/Semantics/SymbolTableVisitor.cpp # Symbol Table Generation code
     src/Semantics/SemanticCheckingVisitor.cpp # Semantics Checking code
     src/CodeGenerator/MemSizeVisitor.cpp # Memory size calculation code
+    src/CodeGenerator/CodeGenVisitor.cpp # Code generation code
     src/CodeGenDriver.cpp         # Driver code
 )
 
