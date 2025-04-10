@@ -7,18 +7,12 @@
 
 CodeGenVisitor::CodeGenVisitor(std::shared_ptr<SymbolTable> symbolTable) 
     : symbolTable(symbolTable), currentTable(symbolTable), 
-      labelCounter(0), stringLiteralCounter(0) {
+      labelCounter(0), stringLiteralCounter(0) {  // Remove tempVarCounter
     
-    // Initialize register allocation tracking
-    for (int i = 0; i < NUM_REGS; i++) {
-        registerUsed[i] = false;
+    // Initialize register pool with registers r1-r12 (r0, r13-r15 are reserved)
+    for (int i = 12; i >= 1; i--) {
+        registerPool.push(i);
     }
-    
-    // Reserve r0 (always 0), r13 (return value for IO), r14 (stack frame pointer), and r15 (return address)
-    registerUsed[0] = true;
-    registerUsed[13] = true;
-    registerUsed[14] = true;
-    registerUsed[15] = true;
     
     // Initialize code sections
     dataSection = "% Data Section\n";
@@ -62,30 +56,29 @@ void CodeGenVisitor::generateOutputFile(const std::string& filename) {
 
 // Register allocation
 int CodeGenVisitor::allocateRegister() {
-    // Find first available register (skip r0, r14, r15)
-    for (int i = 1; i < NUM_REGS; i++) {
-        if (i != 14 && i != 15 && !registerUsed[i]) {
-            registerUsed[i] = true;
-            return i;
-        }
+    if (registerPool.empty()) {
+        std::cerr << "Error: No registers available!" << std::endl;
+        return -1;
     }
     
-    // No registers available
-    std::cerr << "Error: No registers available!" << std::endl;
-    return -1;
+    int reg = registerPool.top();
+    registerPool.pop();
+    return reg;
 }
 
 void CodeGenVisitor::freeRegister(int reg) {
-    if (reg > 0 && reg < NUM_REGS && reg != 14 && reg != 15) {
-        registerUsed[reg] = false;
+    // Skip r0, r13, r14, r15
+    if (reg > 0 && reg < 13) {
+        registerPool.push(reg);
     }
 }
 
 void CodeGenVisitor::freeAllRegisters() {
-    for (int i = 1; i < NUM_REGS; i++) {
-        if (i != 14 && i != 15 && i != 13) {
-            registerUsed[i] = false;
-        }
+    while (!registerPool.empty()) {
+        registerPool.pop();
+    }
+    for (int i = 12; i >= 1; i--) {
+        registerPool.push(i);
     }
 }
 
@@ -139,8 +132,8 @@ void CodeGenVisitor::storeVariable(const std::string& varName, int sourceReg) {
 
 // Function handling
 void CodeGenVisitor::generateFunctionPrologue(const std::string& funcName) {
-    emit(funcName + ":");
-    emit("% Function prologue");
+    emitLabel(funcName);  // No indentation for function label
+    emit("% Function prologue (" + funcName + ")");
     emit("sw -4(r14),r15");  // Save return address
 }
 
@@ -169,6 +162,25 @@ int CodeGenVisitor::getSymbolSize(const std::string& name) {
     return 4; // Default to int size
 }
 
+std::string CodeGenVisitor::getSymbolTempVarKind(const std::string& name) {
+    auto symbol = currentTable->lookupSymbol(name);
+    if (symbol) {
+        // Get tempvar kind from symbol metadata
+        return symbol->getMetadata("tempvar_kind");
+    }
+    return ""; // Default
+}
+
+int CodeGenVisitor::getScopeOffset(std::shared_ptr<SymbolTable> table) {
+    // Get scope offset from metadata
+    return std::stoi(table->getMetadata("scope_offset"));
+}
+
+void CodeGenVisitor::setScopeOffset(std::shared_ptr<SymbolTable> table, int offset) {
+    // Set scope offset in metadata
+    table->setMetadata("scope_offset", std::to_string(offset));
+}
+
 std::string CodeGenVisitor::formatInstructionWithComments(const std::string& instruction, const std::string& comment) {
     std::stringstream ss;
     ss << std::left << std::setw(10) << instruction;
@@ -182,11 +194,15 @@ std::string CodeGenVisitor::formatInstructionWithComments(const std::string& ins
 
 // Code emission
 void CodeGenVisitor::emit(const std::string& code) {
-    codeSection += "          " + code + "\n";
+    codeSection += "          " + code + "\n";  // Indent instructions
 }
 
 void CodeGenVisitor::emitComment(const std::string& comment) {
-    codeSection += "          % " + comment + "\n";
+    codeSection += "          % " + comment + "\n";  // Indent comments
+}
+
+void CodeGenVisitor::emitLabel(const std::string& label) {
+    codeSection += label + "\n";  // No indentation for labels
 }
 
 // Basic visitor implementations with example implementations for common nodes
@@ -211,76 +227,216 @@ void CodeGenVisitor::visitBlock(ASTNode* node) {
 
 // Example implementation for integer literals
 void CodeGenVisitor::visitInt(ASTNode* node) {
-    int value = std::stoi(node->getNodeValue());
+    // Allocate a register for this integer
     int reg = allocateRegister();
     
-    // Generate code to load the integer value
-    emit("% Load integer literal: " + std::to_string(value));
+    // Get the integer value
+    int value = std::stoi(node->getNodeValue());
+    
+    // Get metadata that was set by MemSizeVisitor
+    std::string tempVarName = node->getMetadata("moonVarName");
+    int offset = std::stoi(node->getMetadata("offset"));
+    
+    // Generate code to load the integer literal
+    emitComment("processing: " + tempVarName + " := " + node->getNodeValue());
     emit("addi r" + std::to_string(reg) + ",r0," + std::to_string(value));
     
-    // Save result in expression stack
-    exprStack.push(reg);
+    // Store to temporary variable
+    emit("sw " + std::to_string(offset) + "(r14),r" + std::to_string(reg));
+    
+    // Store register info for parent nodes
+    node->setMetadata("reg", std::to_string(reg));
+}
+
+void CodeGenVisitor::visitFloat(ASTNode* node) {
+    // Allocate a register for this float
+    int reg = allocateRegister();
+    
+    // Get the float value
+    float value = std::stof(node->getNodeValue());
+    int intValue = static_cast<int>(value);
+    
+    // Get metadata that was set by MemSizeVisitor
+    std::string tempVarName = node->getMetadata("moonVarName");
+    int offset = std::stoi(node->getMetadata("offset"));
+    
+    // Generate code to load the float literal
+    emitComment("processing: " + tempVarName + " := " + node->getNodeValue());
+    emit("addi r" + std::to_string(reg) + ",r0," + std::to_string(intValue));
+    
+    // Store to temporary variable
+    emit("sw " + std::to_string(offset) + "(r14),r" + std::to_string(reg));
+    
+    // Store register info for parent nodes
+    node->setMetadata("reg", std::to_string(reg));
 }
 
 // Example implementation for addition operations
 void CodeGenVisitor::visitAddOp(ASTNode* node) {
-    // Visit left and right operands
-    ASTNode* leftOperand = node->getLeftMostChild();
-    if (leftOperand) {
-        leftOperand->accept(this);
+    // Traverse children first
+    ASTNode* leftChild = node->getLeftMostChild();
+    ASTNode* rightChild = leftChild ? leftChild->getRightSibling() : nullptr;
+    
+    if (leftChild) leftChild->accept(this);
+    if (rightChild) rightChild->accept(this);
+    
+    // Get registers from child nodes
+    int reg1 = allocateRegister();
+    int reg2 = allocateRegister();
+    int reg3 = allocateRegister();
+    
+    // Get offsets for the operands - handle identifiers separately
+    int leftOffset;
+    int rightOffset;
+    
+    // Handle left operand
+    if (leftChild->getNodeEnum() == NodeType::IDENTIFIER) {
+        // For identifiers, get offset from symbol table
+        leftOffset = getSymbolOffset(leftChild->getNodeValue());
+    } else {
+        // For expressions and literals, get from metadata
+        leftOffset = std::stoi(leftChild->getMetadata("offset"));
     }
     
-    ASTNode* rightOperand = leftOperand ? leftOperand->getRightSibling() : nullptr;
-    if (rightOperand) {
-        rightOperand->accept(this);
+    // Handle right operand
+    if (rightChild->getNodeEnum() == NodeType::IDENTIFIER) {
+        // For identifiers, get offset from symbol table
+        rightOffset = getSymbolOffset(rightChild->getNodeValue());
+    } else {
+        // For expressions and literals, get from metadata
+        rightOffset = std::stoi(rightChild->getMetadata("offset"));
     }
     
-    // Get values from expression stack
-    int rightReg = exprStack.top(); exprStack.pop();
-    int leftReg = exprStack.top(); exprStack.pop();
+    // Rest of the method remains unchanged
+    // Get result metadata (already set by MemSizeVisitor)
+    std::string resultVarName = node->getMetadata("moonVarName");
+    int resultOffset = std::stoi(node->getMetadata("offset"));
     
-    // Allocate a new register for the result
-    int resultReg = allocateRegister();
-    
-    // Generate code for addition
+    // Generate code for the operation
     std::string opStr = node->getNodeValue();
+    emitComment("processing: " + resultVarName + " := " + 
+             (leftChild->getNodeEnum() == NodeType::IDENTIFIER ? leftChild->getNodeValue() : leftChild->getMetadata("moonVarName")) + " " + opStr + " " + 
+             (rightChild->getNodeEnum() == NodeType::IDENTIFIER ? rightChild->getNodeValue() : rightChild->getMetadata("moonVarName")));
+    
+    // Load values into registers
+    emit("lw r" + std::to_string(reg1) + "," + std::to_string(leftOffset) + "(r14)");
+    emit("lw r" + std::to_string(reg2) + "," + std::to_string(rightOffset) + "(r14)");
+    
+    // Perform addition/subtraction
     if (opStr == "+") {
-        emit("% Addition operation");
-        emit("add r" + std::to_string(resultReg) + ",r" + std::to_string(leftReg) + ",r" + std::to_string(rightReg));
+        emit("add r" + std::to_string(reg3) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
     } else if (opStr == "-") {
-        emit("% Subtraction operation");
-        emit("sub r" + std::to_string(resultReg) + ",r" + std::to_string(leftReg) + ",r" + std::to_string(rightReg));
+        emit("sub r" + std::to_string(reg3) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
     }
     
-    // Free operand registers
-    freeRegister(leftReg);
-    freeRegister(rightReg);
+    // Store result in a temporary variable
+    emit("sw " + std::to_string(resultOffset) + "(r14),r" + std::to_string(reg3));
     
-    // Push result register
-    exprStack.push(resultReg);
+    // Store register info for parent nodes
+    node->setMetadata("reg", std::to_string(reg3));
+    
+    // Free registers
+    freeRegister(reg1);
+    freeRegister(reg2);
+    // Don't free reg3 as parent will use it
+}
+
+void CodeGenVisitor::visitMultOp(ASTNode* node) {
+    // Traverse children first
+    ASTNode* leftChild = node->getLeftMostChild();
+    ASTNode* rightChild = leftChild ? leftChild->getRightSibling() : nullptr;
+    
+    if (leftChild) leftChild->accept(this);
+    if (rightChild) rightChild->accept(this);
+    
+    // Get registers
+    int reg1 = allocateRegister();
+    int reg2 = allocateRegister();
+    int reg3 = allocateRegister();
+    
+    // Get offsets for the operands - handle identifiers separately
+    int leftOffset;
+    int rightOffset;
+    
+    // Handle left operand
+    if (leftChild->getNodeEnum() == NodeType::IDENTIFIER) {
+        // For identifiers, get offset from symbol table
+        leftOffset = getSymbolOffset(leftChild->getNodeValue());
+    } else {
+        // For expressions and literals, get from metadata
+        leftOffset = std::stoi(leftChild->getMetadata("offset"));
+    }
+    
+    // Handle right operand
+    if (rightChild->getNodeEnum() == NodeType::IDENTIFIER) {
+        // For identifiers, get offset from symbol table
+        rightOffset = getSymbolOffset(rightChild->getNodeValue());
+    } else {
+        // For expressions and literals, get from metadata
+        rightOffset = std::stoi(rightChild->getMetadata("offset"));
+    }
+    
+    // Get result metadata (already set by MemSizeVisitor)
+    std::string resultVarName = node->getMetadata("moonVarName");
+    int resultOffset = std::stoi(node->getMetadata("offset"));
+    
+    // Generate code for the operation
+    std::string opStr = node->getNodeValue();
+    emitComment("processing: " + resultVarName + " := " + 
+             (leftChild->getNodeEnum() == NodeType::IDENTIFIER ? leftChild->getNodeValue() : leftChild->getMetadata("moonVarName")) + " " + opStr + " " + 
+             (rightChild->getNodeEnum() == NodeType::IDENTIFIER ? rightChild->getNodeValue() : rightChild->getMetadata("moonVarName")));
+    
+    // Load values into registers
+    emit("lw r" + std::to_string(reg1) + "," + std::to_string(leftOffset) + "(r14)");
+    emit("lw r" + std::to_string(reg2) + "," + std::to_string(rightOffset) + "(r14)");
+    
+    // Perform multiplication/division
+    if (opStr == "*") {
+        emit("mul r" + std::to_string(reg3) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
+    } else if (opStr == "/") {
+        emit("div r" + std::to_string(reg3) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
+    }
+    
+    // Store result in a temporary variable
+    emit("sw " + std::to_string(resultOffset) + "(r14),r" + std::to_string(reg3));
+    
+    // Store register info for parent nodes
+    node->setMetadata("reg", std::to_string(reg3));
+    
+    // Free registers
+    freeRegister(reg1);
+    freeRegister(reg2);
+    // Don't free reg3 as parent will use it
 }
 
 // Example implementation for assignment
 void CodeGenVisitor::visitAssignment(ASTNode* node) {
-    // Get variable identifier and expression
+    // Get variable node and expression node
     ASTNode* varNode = node->getLeftMostChild();
     ASTNode* exprNode = varNode ? varNode->getRightSibling() : nullptr;
     
     if (!varNode || !exprNode) return;
     
-    // Evaluate the expression first
+    // Process the expression first
     exprNode->accept(this);
     
-    // Get result register from expression stack
-    int resultReg = exprStack.top(); exprStack.pop();
+    // Only allocate one register - we don't need three
+    int reg = allocateRegister();
     
-    // Store result in variable
     std::string varName = varNode->getNodeValue();
-    emitComment("Assignment to " + varName);
-    storeVariable(varName, resultReg);
+    std::string exprVarName = exprNode->getMetadata("moonVarName");
     
-    // Free the result register
-    freeRegister(resultReg);
+    // Get memory offsets
+    int varOffset = getSymbolOffset(varName);
+    int exprOffset = std::stoi(exprNode->getMetadata("offset"));
+    
+    // Generate assignment code
+    emitComment("processing:: " + varName + " := " + exprVarName);
+    emit("lw r" + std::to_string(reg) + "," + std::to_string(exprOffset) + "(r14)");
+    emit("sw " + std::to_string(varOffset) + "(r14),r" + std::to_string(reg));
+    
+    // Free the register
+    freeRegister(reg);
 }
 
 // Example default visitor method for nodes that just traverse children
@@ -328,11 +484,9 @@ DEFAULT_VISITOR_METHOD(Attribute)
 DEFAULT_VISITOR_METHOD(SingleStatement)
 DEFAULT_VISITOR_METHOD(ExpressionStatement)
 DEFAULT_VISITOR_METHOD(ReadStatement)
-DEFAULT_VISITOR_METHOD(WriteStatement)
 DEFAULT_VISITOR_METHOD(ReturnStatement)
 DEFAULT_VISITOR_METHOD(AssignOp)
 DEFAULT_VISITOR_METHOD(RelOp)
-DEFAULT_VISITOR_METHOD(MultOp)
 DEFAULT_VISITOR_METHOD(Identifier)
 DEFAULT_VISITOR_METHOD(SelfIdentifier)
 DEFAULT_VISITOR_METHOD(Type)
@@ -354,5 +508,128 @@ DEFAULT_VISITOR_METHOD(StatementsList)
 DEFAULT_VISITOR_METHOD(ImplementationFunctionList)
 DEFAULT_VISITOR_METHOD(Condition)
 DEFAULT_VISITOR_METHOD(ArrayType)
-DEFAULT_VISITOR_METHOD(Float)
-DEFAULT_VISITOR_METHOD(Function)
+
+void CodeGenVisitor::visitFunction(ASTNode* node) {
+    // Get function signature (first child)
+    ASTNode* functionSignature = node->getLeftMostChild();
+    if (!functionSignature) return;
+    
+    // Get function ID from inside the signature
+    ASTNode* functionId = functionSignature->getLeftMostChild();
+    if (!functionId) return;
+    
+    std::string functionName = functionId->getNodeValue();
+    currentFunction = functionName;
+    
+    codeSection+= "\n";
+    emitComment("Processing function: " + functionName);
+    
+    // Save previous table before changing scope
+    std::shared_ptr<SymbolTable> previousTable = currentTable;
+    
+    // Find and set the function's symbol table as current
+    auto nestedTable = symbolTable->getNestedTable(functionName);
+    if (nestedTable) {
+        currentTable = nestedTable;
+        emitComment("Entering function scope: " + functionName);
+    }
+    
+    // Special handling for main function (entry point)
+    if (functionName == "main") {
+        emitLabel(functionName + "      entry");
+        emit("addi r14,r0,topaddr");
+    } else {
+        // For non-main functions, generate prologue
+        generateFunctionPrologue(functionName);
+    }
+    
+    // Process function signature (parameters, etc.)
+    functionSignature->accept(this);
+    
+    // Process function body (right sibling of signature)
+    ASTNode* functionBody = functionSignature->getRightSibling();
+    if (functionBody) {
+        functionBody->accept(this);
+    }
+    
+    // Generate function epilogue for non-main functions
+    if (functionName != "main") {
+        generateFunctionEpilogue();
+    }
+    
+    // Restore previous table when leaving function scope
+    currentTable = previousTable;
+    emitComment("Exiting function scope: " + functionName);
+}
+
+void CodeGenVisitor::visitWriteStatement(ASTNode* node) {
+    // Get the expression to print
+    ASTNode* exprNode = node->getLeftMostChild();
+    if (!exprNode) return;
+    
+    // Process the expression first
+    exprNode->accept(this);
+    
+    // Allocate registers
+    int reg1 = allocateRegister();
+    int reg2 = allocateRegister();
+    
+    // Get the output expression offset
+    // int exprOffset = std::stoi(exprNode->getMetadata("offset"));
+    // int scopeOffset = getScopeOffset(currentTable);
+    
+    // emitComment("processing: write(" + exprNode->getMetadata("moonVarName") + ")");
+    // emit("lw r" + std::to_string(reg1) + "," + std::to_string(exprOffset) + "(r14)");
+    
+    // emitComment("put value on stack");
+    // emit("addi r14,r14," + std::to_string(scopeOffset));
+    // emit("sw -8(r14),r" + std::to_string(reg1));
+    
+    // emitComment("link buffer to stack");
+    // emit("addi r" + std::to_string(reg1) + ",r0,buf");
+    // emit("sw -12(r14),r" + std::to_string(reg1));
+    
+    // emitComment("convert int to string for output");
+    // emit("jl r15,intstr");
+    // emit("sw -8(r14),r13");
+    
+    // emitComment("output to console");
+    // emit("jl r15,putstr");
+    // emit("jl r15,putnl");  // add newline
+    // emit("subi r14,r14," + std::to_string(scopeOffset));
+    
+    // Free registers
+    freeRegister(reg1);
+    freeRegister(reg2);
+}
+
+// int CodeGenVisitor::getNewTempVarOffset(const std::string& type) {
+//     // Get the name of the current temporary variable
+//     std::string tempVarName = "t" + std::to_string(tempVarCounter);
+    
+//     // Look up the temp var that was already created by MemSizeVisitor
+//     auto tempVar = currentTable->lookupSymbol(tempVarName);
+//     if (!tempVar) {
+//         // Try to find any unused temp var as a fallback
+//         for (int i = 1; i <= 10; i++) { // Check a reasonable number of temp vars
+//             std::string altName = "t" + std::to_string(i);
+//             auto alt = currentTable->lookupSymbol(altName);
+//             if (alt) {
+//                 std::cerr << "Warning: Using alternative temporary variable " 
+//                           << altName << " instead of " << tempVarName << std::endl;
+//                 tempVarCounter = i + 1; // Update counter for next time
+//                 return getSymbolOffset(altName);
+//             }
+//         }
+        
+//         std::cerr << "Error: Temporary variable " << tempVarName 
+//                   << " not found in symbol table!" << std::endl;
+//         return 0; // Return a default offset
+//     }
+    
+//     // Increment the counter for next use only after successful lookup
+//     tempVarCounter++;
+    
+//     // Return the offset of the existing variable
+//     return getSymbolOffset(tempVarName);
+// }

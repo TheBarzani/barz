@@ -1,0 +1,14 @@
+program{
+  int a;
+  int b;
+  int c;
+  a=1;
+  put(a);
+  b=2;
+  put(b);
+  c=3;
+  put(c);
+  a=a+b*c;
+  put(a+6);
+}
+

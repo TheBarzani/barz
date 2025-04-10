@@ -225,3 +225,19 @@ int ASTNode::getLineNumber() const {
 void ASTNode::setLineNumber(int line) {
     lineNumber = line;
 }
+
+void ASTNode::setMetadata(const std::string& key, const std::string& value) {
+    metadata[key] = value;
+}
+
+std::string ASTNode::getMetadata(const std::string& key) const {
+    auto it = metadata.find(key);
+    if (it != metadata.end()) {
+        return it->second;
+    }
+    return "";
+}
+
+bool ASTNode::hasMetadata(const std::string& key) const {
+    return metadata.find(key) != metadata.end();
+}

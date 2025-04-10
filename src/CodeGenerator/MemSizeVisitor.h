@@ -111,7 +111,7 @@ private:
     // Helper methods
     int getTypeSize(const std::string& type);
     void calculateTableOffsets(std::shared_ptr<SymbolTable> table);
-    std::string createTempVar(const std::string& type, const std::string& kind = "tempvar");
+    std::string createTempVar(const std::string& type, const std::string& kind = "tempvar", ASTNode* node = nullptr);
     void writeTableToFile(std::ofstream& out, std::shared_ptr<SymbolTable> table, int indent);
 
     // Extensions to Symbol class

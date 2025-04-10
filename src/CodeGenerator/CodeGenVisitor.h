@@ -152,6 +152,16 @@ private:
     // Code emission
     void emit(const std::string& code);
     void emitComment(const std::string& comment);
+    void emitLabel(const std::string& label);
+
+    std::stack<int> registerPool;
+
+    // Symbol metadata helpers
+    std::string getSymbolTempVarKind(const std::string& name);
+
+    // SymbolTable metadata helpers
+    int getScopeOffset(std::shared_ptr<SymbolTable> table);
+    void setScopeOffset(std::shared_ptr<SymbolTable> table, int offset);
 };
 
 #endif // CODE_GEN_VISITOR_H

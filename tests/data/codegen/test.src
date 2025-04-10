@@ -45,13 +45,18 @@
 // 5.3: |     | 1.0 |
 //      -------------
 
+function func1() => void
+{
+  local a: int;
+}
+
 function main() => void  
 {
   local x: int;                                    // 1.1
   local y: int;                                    // 1.1
   x := 69;
   y := 70;
-  write(x);
+  write(x+1);
   read(y);                                         // 3.4	
   write(y);                                   // 3.4 
 }

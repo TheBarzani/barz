@@ -1,6 +1,7 @@
           % Brief: this program is for memsize allocation and write/read operations.
           
-          
+          align
+main      
           entry
           addi r14,r0,topaddr
 
@@ -13,7 +14,7 @@
           sw -4(r14), r2
 
           % processing: t2 := 70
-          addi r2,r0,2
+          addi r2,r0,70
           sw -16(r14),r2
           % processing: y := t2
           lw r3,-16(r14)

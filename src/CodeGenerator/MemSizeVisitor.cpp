@@ -247,7 +247,35 @@ void MemSizeVisitor::calculateTableOffsets(std::shared_ptr<SymbolTable> table) {
     }
 }
 
-std::string MemSizeVisitor::createTempVar(const std::string& type, const std::string& kind) {
+// std::string MemSizeVisitor::createTempVar(const std::string& type, const std::string& kind) {
+//     // Generate unique temp var name
+//     std::string tempName = "t" + std::to_string(tempVarCounter++);
+    
+//     // Create a symbol for the temp var
+//     auto tempSymbol = std::make_shared<Symbol>(tempName, type, SymbolKind::VARIABLE);
+//     setSymbolTempVarKind(tempSymbol, kind);
+    
+//     // Add it to the current table
+//     if (currentTable) {
+//         currentTable->addSymbol(tempSymbol);
+        
+//         // Calculate size and offset
+//         int size = getTypeSize(type);
+//         setSymbolSize(tempSymbol, size);
+        
+//         // Get current scope offset
+//         int currentOffset = getTableScopeOffset(currentTable);
+//         currentOffset -= size;
+//         setSymbolOffset(tempSymbol, currentOffset);
+        
+//         // Update table scope offset
+//         setTableScopeOffset(currentTable, currentOffset);
+//     }
+    
+//     return tempName;
+// }
+
+std::string MemSizeVisitor::createTempVar(const std::string& type, const std::string& kind, ASTNode* node) {
     // Generate unique temp var name
     std::string tempName = "t" + std::to_string(tempVarCounter++);
     
@@ -262,14 +290,21 @@ std::string MemSizeVisitor::createTempVar(const std::string& type, const std::st
         // Calculate size and offset
         int size = getTypeSize(type);
         setSymbolSize(tempSymbol, size);
-        
+        calculateTableOffsets(currentTable);
         // Get current scope offset
         int currentOffset = getTableScopeOffset(currentTable);
-        currentOffset -= size;
         setSymbolOffset(tempSymbol, currentOffset);
         
         // Update table scope offset
         setTableScopeOffset(currentTable, currentOffset);
+        
+        // Attach metadata to the AST node if provided
+        if (node) {
+            node->setMetadata("moonVarName", tempName);
+            node->setMetadata("offset", std::to_string(currentOffset));
+            node->setMetadata("size", std::to_string(size));
+            node->setMetadata("type", type);
+        }
     }
     
     return tempName;
@@ -464,8 +499,7 @@ void MemSizeVisitor::visitAssignment(ASTNode* node) {
     if (rightNode && (rightNode->getNodeEnum() == NodeType::INT || 
                       rightNode->getNodeEnum() == NodeType::FLOAT)) {
         // Create a temporary variable for the literal
-        std::string type = (rightNode->getNodeEnum() == NodeType::FLOAT) ? "float" : "int";
-        createTempVar(type, "litval");  // For direct literals, use "litval"
+        rightNode->accept(this);
     }
     // Check if right-hand side is an operator (ADD_OP or MULT_OP)
     else if (rightNode && (rightNode->getNodeEnum() == NodeType::ADD_OP || 
@@ -560,7 +594,7 @@ void MemSizeVisitor::visitFunctionCall(ASTNode* node) {
         currentTable = prevTable;
         std::string returnType = funcSymbols[0]->getType();
         if (returnType != "void") {
-            createTempVar(returnType, "retval");
+            createTempVar(returnType, "retval", node);
         }
     }
     
@@ -589,7 +623,7 @@ void MemSizeVisitor::visitRelationalExpr(ASTNode* node) {
     }
     
     // Create temp var for the result
-    createTempVar("int", "tempvar"); // Boolean result represented as int
+    createTempVar("int", "tempvar", node); // Boolean result represented as int
 }
 
 void MemSizeVisitor::visitArithExpr(ASTNode* node) {
@@ -609,7 +643,7 @@ void MemSizeVisitor::visitArithExpr(ASTNode* node) {
                 nextTerm->accept(this);
                 
                 // Create a temp var for the result
-                createTempVar("int", "tempvar"); // Assuming int for simplicity
+                createTempVar("int", "tempvar", node); // Assuming int for simplicity
             }
             current = nextTerm ? nextTerm->getRightSibling() : nullptr;
         } else {
@@ -635,7 +669,7 @@ void MemSizeVisitor::visitTerm(ASTNode* node) {
                 nextFactor->accept(this);
                 
                 // Create a temp var for the result
-                createTempVar("int", "tempvar"); // Assuming int for simplicity
+                createTempVar("int", "tempvar", node); // Assuming int for simplicity
             }
             current = nextFactor ? nextFactor->getRightSibling() : nullptr;
         } else {
@@ -647,16 +681,16 @@ void MemSizeVisitor::visitTerm(ASTNode* node) {
 void MemSizeVisitor::visitInt(ASTNode* node) {
     // Only create a temp var if this int is not part of an operation
     // Let ADD_OP and MULT_OP handle their operands
-    if (!node->getParent() && (node->getParent()->getNodeEnum() == NodeType::ASSIGNMENT)) {
-        createTempVar("int", "litval");
+    if (node->getParent()) {
+        createTempVar("int", "litval",node);
     }
 }
 
 void MemSizeVisitor::visitFloat(ASTNode* node) {
     // Only create a temp var if this int is not part of an operation
     // Let ADD_OP and MULT_OP handle their operands
-    if (!node->getParent() && (node->getParent()->getNodeEnum() == NodeType::ASSIGNMENT)) {
-        createTempVar("float", "litval");
+    if (node->getParent()) {
+        createTempVar("float", "litval", node);
     }
 }
 
@@ -673,8 +707,8 @@ void MemSizeVisitor::visitAddOp(ASTNode* node) {
         rightOperand->accept(this);
     }
     
-    // Create a temporary variable for the result of the addition
-    createTempVar("int", "tempvar");  // Adjust type as needed
+    // Create a temporary variable for the result and attach to node
+    createTempVar("int", "tempvar", node);
 }
 
 void MemSizeVisitor::visitMultOp(ASTNode* node) {
@@ -690,8 +724,8 @@ void MemSizeVisitor::visitMultOp(ASTNode* node) {
         rightOperand->accept(this);
     }
     
-    // Create a temporary variable for the result of the multiplication
-    createTempVar("int", "tempvar");  // Adjust type as needed
+    // Create a temporary variable for the result
+    createTempVar("int", "tempvar", node);  // Adjust type as needed
 }
 
 void MemSizeVisitor::visitImplementation(ASTNode* node) {
