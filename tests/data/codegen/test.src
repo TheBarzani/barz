@@ -55,8 +55,9 @@ function main() => void
   local x: int;                                    // 1.1
   local y: int;                                    // 1.1
   x := 69;
-  y := 70;
-  write(x+1);
+  y := 60;
+  write(x+2);
+  write(y);
   read(y);                                         // 3.4	
   write(y);                                   // 3.4 
 }

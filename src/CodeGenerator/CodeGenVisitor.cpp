@@ -246,9 +246,13 @@ void CodeGenVisitor::visitInt(ASTNode* node) {
     
     // Store register info for parent nodes
     node->setMetadata("reg", std::to_string(reg));
+
+    // Free the register
+    freeRegister(reg);
 }
 
 void CodeGenVisitor::visitFloat(ASTNode* node) {
+    // TODO: Handle float literals
     // Allocate a register for this float
     int reg = allocateRegister();
     
@@ -269,6 +273,8 @@ void CodeGenVisitor::visitFloat(ASTNode* node) {
     
     // Store register info for parent nodes
     node->setMetadata("reg", std::to_string(reg));
+    // Free the register
+    freeRegister(reg);
 }
 
 // Example implementation for addition operations
@@ -483,7 +489,6 @@ DEFAULT_VISITOR_METHOD(FunctionDeclaration)
 DEFAULT_VISITOR_METHOD(Attribute)
 DEFAULT_VISITOR_METHOD(SingleStatement)
 DEFAULT_VISITOR_METHOD(ExpressionStatement)
-DEFAULT_VISITOR_METHOD(ReadStatement)
 DEFAULT_VISITOR_METHOD(ReturnStatement)
 DEFAULT_VISITOR_METHOD(AssignOp)
 DEFAULT_VISITOR_METHOD(RelOp)
@@ -574,62 +579,100 @@ void CodeGenVisitor::visitWriteStatement(ASTNode* node) {
     int reg1 = allocateRegister();
     int reg2 = allocateRegister();
     
-    // Get the output expression offset
-    // int exprOffset = std::stoi(exprNode->getMetadata("offset"));
-    // int scopeOffset = getScopeOffset(currentTable);
+    // Get the output expression offset - handle identifiers correctly
+    int exprOffset;
+    if (exprNode->getNodeEnum() == NodeType::IDENTIFIER) {
+        // For identifiers, get offset from symbol table
+        exprOffset = getSymbolOffset(exprNode->getNodeValue());
+    } else {
+        // For expressions and literals, get from metadata
+        exprOffset = std::stoi(exprNode->getMetadata("offset"));
+    }
     
-    // emitComment("processing: write(" + exprNode->getMetadata("moonVarName") + ")");
-    // emit("lw r" + std::to_string(reg1) + "," + std::to_string(exprOffset) + "(r14)");
+    int scopeOffset = getScopeOffset(currentTable);
     
-    // emitComment("put value on stack");
-    // emit("addi r14,r14," + std::to_string(scopeOffset));
-    // emit("sw -8(r14),r" + std::to_string(reg1));
+    // Get the variable name for the comment
+    std::string varName = (exprNode->getNodeEnum() == NodeType::IDENTIFIER) ? 
+                          exprNode->getNodeValue() : 
+                          exprNode->getMetadata("moonVarName");
     
-    // emitComment("link buffer to stack");
-    // emit("addi r" + std::to_string(reg1) + ",r0,buf");
-    // emit("sw -12(r14),r" + std::to_string(reg1));
+    emitComment("processing: write(" + varName + ")");
+    emit("lw r" + std::to_string(reg1) + "," + std::to_string(exprOffset) + "(r14)");
     
-    // emitComment("convert int to string for output");
-    // emit("jl r15,intstr");
-    // emit("sw -8(r14),r13");
+    // Rest of the method remains unchanged
+    emitComment("put value on stack");
+    emit("addi r14,r14," + std::to_string(scopeOffset));
+    emit("sw -8(r14),r" + std::to_string(reg1));
     
-    // emitComment("output to console");
-    // emit("jl r15,putstr");
-    // emit("jl r15,putnl");  // add newline
-    // emit("subi r14,r14," + std::to_string(scopeOffset));
+    emitComment("link buffer to stack");
+    emit("addi r" + std::to_string(reg1) + ",r0,buf");
+    emit("sw -12(r14),r" + std::to_string(reg1));
+    
+    emitComment("convert int to string for output");
+    emit("jl r15,intstr");
+    emit("sw -8(r14),r13");
+    
+    emitComment("output to console");
+    emit("jl r15,putstr");
+    emit("jl r15,putnl");  // add newline
+    emit("subi r14,r14," + std::to_string(scopeOffset));
     
     // Free registers
     freeRegister(reg1);
     freeRegister(reg2);
 }
 
-// int CodeGenVisitor::getNewTempVarOffset(const std::string& type) {
-//     // Get the name of the current temporary variable
-//     std::string tempVarName = "t" + std::to_string(tempVarCounter);
+void CodeGenVisitor::visitReadStatement(ASTNode* node) {
+    // Get the variable to read into
+    ASTNode* varNode = node->getLeftMostChild();
+    if (!varNode) return;
     
-//     // Look up the temp var that was already created by MemSizeVisitor
-//     auto tempVar = currentTable->lookupSymbol(tempVarName);
-//     if (!tempVar) {
-//         // Try to find any unused temp var as a fallback
-//         for (int i = 1; i <= 10; i++) { // Check a reasonable number of temp vars
-//             std::string altName = "t" + std::to_string(i);
-//             auto alt = currentTable->lookupSymbol(altName);
-//             if (alt) {
-//                 std::cerr << "Warning: Using alternative temporary variable " 
-//                           << altName << " instead of " << tempVarName << std::endl;
-//                 tempVarCounter = i + 1; // Update counter for next time
-//                 return getSymbolOffset(altName);
-//             }
-//         }
-        
-//         std::cerr << "Error: Temporary variable " << tempVarName 
-//                   << " not found in symbol table!" << std::endl;
-//         return 0; // Return a default offset
-//     }
+    // Allocate registers
+    int reg1 = allocateRegister();
     
-//     // Increment the counter for next use only after successful lookup
-//     tempVarCounter++;
+    // Get the variable offset - handle identifiers
+    int varOffset;
+    if (varNode->getNodeEnum() == NodeType::IDENTIFIER) {
+        // For identifiers, get offset from symbol table
+        varOffset = getSymbolOffset(varNode->getNodeValue());
+    } else {
+        // For expressions, get from metadata
+        varOffset = std::stoi(varNode->getMetadata("offset"));
+    }
     
-//     // Return the offset of the existing variable
-//     return getSymbolOffset(tempVarName);
-// }
+    int scopeOffset = getScopeOffset(currentTable);
+    
+    // Get the variable name for the comment
+    std::string varName = (varNode->getNodeEnum() == NodeType::IDENTIFIER) ? 
+                          varNode->getNodeValue() : 
+                          varNode->getMetadata("moonVarName");
+    
+    emitComment("Processing: read(" + varName + ")");
+    
+    // Allocate buffer space (could be in data section)
+    emitComment("Allocate buffer space for input");
+    emit("addi r" + std::to_string(reg1) + ",r0,buf");
+    emit("sw -8(r14),r" + std::to_string(reg1));
+    
+    // Read string from stdin
+    emitComment("Read string from console");
+    emit("addi r14,r14," + std::to_string(scopeOffset));
+    emit("jl r15,getstr");
+    emit("subi r14,r14," + std::to_string(scopeOffset));
+    
+    // Convert string to integer
+    emitComment("Convert string to integer");
+    emit("addi r" + std::to_string(reg1) + ",r0,buf");
+    emit("sw -8(r14),r" + std::to_string(reg1));
+    
+    emit("addi r14,r14," + std::to_string(scopeOffset));
+    emit("jl r15,strint");
+    emit("subi r14,r14," + std::to_string(scopeOffset));
+    
+    // Now r13 contains the integer value
+    emitComment("Store read value into r13");
+    emit("sw " + std::to_string(varOffset) + "(r14),r13");
+    
+    // Free registers
+    freeRegister(reg1);
+}
