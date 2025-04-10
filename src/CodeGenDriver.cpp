@@ -1,6 +1,7 @@
 #include "Semantics/SymbolTableVisitor.h"
 #include "Semantics/SemanticCheckingVisitor.h"
 #include "CodeGenerator/MemSizeVisitor.h"
+#include "CodeGenerator/CodeGenVisitor.h"
 #include "Parser/Parser.h"
 #include <iostream>
 #include <string>
@@ -128,15 +129,20 @@ int main(int argc, char* argv[]) {
     memSizeVisitor.outputSymbolTable(sizeSymbolTableFile);
     std::cout << "Memory-sized symbol table generated: " << sizeSymbolTableFile << std::endl;
 
-    // Phase 4: Code Generation (commented out for now)
-    // std::cout << "Generating MOON machine code..." << std::endl;
-    // MoonCodeGenerator codeGenerator(symbolTableVisitor.getGlobalTable());
-    // root->accept(&codeGenerator);
+    // Phase 4: Code Generation
+    std::cout << "Generating MOON machine code..." << std::endl;
+    
+    // Create code generation visitor with the memory-sized symbol table
+    CodeGenVisitor codeGenVisitor(symbolTableVisitor.getGlobalTable());
+    
+    // Process the AST with the code generation visitor
+    codeGenVisitor.processAST(root);
 
-    // // Output MOON code to file
-    // std::string moonCodeFile = fs::path(outputDir) / (fs::path(inputFile).stem().string() + ".moon");
-    // codeGenerator.outputMoonCode(moonCodeFile);
-    // std::cout << "MOON machine code generated: " << moonCodeFile << std::endl;
+    // Output MOON code to file
+    // std::string moonCodeFile = fs::path(outputDir) / (fs::path(inputFile).stem().string() + ".m");
+    std::string moonCodeFile = inputFile + ".m";
+    codeGenVisitor.generateOutputFile(moonCodeFile);
+    std::cout << "MOON machine code generated: " << moonCodeFile << std::endl;
 
     std::cout << "-------------------------------------------++" << std::endl;
 
