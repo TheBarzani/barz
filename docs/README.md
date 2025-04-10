@@ -264,3 +264,52 @@ NOTE:
 - function call stack​
 - expressions involving access to object members (offset calculations)​
 - calls to member functions (access to object’s data members) 
+
+## Table of features
+
+- [x] 1.1.1. Allocate memory for integers.
+- [ ] 1.1.2. Allocate memory for floats.
+- [ ] 1.2. Allocate memory for arrays of basic types.
+- [ ] 1.3. Allocate memory for objects.
+- [ ] 1.4. Allocate memory for arrays of objects.
+- [ ] 2.1. Branch to a function’s code block, execute the code block, branch back to the calling function.
+- [ ] 2.2. Pass parameters as local values to the function’s code block.
+- [ ] 2.3. Upon execution of a return statement, pass the return value back to the calling function.
+- [ ] 2.4. Call to member functions that can use their object’s data members.
+- [x] 3.1. Assignment statement: assignment of the resulting value of an expression to a variable, independently of what is the expression to the right of the assignment operator.
+- [ ] 3.2. Conditional statement: implementation of a branching mechanism.
+- [ ] 3.3. Loop statement: implementation of a branching mechanism.
+- [x] 3.4. Input/output statement: Moon machine keyboard input/console output.
+- [ ] 4.1. For arrays of basic types (integer and float), access to an array’s elements.
+- [ ] 4.2. For arrays of objects, access to an array’s element’s data members.
+- [ ] 4.3. For objects, access to members of basic types.
+- [ ] 4.4. For objects, access to members of array or object types.
+- [ ] 5.1. Computing the value of an entire complex expression.
+- [ ] 5.2. Expression involving an array factor whose indexes are themselves expressions.
+- [ ] 5.3. Expression involving an object factor referring to object members.
+
+
+
+### Assignment 5 coverage:
+| Section | IMP |  P  |
+|---------|:---:|:---:|
+| 1.1.1   |  X  | 0.5 |
+| 1.1.2   |     | 0.5 |
+| 1.2     |     | 0.5 |
+| 1.3     |     | 0.5 |
+| 1.4     |     | 0.5 |
+| 2.1     |     | 1.0 |
+| 2.2     |     | 1.0 |
+| 2.3     |     | 1.0 |
+| 2.4     |     | 1.0 |
+| 3.1     |  X  | 1.5 |
+| 3.2     |     | 1.0 |
+| 3.3     |     | 1.0 |
+| 3.4     |  X  | 2.0 |
+| 4.1     |     | 1.0 |
+| 4.2     |     | 1.0 |
+| 4.3     |     | 1.0 |
+| 4.4     |     | 1.0 |
+| 5.1     |     | 2.0 |
+| 5.2     |     | 1.0 |
+| 5.3     |     | 1.0 |
