@@ -276,9 +276,10 @@ void AST::performAction(std::string action, std::string value, int line) {
 
     // Statement Actions
     else if (action == "_createBlock") {
-        ASTNode* statements = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* block = makeFamily(NodeType::BLOCK, statements);
-        ASTStack.push_back(block);
+        // ASTNode* statements = ASTStack.back(); ASTStack.pop_back();
+        // ASTNode* block = makeFamily(NodeType::BLOCK, statements);
+        // ASTStack.push_back(block);
+        ASTStack.back()->setNodeType(NodeType::BLOCK);
     }
     else if (action == "_createIfStatement") {
         ASTNode* elsePart = ASTStack.back(); ASTStack.pop_back();
@@ -303,8 +304,8 @@ void AST::performAction(std::string action, std::string value, int line) {
         ASTNode* left = ASTStack.back(); ASTStack.pop_back();
         op->adoptChildren(left);
         op->adoptChildren(right);
-        ASTNode* relExpr = makeFamily(NodeType::RELATIONAL_EXPR, op);
-        ASTStack.push_back(relExpr);
+        //ASTNode* relExpr = makeFamily(NodeType::RELATIONAL_EXPR, op);
+        ASTStack.push_back(op);
     }
     else if (action == "_createAssignment") {
         ASTNode* expr = ASTStack.back(); ASTStack.pop_back();
@@ -552,7 +553,7 @@ void AST::performAction(std::string action, std::string value, int line) {
         ASTStack.push_back(makeFamily(NodeType::CONDITION, condition));
     }
     else if(action == "_addEmptyBlock"){
-        ASTStack.push_back(createNode(NodeType::BLOCK, "empty", line));
+        // ASTStack.push_back(createNode(NodeType::BLOCK, "empty", line));
     }
     else if(action == "_processArraySize"){
         ASTNode * type = ASTStack.back(); ASTStack.pop_back();

@@ -1,17 +1,29 @@
+class CALCULATOR {
+  private attribute memory: float;
+  public attribute x: int[10];
+  public attribute y: float[10];
+};
+
 function func1() => void
 {
-  local a: int;
+  local a: int[10][34];
+  local calcs: CALCULATOR[10];
 }
 
 function main() => void  
 {
-  local x: int;                                    // 1.1
-  local y: int;                                    // 1.1
+  local x: int;                                    
+  local y: int;                                    
   local z: int;
-  x := 2;
-  y := 3;
-  z := x*y/2;
-  write(x);
-  write(y);                                   // 3.4 
+  x := 3;
+  y := 2;
+  z := x * y;
+  if (x <> y+1) 
+        then {
+            write (x-y);
+        } else {
+            write (y);
+            write (x);
+        };
   write(z);
 }

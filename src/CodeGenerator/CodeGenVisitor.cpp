@@ -482,7 +482,7 @@ DEFAULT_VISITOR_METHOD(FunctionSignature)
 DEFAULT_VISITOR_METHOD(FunctionBody)
 DEFAULT_VISITOR_METHOD(ConstructorSignature)
 DEFAULT_VISITOR_METHOD(LocalVariable)
-DEFAULT_VISITOR_METHOD(IfStatement)
+// DEFAULT_VISITOR_METHOD(IfStatement)
 DEFAULT_VISITOR_METHOD(WhileStatement)
 DEFAULT_VISITOR_METHOD(RelationalExpr)
 DEFAULT_VISITOR_METHOD(FunctionDeclaration)
@@ -491,7 +491,7 @@ DEFAULT_VISITOR_METHOD(SingleStatement)
 DEFAULT_VISITOR_METHOD(ExpressionStatement)
 DEFAULT_VISITOR_METHOD(ReturnStatement)
 DEFAULT_VISITOR_METHOD(AssignOp)
-DEFAULT_VISITOR_METHOD(RelOp)
+// DEFAULT_VISITOR_METHOD(RelOp)
 DEFAULT_VISITOR_METHOD(Identifier)
 DEFAULT_VISITOR_METHOD(SelfIdentifier)
 DEFAULT_VISITOR_METHOD(Type)
@@ -511,7 +511,7 @@ DEFAULT_VISITOR_METHOD(ParamList)
 DEFAULT_VISITOR_METHOD(ParamId)
 DEFAULT_VISITOR_METHOD(StatementsList)
 DEFAULT_VISITOR_METHOD(ImplementationFunctionList)
-DEFAULT_VISITOR_METHOD(Condition)
+// DEFAULT_VISITOR_METHOD(Condition)
 DEFAULT_VISITOR_METHOD(ArrayType)
 
 void CodeGenVisitor::visitFunction(ASTNode* node) {
@@ -675,4 +675,144 @@ void CodeGenVisitor::visitReadStatement(ASTNode* node) {
     
     // Free registers
     freeRegister(reg1);
+}
+
+void CodeGenVisitor::visitIfStatement(ASTNode* node) {
+    // Create unique labels for branching
+    std::string thenLabel = "then" + std::to_string(labelCounter++);
+    std::string elseLabel = "else" + std::to_string(labelCounter++);
+    std::string endifLabel = "endif" + std::to_string(labelCounter++);
+    
+    // Get the three children: condition, then-block, and else-block
+    ASTNode* conditionNode = node->getLeftMostChild();
+    ASTNode* thenBlock = conditionNode ? conditionNode->getRightSibling() : nullptr;
+    ASTNode* elseBlock = thenBlock ? thenBlock->getRightSibling() : nullptr;
+    
+    emitComment("if statement - evaluating condition");
+    
+    // Process condition and get its result
+    if (conditionNode) {
+        conditionNode->accept(this);
+        
+        // Get the register or memory location holding the condition result
+        int condReg = allocateRegister();
+        int condOffset;
+        
+        if (conditionNode->getMetadata("reg").empty()) {
+            // Condition result is in memory, load it
+            condOffset = std::stoi(conditionNode->getMetadata("offset"));
+            emit("lw r" + std::to_string(condReg) + "," + std::to_string(condOffset) + "(r14)");
+        } else {
+            // Condition result is already in a register
+            int sourceReg = std::stoi(conditionNode->getMetadata("reg"));
+            emit("add r" + std::to_string(condReg) + ",r" + std::to_string(sourceReg) + ",r0");
+        }
+        
+        // Branch based on condition (0 = false, non-zero = true)
+        emit("bz r" + std::to_string(condReg) + "," + elseLabel);
+        freeRegister(condReg);
+    }
+    
+    // Then block
+    emitComment("then branch");
+    emitLabel(thenLabel);
+    if (thenBlock) {
+        thenBlock->accept(this);
+    }
+    emit("j " + endifLabel);
+    
+    // Else block
+    emitComment("else branch");
+    emitLabel(elseLabel);
+    if (elseBlock) {
+        elseBlock->accept(this);
+    }
+    
+    // End of if statement
+    emitLabel(endifLabel);
+    emitComment("end if");
+}
+
+void CodeGenVisitor::visitCondition(ASTNode* node) {
+    // A condition has a rel_op node as its only child
+    ASTNode* relOpNode = node->getLeftMostChild();
+    if (!relOpNode) return;
+    
+    // Process the rel_op node
+    relOpNode->accept(this);
+    
+    // Pass register info up to parent node
+    if (!relOpNode->getMetadata("reg").empty()) {
+        node->setMetadata("reg", relOpNode->getMetadata("reg"));
+    }
+    
+    // Pass memory location info up to parent node
+    if (!relOpNode->getMetadata("offset").empty()) {
+        node->setMetadata("offset", relOpNode->getMetadata("offset"));
+    }
+}
+
+void CodeGenVisitor::visitRelOp(ASTNode* node) {
+    // Get the left and right arithmetic expressions
+    ASTNode* leftExpr = node->getLeftMostChild();
+    ASTNode* rightExpr = leftExpr ? leftExpr->getRightSibling() : nullptr;
+    
+    if (!leftExpr || !rightExpr) return;
+    
+    // Process operands
+    leftExpr->accept(this);
+    rightExpr->accept(this);
+    
+    // Allocate registers for the comparison
+    int reg1 = allocateRegister();
+    int reg2 = allocateRegister();
+    int resultReg = allocateRegister();
+    
+    // Get operand values into registers - handle identifiers separately
+    int leftOffset, rightOffset;
+    
+    // Handle left operand
+    if (leftExpr->getNodeEnum() == NodeType::IDENTIFIER) {
+        leftOffset = getSymbolOffset(leftExpr->getNodeValue());
+    } else {
+        leftOffset = std::stoi(leftExpr->getMetadata("offset"));
+    }
+    
+    // Handle right operand
+    if (rightExpr->getNodeEnum() == NodeType::IDENTIFIER) {
+        rightOffset = getSymbolOffset(rightExpr->getNodeValue());
+    } else {
+        rightOffset = std::stoi(rightExpr->getMetadata("offset"));
+    }
+    
+    // Load operands into registers
+    emit("lw r" + std::to_string(reg1) + "," + std::to_string(leftOffset) + "(r14)");
+    emit("lw r" + std::to_string(reg2) + "," + std::to_string(rightOffset) + "(r14)");
+    
+    // Get the relational operator
+    std::string op = node->getNodeValue();
+    
+    // Use Moon's comparison instructions instead of branch instructions
+    if (op == ">") {
+        emit("cgt r" + std::to_string(resultReg) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
+    } else if (op == ">=") {
+        emit("cge r" + std::to_string(resultReg) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
+    } else if (op == "<") {
+        emit("clt r" + std::to_string(resultReg) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
+    } else if (op == "<=") {
+        emit("cle r" + std::to_string(resultReg) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
+    } else if (op == "==") {
+        emit("ceq r" + std::to_string(resultReg) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
+    } else if (op == "<>") {
+        emit("cne r" + std::to_string(resultReg) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
+    }
+    
+    // Store the result - result is already 1 (true) or 0 (false)
+    int resultOffset = std::stoi(node->getMetadata("offset"));
+    emit("sw " + std::to_string(resultOffset) + "(r14),r" + std::to_string(resultReg));
+    node->setMetadata("reg", std::to_string(resultReg));
+    
+    // Free registers for operands
+    freeRegister(reg1);
+    freeRegister(reg2);
 }

@@ -107,7 +107,6 @@ int MemSizeVisitor::getTableScopeOffset(std::shared_ptr<SymbolTable> table) {
     return 0; // Default
 }
 
-// Fixed getTypeSize to calculate proper class sizes
 int MemSizeVisitor::getTypeSize(const std::string& type) {
     // Basic types
     if (type == "int") return TypeSize::INT_SIZE;
@@ -153,7 +152,24 @@ int MemSizeVisitor::getTypeSize(const std::string& type) {
         for (const auto& symbolPair : classTable->getSymbols()) {
             auto symbol = symbolPair.second;
             if (symbol && symbol->getKind() == SymbolKind::VARIABLE) {
-                totalSize += getTypeSize(symbol->getType());
+                int memberSize = 0;
+                
+                // Check if the member is an array
+                if (symbol->isArray()) {
+                    // For arrays in classes, calculate size based on type and dimensions
+                    std::string memberType = symbol->getType();
+                    memberSize = getTypeSize(memberType);
+                    
+                    // Multiply by each dimension
+                    for (int dim : symbol->getArrayDimensions()) {
+                        memberSize *= dim;
+                    }
+                } else {
+                    // Normal member, just get its type size
+                    memberSize = getTypeSize(symbol->getType());
+                }
+                
+                totalSize += memberSize;
             }
         }
         return totalSize > 0 ? totalSize : TypeSize::POINTER_SIZE;
@@ -246,34 +262,6 @@ void MemSizeVisitor::calculateTableOffsets(std::shared_ptr<SymbolTable> table) {
         calculateTableOffsets(nestedTable);
     }
 }
-
-// std::string MemSizeVisitor::createTempVar(const std::string& type, const std::string& kind) {
-//     // Generate unique temp var name
-//     std::string tempName = "t" + std::to_string(tempVarCounter++);
-    
-//     // Create a symbol for the temp var
-//     auto tempSymbol = std::make_shared<Symbol>(tempName, type, SymbolKind::VARIABLE);
-//     setSymbolTempVarKind(tempSymbol, kind);
-    
-//     // Add it to the current table
-//     if (currentTable) {
-//         currentTable->addSymbol(tempSymbol);
-        
-//         // Calculate size and offset
-//         int size = getTypeSize(type);
-//         setSymbolSize(tempSymbol, size);
-        
-//         // Get current scope offset
-//         int currentOffset = getTableScopeOffset(currentTable);
-//         currentOffset -= size;
-//         setSymbolOffset(tempSymbol, currentOffset);
-        
-//         // Update table scope offset
-//         setTableScopeOffset(currentTable, currentOffset);
-//     }
-    
-//     return tempName;
-// }
 
 std::string MemSizeVisitor::createTempVar(const std::string& type, const std::string& kind, ASTNode* node) {
     // Generate unique temp var name
@@ -793,80 +781,22 @@ void MemSizeVisitor::visitLocalVariable(ASTNode* node) {
     }
 }
 
-// void MemSizeVisitor::visitArrayType(ASTNode* node) {
-//     // An ArrayType node has:
-//     // - Left child: dimension (could be a number or an expression)
-//     // - Right child: the base type (could be another ArrayType for multi-dimensional arrays)
+void MemSizeVisitor::visitRelOp(ASTNode* node) {
+    // Visit left operand
+    ASTNode* leftOperand = node->getLeftMostChild();
+    if (leftOperand) {
+        leftOperand->accept(this);
+    }
     
-//     // Process dimension
-//     ASTNode* dimNode = node->getLeftMostChild();
-//     int dimension = 1; // Default dimension if not specified
+    // Visit right operand
+    ASTNode* rightOperand = leftOperand ? leftOperand->getRightSibling() : nullptr;
+    if (rightOperand) {
+        rightOperand->accept(this);
+    }
     
-//     if (dimNode) {
-//         // If the dimension is a direct integer literal, use that value
-//         if (dimNode->getNodeEnum() == NodeType::ARRAY_DIMENSION) {
-//             try {
-//                 dimension = std::stoi(dimNode->getNodeValue());
-//             } catch (const std::exception&) {
-//                 // If conversion fails, default to 1
-//                 dimension = 1;
-//             }
-//         } 
-//         else {
-//             // For non-constant dimensions, we still need to visit the node
-//             // but we'll use a default size of 1 or determined elsewhere
-//             dimNode->accept(this);
-//         }
-//     }
-    
-//     // Process base type to get element type info
-//     ASTNode* typeNode = dimNode ? dimNode->getRightSibling() : nullptr;
-//     std::string baseType = "int"; // Default base type
-    
-//     if (typeNode) {
-//         if (typeNode->getNodeEnum() == NodeType::TYPE) {
-//             baseType = typeNode->getNodeValue();
-//         }
-        
-//         // Process the type node (could be another array type for multidimensional arrays)
-//         typeNode->accept(this);
-//     }
-    
-//     // For array declarations in local variables, the parent node should be LOCAL_VARIABLE
-//     // and we should store the array dimension information on the symbol
-//     ASTNode* ancestorNode = node->getParent();
-//     while (ancestorNode && ancestorNode->getNodeEnum() != NodeType::LOCAL_VARIABLE &&
-//            ancestorNode->getNodeEnum() != NodeType::VARIABLE) {
-//         ancestorNode = ancestorNode->getParent();
-//     }
-    
-//     if (ancestorNode && 
-//         (ancestorNode->getNodeEnum() == NodeType::LOCAL_VARIABLE || 
-//          ancestorNode->getNodeEnum() == NodeType::VARIABLE)) {
-//         // This is part of a variable declaration - find the variable name
-//         ASTNode* varIdNode = ancestorNode->getLeftMostChild();
-//         if (varIdNode) {
-//             std::string varName = varIdNode->getNodeValue();
-//             auto varSymbol = currentTable->lookupSymbol(varName, true); // localOnly=true
-            
-//             if (varSymbol) {
-//                 // Update the symbol's type to include array notation
-//                 std::string currentType = varSymbol->getType();
-//                 if (currentType.find('[') == std::string::npos) {
-//                     // Not already an array type, make it one
-//                     varSymbol->setMetadata("original_type", currentType); // Save original type
-//                     std::string newType = currentType + "[" + std::to_string(dimension) + "]";
-//                     // We can't directly change the type in Symbol, but we can store it in metadata
-//                     varSymbol->setMetadata("array_type", newType);
-//                 }
-                
-//                 // Recalculate size based on dimensions
-//                 int newSize = getTypeSize(baseType) * dimension;
-//                 setSymbolSize(varSymbol, newSize);
-//             }
-//         }
-//     }
-// }
+    // Create a temporary variable to store the comparison result (boolean as int)
+    createTempVar("int", "tempvar", node);
+}
 
 // For simplicity, I'm just implementing the main visitor methods
 // All other visitor methods would just traverse the AST without special handling
@@ -924,6 +854,6 @@ DEFAULT_VISITOR_METHOD(ArrayAccess)
 DEFAULT_VISITOR_METHOD(Expr)
 DEFAULT_VISITOR_METHOD(Factor)
 DEFAULT_VISITOR_METHOD(AssignOp)
-DEFAULT_VISITOR_METHOD(RelOp)
+// DEFAULT_VISITOR_METHOD(RelOp)
 DEFAULT_VISITOR_METHOD(Attribute)
 DEFAULT_VISITOR_METHOD(ImplementationId)
