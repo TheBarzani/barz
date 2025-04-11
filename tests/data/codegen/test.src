@@ -10,7 +10,7 @@ function main() => void
   local z: int;
   x := 2;
   y := 3;
-  z := x+y*10;
+  z := x*y/2;
   write(x);
   write(y);                                   // 3.4 
   write(z);

@@ -37,11 +37,11 @@ digraph AST {
   node33 [label="INTEGER | 3 "];
   node42 [label="ASSIGNMENT |  "];
   node35 [label="IDENTIFIER | z "];
-  node38 [label="ADD_OP | + "];
+  node40 [label="MULT_OP | / "];
+  node38 [label="MULT_OP | * "];
   node37 [label="IDENTIFIER | x "];
-  node40 [label="MULT_OP | * "];
   node39 [label="IDENTIFIER | y "];
-  node41 [label="INTEGER | 10 "];
+  node41 [label="INTEGER | 2 "];
   node44 [label="WRITE_STATEMENT |  "];
   node43 [label="IDENTIFIER | x "];
   node46 [label="WRITE_STATEMENT |  "];
@@ -83,10 +83,10 @@ digraph AST {
   node34 -> node33;
   node17 -> node42;
   node42 -> node35;
-  node42 -> node38;
+  node42 -> node40;
+  node40 -> node38;
   node38 -> node37;
-  node38 -> node40;
-  node40 -> node39;
+  node38 -> node39;
   node40 -> node41;
   node17 -> node44;
   node44 -> node43;

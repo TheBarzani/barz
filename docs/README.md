@@ -284,7 +284,7 @@ NOTE:
 - [ ] 4.2. For arrays of objects, access to an array’s element’s data members.
 - [ ] 4.3. For objects, access to members of basic types.
 - [ ] 4.4. For objects, access to members of array or object types.
-- [ ] 5.1. Computing the value of an entire complex expression.
+- [x] 5.1. Computing the value of an entire complex expression.
 - [ ] 5.2. Expression involving an array factor whose indexes are themselves expressions.
 - [ ] 5.3. Expression involving an object factor referring to object members.
 
@@ -310,6 +310,6 @@ NOTE:
 | 4.2     |     | 1.0 |
 | 4.3     |     | 1.0 |
 | 4.4     |     | 1.0 |
-| 5.1     |     | 2.0 |
+| 5.1     |  X  | 2.0 |
 | 5.2     |     | 1.0 |
 | 5.3     |     | 1.0 |

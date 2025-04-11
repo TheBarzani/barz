@@ -26,18 +26,18 @@ main      entry
           % processing:: y := t2
           lw r1,-20(r14)
           sw -8(r14),r1
-          % processing: t3 := 10
-          addi r1,r0,10
-          sw -24(r14),r1
-          % processing: t4 := y * t3
-          lw r1,-8(r14)
-          lw r2,-24(r14)
+          % processing: t3 := x * y
+          lw r1,-4(r14)
+          lw r2,-8(r14)
           mul r3,r1,r2
-          sw -28(r14),r3
-          % processing: t5 := x + t4
-          lw r2,-4(r14)
+          sw -24(r14),r3
+          % processing: t4 := 2
+          addi r2,r0,2
+          sw -28(r14),r2
+          % processing: t5 := t3 / t4
+          lw r2,-24(r14)
           lw r1,-28(r14)
-          add r4,r2,r1
+          div r4,r2,r1
           sw -32(r14),r4
           % processing:: z := t5
           lw r1,-32(r14)

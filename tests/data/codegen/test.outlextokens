@@ -9,7 +9,7 @@
 [local, local, 10] [id, z, 10] [colon, :, 10] [int, int, 10] [semi, ;, 10]
 [id, x, 11] [assign, :=, 11] [intlit, 2, 11] [semi, ;, 11]
 [id, y, 12] [assign, :=, 12] [intlit, 3, 12] [semi, ;, 12]
-[id, z, 13] [assign, :=, 13] [id, x, 13] [plus, +, 13] [id, y, 13] [mult, *, 13] [intlit, 10, 13] [semi, ;, 13]
+[id, z, 13] [assign, :=, 13] [id, x, 13] [mult, *, 13] [id, y, 13] [div, /, 13] [intlit, 2, 13] [semi, ;, 13]
 [write, write, 14] [lpar, (, 14] [id, x, 14] [rpar, ), 14] [semi, ;, 14]
 [write, write, 15] [lpar, (, 15] [id, y, 15] [rpar, ), 15] [semi, ;, 15] [inlinecmt, // 3.4 , 15]
 [write, write, 16] [lpar, (, 16] [id, z, 16] [rpar, ), 16] [semi, ;, 16]
