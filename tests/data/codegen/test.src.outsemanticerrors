@@ -1,4 +1,3 @@
 === Semantic Errors/Warnings for ../tests/data/codegen/test.src ===
 
-Error at line 27: SemCheck Error: Use of undeclared variable: z3
-Warning at line 27: SemCheck Warning: Writing non-standard type: error
+Error at line 19: SemCheck Error: Use of array with wrong number of dimensions. Expected 2, got 1

@@ -111,6 +111,7 @@ private:
     // Expression handling
     int tempVarCounter;
     std::stack<std::string> expressionTypes;
+    std::vector<int> currentArrayDimensions;
     
     // Helper methods
     int getTypeSize(const std::string& type);

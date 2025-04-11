@@ -21,8 +21,26 @@ function main() => void
   local z: int;
   x:=1;
   write(x);
-    y:=2;
+  y:=2;
   write(y);
-    z:=3;
+  z:=3;
   write(z);
+  local i: int;
+  i := 0;
+  while (i<10)
+  {
+    write (i);
+    i:=i+2;
+  };
+  i := 0;
+  while (i<10){
+    write (i);
+      if (i == 5) 
+    then
+    {
+      write (i);
+    } 
+    else {};
+    i:=i+1;
+  };
 }

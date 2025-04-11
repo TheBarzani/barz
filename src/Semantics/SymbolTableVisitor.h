@@ -96,6 +96,9 @@ public:
     bool isArray() const { return !arrayDimensions.empty(); }
     void addArrayDimension(int dim) { arrayDimensions.push_back(dim); }
     const std::vector<int>& getArrayDimensions() const { return arrayDimensions; }
+    void clearArrayDimensions() {
+        arrayDimensions.clear();
+    }
 
     void setDeclarationLine(int line) { declarationLine = line; }
     void setDefinitionLine(int line) { definitionLine = line; }

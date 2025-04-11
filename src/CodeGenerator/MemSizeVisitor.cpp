@@ -424,6 +424,7 @@ void MemSizeVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Symbol
     }
     
     // Process nested tables in reversed order
+    std::reverse(nestedTables.begin(), nestedTables.end());
     for (const auto& [name, nestedTable] : nestedTables) {
         // Print nested table with increased indentation
         writeTableToFile(out, nestedTable, indent + 4);
@@ -872,25 +873,59 @@ void MemSizeVisitor::visitLocalVariable(ASTNode* node) {
     ASTNode* typeNode = varIdNode ? varIdNode->getRightSibling() : nullptr;
     
     if (varIdNode && typeNode) {
+        // Clear array dimensions before processing the type
+        currentArrayDimensions.clear();
+        
         // Get the variable name
         std::string varName = varIdNode->getNodeValue();
         
+        // Process the type node - this will set currentArrayDimensions if it's an array
+        if (typeNode->getNodeEnum() == NodeType::ARRAY_TYPE) {
+            typeNode->accept(this);
+            // After visiting array type, currentArrayDimensions should be populated
+        } else {
+            // For non-array types, just get the type name
+            typeNode->accept(this);
+        }
+        
         // Look it up in the current table - it should already exist
         auto varSymbol = currentTable->lookupSymbol(varName, true); // localOnly=true
+        std::string typeName = typeNode->getNodeValue();
         
         if (!varSymbol) {
             // If it doesn't exist, create it
-            std::string typeName = typeNode->getNodeValue();
+            if (typeNode->getNodeEnum() == NodeType::ARRAY_TYPE) {
+                // For array types, get the base type from the first child
+                ASTNode* baseTypeNode = typeNode->getLeftMostChild();
+                if (baseTypeNode) {
+                    typeName = currentType;
+                }
+            }
+            
             auto newSymbol = std::make_shared<Symbol>(varName, typeName, SymbolKind::VARIABLE);
+            
+            // Add array dimensions if any
+            for (int dim : currentArrayDimensions) {
+                newSymbol->addArrayDimension(dim);
+            }
+            
             currentTable->addSymbol(newSymbol);
         } else {
             // Important: Re-add it to the symbol table to update its position in insertion order
-            // This will place it after any temp vars created before this local variable
+            // AND make sure array dimensions are preserved
+            
+            // Update dimensions if it's an array
+            if (!currentArrayDimensions.empty()) {
+                // Clear existing dimensions first to avoid duplicates
+                varSymbol->clearArrayDimensions();
+                for (int dim : currentArrayDimensions) {
+                    varSymbol->addArrayDimension(dim);
+                }
+            }
+            
+            // Re-add to update position
             currentTable->removeSymbol(varName);
             currentTable->addSymbol(varSymbol);
-        }
-        if(typeNode->getNodeEnum() == NodeType::ARRAY_TYPE){
-            typeNode->accept(this); // Visit array type node to calculate size
         }
     }
 }
@@ -912,50 +947,6 @@ void MemSizeVisitor::visitRelOp(ASTNode* node) {
     createTempVar("int", "tempvar", node);
 }
 
-// void MemSizeVisitor::visitFunctionBody(ASTNode* node) {
-//     // Track all symbols that need to be properly ordered
-//     std::set<std::string> localVars;
-    
-//     // First pass - collect all existing local variables
-//     for (const auto& symbolPair : currentTable->getSymbols()) {
-//         auto symbol = symbolPair.second;
-//         if (symbol && symbol->getKind() == SymbolKind::VARIABLE) {
-//             localVars.insert(symbol->getName());
-//         }
-//     }
-    
-//     // Process all statements in order
-//     ASTNode* child = node->getLeftMostChild();
-//     while (child) {
-//         // Special handling for local variable declarations
-//         if (child->getNodeEnum() == NodeType::LOCAL_VARIABLE) {
-//             ASTNode* varIdNode = child->getLeftMostChild();
-//             if (varIdNode) {
-//                 std::string varName = varIdNode->getNodeValue();
-                
-//                 // If it exists, remove it so we can reorder
-//                 auto varSymbol = currentTable->lookupSymbol(varName, true);
-//                 if (varSymbol) {
-//                     currentTable->removeSymbol(varName);
-//                 }
-                
-//                 // Process the declaration normally
-//                 child->accept(this);
-                
-//                 // Mark as processed
-//                 localVars.insert(varName);
-//             }
-//         } else {
-//             // Process other statements normally
-//             child->accept(this);
-//         }
-        
-//         child = child->getRightSibling();
-//     }
-    
-//     // Force recalculation of all offsets after all statements are processed
-//     calculateTableOffsets(currentTable);
-// }
 
 // For simplicity, I'm just implementing the main visitor methods
 // All other visitor methods would just traverse the AST without special handling
@@ -992,8 +983,8 @@ DEFAULT_VISITOR_METHOD(ParamList)
 DEFAULT_VISITOR_METHOD(Param)
 DEFAULT_VISITOR_METHOD(ParamId)
 DEFAULT_VISITOR_METHOD(Type)
-DEFAULT_VISITOR_METHOD(ArrayType)
-DEFAULT_VISITOR_METHOD(ArrayDimension)
+// DEFAULT_VISITOR_METHOD(ArrayType)
+// DEFAULT_VISITOR_METHOD(ArrayDimension)
 DEFAULT_VISITOR_METHOD(Block)
 DEFAULT_VISITOR_METHOD(StatementsList)
 DEFAULT_VISITOR_METHOD(IfStatement)
@@ -1069,5 +1060,54 @@ void MemSizeVisitor::removeLocalVariables(std::shared_ptr<SymbolTable> table) {
     // Recursively process nested tables
     for (const auto& [name, nestedTable] : table->getNestedTables()) {
         removeLocalVariables(nestedTable);
+    }
+}
+
+// Update visitArrayType to properly collect dimensions
+void MemSizeVisitor::visitArrayType(ASTNode* node) {
+    // Get dimension node (left child)
+    ASTNode* dimNode = node->getLeftMostChild();
+    if (dimNode) {
+        // Process dimension node to add it to currentArrayDimensions
+        dimNode->accept(this);
+    }
+    
+    // Get type node (right child)
+    ASTNode* typeNode = dimNode ? dimNode->getRightSibling() : nullptr;
+    if (typeNode) {
+        // Check if this is another array type (multidimensional array)
+        if (typeNode->getNodeEnum() == NodeType::ARRAY_TYPE) {
+            // Process nested array type recursively - will collect inner dimensions
+            typeNode->accept(this);
+        } else {
+            // This is the base type (like int, float, etc.)
+            currentType = typeNode->getNodeValue();
+        }
+    }
+}
+
+// Add a proper implementation for visitArrayDimension
+void MemSizeVisitor::visitArrayDimension(ASTNode* node) {
+    std::string dimensionValue = node->getNodeValue();
+    
+    // Check if this is a dynamic array (marked as "dynamic" or empty)
+    if (dimensionValue == "dynamic" || dimensionValue.empty()) {
+        // Dynamic array - use special marker -1
+        currentArrayDimensions.push_back(-1);
+        return;
+    }
+    
+    // For regular arrays with dimension values stored directly in the node
+    try {
+        int dimension = std::stoi(dimensionValue);
+        if (dimension <= 0) {
+            // Handle invalid dimension (should log an error in a real implementation)
+            currentArrayDimensions.push_back(1); // Default to 1
+        } else {
+            currentArrayDimensions.push_back(dimension);
+        }
+    } catch (const std::exception&) {
+        // If not a number, default to dynamic array
+        currentArrayDimensions.push_back(-1);
     }
 }

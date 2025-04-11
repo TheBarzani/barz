@@ -338,11 +338,9 @@ void SemanticCheckingVisitor::visitArrayAccess(ASTNode* node) {
             return;
         }
         
-        // Count how many indices are applied
-        int indexCount = 0;
+        // Process the current dimension's index
         ASTNode* indexNode = arrayNode->getRightSibling();
-        while (indexNode) {
-            indexCount++;
+        if (indexNode) {
             indexNode->accept(this);
             TypeInfo indexType = currentExprType;
             
@@ -350,23 +348,11 @@ void SemanticCheckingVisitor::visitArrayAccess(ASTNode* node) {
             if (indexType.type != "int") {
                 reportError("Array index must be of integer type, got: " + indexType.type, node);
             }
-            
-            indexNode = indexNode->getRightSibling();
         }
         
-        // Check if correct number of dimensions are used
-        if (indexCount > arrayType.dimensions.size()) {
-            reportError("Too many indices for array of dimension " + 
-                       std::to_string(arrayType.dimensions.size()), node);
-        } else if (indexCount < arrayType.dimensions.size()) {
-            reportError("Use of array with wrong number of dimensions. Expected " + 
-                       std::to_string(arrayType.dimensions.size()) + ", got " + 
-                       std::to_string(indexCount), node);
-        }
-        
-        // Reduce array dimensions by index count
+        // Reduce array dimensions by one for this level of access
         currentExprType = arrayType;
-        for (int i = 0; i < indexCount && !currentExprType.dimensions.empty(); i++) {
+        if (!currentExprType.dimensions.empty()) {
             currentExprType.dimensions.erase(currentExprType.dimensions.begin());
         }
     }
