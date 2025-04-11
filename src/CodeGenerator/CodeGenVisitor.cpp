@@ -512,7 +512,7 @@ DEFAULT_VISITOR_METHOD(FunctionDeclaration)
 DEFAULT_VISITOR_METHOD(Attribute)
 DEFAULT_VISITOR_METHOD(SingleStatement)
 DEFAULT_VISITOR_METHOD(ExpressionStatement)
-DEFAULT_VISITOR_METHOD(ReturnStatement)
+// DEFAULT_VISITOR_METHOD(ReturnStatement)
 DEFAULT_VISITOR_METHOD(AssignOp)
 // DEFAULT_VISITOR_METHOD(RelOp)
 DEFAULT_VISITOR_METHOD(Identifier)
@@ -520,7 +520,7 @@ DEFAULT_VISITOR_METHOD(SelfIdentifier)
 DEFAULT_VISITOR_METHOD(Type)
 DEFAULT_VISITOR_METHOD(ArrayDimension)
 DEFAULT_VISITOR_METHOD(Param)
-DEFAULT_VISITOR_METHOD(FunctionCall)
+// DEFAULT_VISITOR_METHOD(FunctionCall)
 DEFAULT_VISITOR_METHOD(ArrayAccess)
 DEFAULT_VISITOR_METHOD(DotIdentifier)
 DEFAULT_VISITOR_METHOD(DotAccess)
@@ -888,4 +888,121 @@ void CodeGenVisitor::visitWhileStatement(ASTNode* node) {
     // Label for the end of the loop
     emitLabel(whileEndLabel);
     emitComment("end while loop");
+}
+
+void CodeGenVisitor::visitFunctionCall(ASTNode* node) {
+    // Get function name and parameter list
+    ASTNode* idNode = node->getLeftMostChild();
+    ASTNode* paramListNode = idNode ? idNode->getRightSibling() : nullptr;
+    
+    if (!idNode) return;
+    
+    std::string functionName = idNode->getNodeValue();
+    
+    // Generate comment for function call
+    emitComment("Function call: " + functionName);
+    
+    // Save current scope offset for restoring later
+    int currentScopeOffset = getScopeOffset(currentTable);
+    
+    // Step 1: Process parameters in reverse order (right to left)
+    std::vector<ASTNode*> params;
+    if (paramListNode) {
+        ASTNode* paramNode = paramListNode->getLeftMostChild();
+        while (paramNode) {
+            params.push_back(paramNode);
+            paramNode = paramNode->getRightSibling();
+        }
+    }
+    
+    // Step 2: Evaluate parameters and push them onto the stack
+    emitComment("Pushing parameters onto stack");
+    int paramSizes = 0;
+    
+    // Process parameters in reverse order
+    for (auto it = params.rbegin(); it != params.rend(); ++it) {
+        ASTNode* param = *it;
+        
+        // Visit the parameter to evaluate it
+        param->accept(this);
+        
+        // Get parameter value
+        int paramReg = allocateRegister();
+        
+        // Load parameter value (could be from variable or temp)
+        if (param->getNodeEnum() == NodeType::IDENTIFIER) {
+            int paramOffset = getSymbolOffset(param->getNodeValue());
+            emit("lw r" + std::to_string(paramReg) + "," + std::to_string(paramOffset) + "(r14)");
+        } else {
+            // Expression result is in a temporary variable
+            int exprOffset = std::stoi(param->getMetadata("offset"));
+            emit("lw r" + std::to_string(paramReg) + "," + std::to_string(exprOffset) + "(r14)");
+        }
+        
+        // Push parameter onto the stack (adjust stack pointer and store value)
+        // Assuming 4-byte parameters for simplicity - adjust based on actual types
+        emit("sw " + std::to_string(paramSizes) + "(r14),r" + std::to_string(paramReg));
+        paramSizes += 4; // Increment by parameter size (4 bytes for int)
+        
+        freeRegister(paramReg);
+    }
+    
+    // Step 3: Save current frame information for the callee
+    // Adjust stack pointer for new activation record
+    emitComment("Setting up activation record for function call");
+    emit("addi r14,r14," + std::to_string(paramSizes));
+    
+    // Step 4: Jump to function with link
+    emit("jl r15," + functionName);
+    
+    // Step 5: Restore stack frame after function returns
+    emitComment("Function " + functionName + " returned, restoring stack");
+    emit("subi r14,r14," + std::to_string(paramSizes));
+    
+    // Step 6: Handle return value if the function returns something
+    // Look up function in symbol table to determine its return type
+    auto funcSymbols = symbolTable->lookupFunctions(functionName);
+    if (!funcSymbols.empty() && funcSymbols[0]->getType() != "void") {
+        // For non-void functions, the return value is in r13
+        // Store it in a temporary variable
+        std::string retVarName = node->getMetadata("moonVarName");
+        int retOffset = std::stoi(node->getMetadata("offset"));
+        
+        emitComment("Storing return value from r13");
+        emit("sw " + std::to_string(retOffset) + "(r14),r13");
+        
+        // Set register metadata for parent nodes
+        node->setMetadata("reg", "13"); // Return value is in r13
+    }
+}
+
+void CodeGenVisitor::visitReturnStatement(ASTNode* node) {
+    // Get the return value expression, if any
+    ASTNode* exprNode = node->getLeftMostChild();
+    
+    // If there's a return value, process it
+    if (exprNode) {
+        exprNode->accept(this);
+        
+        // Load return value into r13 (by convention)
+        int returnReg = allocateRegister();
+        
+        // Get the value from variable or expression
+        if (exprNode->getNodeEnum() == NodeType::IDENTIFIER) {
+            int valueOffset = getSymbolOffset(exprNode->getNodeValue());
+            emit("lw r" + std::to_string(returnReg) + "," + std::to_string(valueOffset) + "(r14)");
+        } else {
+            // Expression result is in a temporary variable
+            int valueOffset = std::stoi(exprNode->getMetadata("offset"));
+            emit("lw r" + std::to_string(returnReg) + "," + std::to_string(valueOffset) + "(r14)");
+        }
+        
+        // Copy to r13 (return value register by convention)
+        emit("add r13,r" + std::to_string(returnReg) + ",r0");
+        freeRegister(returnReg);
+    }
+    
+    // Return to caller
+    emitComment("Return to caller");
+    emit("jr r15");
 }

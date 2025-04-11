@@ -9,28 +9,29 @@
     | var       | y            | float     | 80    | -128  |
     ========================================================
     ========================================================
-    | table: ::func1               | scope offset: -2640   |
+    | table: ::func1               | scope offset: -8      |
     ========================================================
-    | var       | a            | int       | 1360  | -1360 |
-    | var       | calcs        | CALCULATOR| 1280  | -2640 |
+    | var       | a            | int       | 4     | -4    |
+    | litval    | t1           | int       | 4     | -8    |
     ========================================================
     ========================================================
-    | table: ::main                | scope offset: -60     |
+    | table: ::main                | scope offset: -64     |
     ========================================================
     | var       | x            | int       | 4     | -4    |
     | var       | y            | int       | 4     | -8    |
     | var       | z            | int       | 4     | -12   |
-    | litval    | t1           | int       | 4     | -16   |
-    | litval    | t2           | int       | 4     | -20   |
+    | var       | ret          | int       | 4     | -16   |
+    | retval    | t2           | int       | 4     | -20   |
     | litval    | t3           | int       | 4     | -24   |
-    | tempvar   | t4           | int       | 4     | -28   |
-    | tempvar   | t5           | int       | 4     | -32   |
+    | litval    | t4           | int       | 4     | -28   |
+    | litval    | t5           | int       | 4     | -32   |
     | tempvar   | t6           | int       | 4     | -36   |
-    | var       | i            | int       | 4     | -40   |
-    | litval    | t7           | int       | 4     | -44   |
+    | tempvar   | t7           | int       | 4     | -40   |
+    | var       | i            | int       | 4     | -44   |
     | litval    | t8           | int       | 4     | -48   |
-    | tempvar   | t9           | int       | 4     | -52   |
-    | litval    | t10          | int       | 4     | -56   |
-    | tempvar   | t11          | int       | 4     | -60   |
+    | litval    | t9           | int       | 4     | -52   |
+    | tempvar   | t10          | int       | 4     | -56   |
+    | litval    | t11          | int       | 4     | -60   |
+    | tempvar   | t12          | int       | 4     | -64   |
     ========================================================
 ========================================================

@@ -4,10 +4,11 @@ class CALCULATOR {
   public attribute y: float[10];
 };
 
-function func1() => void
+function func1() => int
 {
-  local a: int[10][34];
-  local calcs: CALCULATOR[10];
+  local a: int;
+  a := 111; 
+  return(a);
 }
 
 function main() => void  
@@ -15,21 +16,24 @@ function main() => void
   local x: int;                                    
   local y: int;                                    
   local z: int;
+  local ret: int;
+  ret := func1();
+  write(ret);
   x := 3;
   y := 2;
   z := x or 0;
   if (x < y) 
         then {
-            write (x-y);
+            // write (x-y);
         } else {
-            write (y);
-            write (x);
+            // write (y);
+            // write (x);
         };
   local i: int;
   i := 0;
   while (i<=10){
-    write(i);
+    // write(i);
     i := i + 1;
   };
-  write(z);
+  // write(z);
 }
