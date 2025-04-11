@@ -139,6 +139,8 @@ std::string ASTNode::getNodeType()
         case NodeType::CONDITION:           return "CONDITION";
         case NodeType::ARRAY_TYPE:          return "ARRAY_TYPE";
         case NodeType::DOT_ACCESS:          return "DOT_ACCESS";
+        case NodeType::INDEX_LIST:          return "INDEX_LIST";
+        case NodeType::DIM_LIST:            return "DIM_LIST";
         default:
             // TODO: throw an exception when this happens
             return "UNKNOWN";

@@ -46,7 +46,7 @@ FACTOR -> IDORSELF FACTOR2 REPTVARIABLEORFUNCTIONCALL _finishFactor
 | not FACTOR _createNotExpr
 | SIGN FACTOR _applySign .
 FACTOR2 -> lpar APARAMS rpar _createFunctionCall | INDICES .
-INDICES -> INDICE _addIndex _processArrayAccess INDICES | .
+INDICES -> INDICE _addIndex INDICES | _processArrayAccess .
 REPTVARIABLEORFUNCTIONCALL -> IDNEST _processDotAccess REPTVARIABLEORFUNCTIONCALL | .
 VARIABLE -> IDORSELF VARIABLE2 _finishVariable .
 VARIABLE2 -> INDICES REPTVARIABLE | lpar APARAMS rpar _createFunctionCall VARIDNEST .
@@ -58,7 +58,7 @@ IDNEST -> dot id _pushDotIdentifier IDNEST2 .
 IDNEST2 -> lpar APARAMS rpar _createFunctionCall | INDICES .
 ARRAYSIZE -> lsqbr ARRAYSIZE2 .
 ARRAYSIZE2 -> intlit _addArrayDimension rsqbr | _addDynamicArrayDimension rsqbr .
-ARRAYSIZES -> ARRAYSIZE _processArraySize ARRAYSIZES | .
+ARRAYSIZES -> ARRAYSIZE ARRAYSIZES | _processArraySize .
 TYPE -> int _setTypeInt | float _setTypeFloat | id _setTypeCustom .
 RETURNTYPE -> TYPE | void _setTypeVoid .
 APARAMS -> _createParamList EXPR _addActualParam REPTAPARAMS1 | _createParamList .

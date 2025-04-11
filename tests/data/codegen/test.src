@@ -1,46 +1,5 @@
-class CALCULATOR {
-  private attribute memory: float;
-  public attribute x: int[10];
-  public attribute y: float[10];
-};
-
-function func1(a: int, b: int) => int
-{
-  write(a);
-  return(a+b);
-}
-
 function main() => void  
 {
-
-  local ret: int;
-  ret := func1(2,3);
-  write(ret);
-  local x: int;                                    
-  local y: int;                                    
-  local z: int;
-  x:=1;
-  write(x);
-  y:=2;
-  write(y);
-  z:=3;
-  write(z);
-  local i: int;
-  i := 0;
-  while (i<10)
-  {
-    write (i);
-    i:=i+2;
-  };
-  i := 0;
-  while (i<10){
-    write (i);
-      if (i == 5) 
-    then
-    {
-      write (i);
-    } 
-    else {};
-    i:=i+1;
-  };
+  local x: int[4][4][3];
+  x[1][2][1] := 2;
 }

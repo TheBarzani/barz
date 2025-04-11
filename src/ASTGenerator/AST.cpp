@@ -430,11 +430,11 @@ void AST::performAction(std::string action, std::string value, int line) {
             ASTNode* functionCall = makeFamily(NodeType::FUNCTION_CALL, id, params);
             ASTStack.push_back(functionCall);
     }
-    else if (action == "_processArrayAccess") {
-            ASTNode* indices = ASTStack.back(); ASTStack.pop_back();
-            ASTNode* variable = ASTStack.back(); ASTStack.pop_back();
-            ASTNode* arrayAccess = makeFamily(NodeType::ARRAY_ACCESS, variable, indices);
-            ASTStack.push_back(arrayAccess);
+    else if (action == "_addIndex") {
+            // ASTNode* indices = ASTStack.back(); ASTStack.pop_back();
+            // ASTNode* variable = ASTStack.back(); ASTStack.pop_back();
+            // ASTNode* arrayAccess = makeFamily(NodeType::ARRAY_ACCESS, variable, indices);
+            // ASTStack.push_back(arrayAccess);
     }
     else if (action == "_pushIdentifier") {
             ASTNode* identifier = createNode(NodeType::IDENTIFIER, value, line);
@@ -556,9 +556,24 @@ void AST::performAction(std::string action, std::string value, int line) {
         // ASTStack.push_back(createNode(NodeType::BLOCK, "empty", line));
     }
     else if(action == "_processArraySize"){
-        ASTNode * type = ASTStack.back(); ASTStack.pop_back();
-        ASTNode * dimension = ASTStack.back(); ASTStack.pop_back();
-        ASTStack.push_back(makeFamily(NodeType::ARRAY_TYPE, type, dimension));
+        
+        // Get all indices from the stack (in reverse order since we're popping from the end)
+        ASTNode* dimListNode = createNode(NodeType::DIM_LIST, "dimList", line);
+        while (!ASTStack.empty() && (ASTStack.back()->getNodeEnum() != NodeType::TYPE)) {
+            ASTNode* dim = ASTStack.back(); ASTStack.pop_back();
+            dimListNode->adoptChildren(dim);
+        }
+        
+        // Get the array identifier
+        if (ASTStack.empty()) {
+            std::cerr << "Error: Array identifier not found on stack for _processArrayAccess" << std::endl;
+            return;
+        }
+        
+        ASTNode* arrayType = ASTStack.back();
+        ASTStack.pop_back();
+        // Push the completed array access node back onto the stack
+        ASTStack.push_back(makeFamily(NodeType::ARRAY_TYPE, arrayType, dimListNode));
     }
     else if (action == "_pushIntLiteral") {
         ASTNode* intNode = createNode(NodeType::INT, value, line);
@@ -568,6 +583,28 @@ void AST::performAction(std::string action, std::string value, int line) {
         ASTNode* floatNode = createNode(NodeType::FLOAT, value, line);
         ASTStack.push_back(floatNode);
     }
+    else if (action == "_processArrayAccess") {
+        
+        // Get all indices from the stack (in reverse order since we're popping from the end)
+        ASTNode* indexListNode = createNode(NodeType::INDEX_LIST, "indexList", line);
+        while (!ASTStack.empty() && (ASTStack.back()->getNodeEnum() != NodeType::IDENTIFIER && 
+                                    ASTStack.back()->getNodeEnum() != NodeType::DOT_ACCESS)) {
+            ASTNode* index = ASTStack.back(); ASTStack.pop_back();
+            indexListNode->adoptChildren(index);
+        }
+        
+        // Get the array identifier
+        if (ASTStack.empty()) {
+            std::cerr << "Error: Array identifier not found on stack for _processArrayAccess" << std::endl;
+            return;
+        }
+        
+        ASTNode* arrayIdentifier = ASTStack.back();
+        ASTStack.pop_back();
+        // Push the completed array access node back onto the stack
+        ASTStack.push_back(makeFamily(NodeType::ARRAY_ACCESS, arrayIdentifier, indexListNode));
+    }
+
     // Debug output
     printVector(ASTStack);
     std::cout << "Stack size after action: " << ASTStack.size() << std::endl;

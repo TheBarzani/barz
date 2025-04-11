@@ -73,7 +73,9 @@ enum class NodeType
     IMPLEMENTATION_FUNCTION_LIST,
     CONDITION,
     ARRAY_TYPE,
-    DOT_ACCESS
+    DOT_ACCESS,
+    INDEX_LIST,
+    DIM_LIST,
 };
 
 /**
