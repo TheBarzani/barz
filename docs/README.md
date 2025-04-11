@@ -278,7 +278,7 @@ NOTE:
 - [ ] 2.4. Call to member functions that can use their object’s data members.
 - [x] 3.1. Assignment statement: assignment of the resulting value of an expression to a variable, independently of what is the expression to the right of the assignment operator.
 - [x] 3.2. Conditional statement: implementation of a branching mechanism.
-- [ ] 3.3. Loop statement: implementation of a branching mechanism.
+- [x] 3.3. Loop statement: implementation of a branching mechanism.
 - [x] 3.4. Input/output statement: Moon machine keyboard input/console output.
 - [ ] 4.1. For arrays of basic types (integer and float), access to an array’s elements.
 - [ ] 4.2. For arrays of objects, access to an array’s element’s data members.
@@ -286,10 +286,10 @@ NOTE:
 - [ ] 4.4. For objects, access to members of array or object types.
 - [x] 5.1.1. Computing expressions with plus (+) operator.
 - [x] 5.1.2. Computing expressions with minus (-) operator.
-- [ ] 5.1.3. Computing expressions with or operator.
+- [x] 5.1.3. Computing expressions with or operator.
 - [x] 5.1.4. Computing expressions with multiplication (*) operator.
 - [x] 5.1.5. Computing expressions with division (/) operator.
-- [ ] 5.1.6. Computing expressions with and operator.
+- [x] 5.1.6. Computing expressions with and operator.
 - [ ] 5.2. Expression involving an array factor whose indexes are themselves expressions.
 - [ ] 5.3. Expression involving an object factor referring to object members.
 

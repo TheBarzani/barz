@@ -313,7 +313,6 @@ void CodeGenVisitor::visitAddOp(ASTNode* node) {
         rightOffset = std::stoi(rightChild->getMetadata("offset"));
     }
     
-    // Rest of the method remains unchanged
     // Get result metadata (already set by MemSizeVisitor)
     std::string resultVarName = node->getMetadata("moonVarName");
     int resultOffset = std::stoi(node->getMetadata("offset"));
@@ -328,11 +327,23 @@ void CodeGenVisitor::visitAddOp(ASTNode* node) {
     emit("lw r" + std::to_string(reg1) + "," + std::to_string(leftOffset) + "(r14)");
     emit("lw r" + std::to_string(reg2) + "," + std::to_string(rightOffset) + "(r14)");
     
-    // Perform addition/subtraction
+    // Perform addition/subtraction/or
     if (opStr == "+") {
         emit("add r" + std::to_string(reg3) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
     } else if (opStr == "-") {
         emit("sub r" + std::to_string(reg3) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
+    } else if (opStr == "or") {
+        // Logical OR implementation
+        std::string trueLabel = "logical_or_true_" + std::to_string(labelCounter);
+        std::string endLabel = "logical_or_end_" + std::to_string(labelCounter++);
+        
+        emit("bnz r" + std::to_string(reg1) + "," + trueLabel); // If left operand is non-zero, result is 1
+        emit("bnz r" + std::to_string(reg2) + "," + trueLabel); // If right operand is non-zero, result is 1
+        emit("addi r" + std::to_string(reg3) + ",r0,0"); // Both are zero, result is 0
+        emit("j " + endLabel);
+        emitLabel(trueLabel);
+        emit("addi r" + std::to_string(reg3) + ",r0,1"); // Result is 1
+        emitLabel(endLabel);
     }
     
     // Store result in a temporary variable
@@ -396,11 +407,23 @@ void CodeGenVisitor::visitMultOp(ASTNode* node) {
     emit("lw r" + std::to_string(reg1) + "," + std::to_string(leftOffset) + "(r14)");
     emit("lw r" + std::to_string(reg2) + "," + std::to_string(rightOffset) + "(r14)");
     
-    // Perform multiplication/division
+    // Perform multiplication/division/and
     if (opStr == "*") {
         emit("mul r" + std::to_string(reg3) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
     } else if (opStr == "/") {
         emit("div r" + std::to_string(reg3) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
+    } else if (opStr == "and") {
+        // Logical AND implementation
+        std::string zeroLabel = "logical_and_zero_" + std::to_string(labelCounter);
+        std::string endLabel = "logical_and_end_" + std::to_string(labelCounter++);
+        
+        emit("bz r" + std::to_string(reg1) + "," + zeroLabel); // If left operand is 0, result is 0
+        emit("bz r" + std::to_string(reg2) + "," + zeroLabel); // If right operand is 0, result is 0
+        emit("addi r" + std::to_string(reg3) + ",r0,1"); // Both are non-zero, result is 1
+        emit("j " + endLabel);
+        emitLabel(zeroLabel);
+        emit("addi r" + std::to_string(reg3) + ",r0,0"); // Result is 0
+        emitLabel(endLabel);
     }
     
     // Store result in a temporary variable
