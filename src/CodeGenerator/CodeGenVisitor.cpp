@@ -483,7 +483,7 @@ DEFAULT_VISITOR_METHOD(FunctionBody)
 DEFAULT_VISITOR_METHOD(ConstructorSignature)
 DEFAULT_VISITOR_METHOD(LocalVariable)
 // DEFAULT_VISITOR_METHOD(IfStatement)
-DEFAULT_VISITOR_METHOD(WhileStatement)
+// DEFAULT_VISITOR_METHOD(WhileStatement)
 DEFAULT_VISITOR_METHOD(RelationalExpr)
 DEFAULT_VISITOR_METHOD(FunctionDeclaration)
 DEFAULT_VISITOR_METHOD(Attribute)
@@ -679,9 +679,9 @@ void CodeGenVisitor::visitReadStatement(ASTNode* node) {
 
 void CodeGenVisitor::visitIfStatement(ASTNode* node) {
     // Create unique labels for branching
-    std::string thenLabel = "then" + std::to_string(labelCounter++);
-    std::string elseLabel = "else" + std::to_string(labelCounter++);
-    std::string endifLabel = "endif" + std::to_string(labelCounter++);
+    std::string thenLabel = "then_" + std::to_string(labelCounter++);
+    std::string elseLabel = "else_" + std::to_string(labelCounter++);
+    std::string endifLabel = "endif_" + std::to_string(labelCounter++);
     
     // Get the three children: condition, then-block, and else-block
     ASTNode* conditionNode = node->getLeftMostChild();
@@ -815,4 +815,54 @@ void CodeGenVisitor::visitRelOp(ASTNode* node) {
     // Free registers for operands
     freeRegister(reg1);
     freeRegister(reg2);
+}
+
+void CodeGenVisitor::visitWhileStatement(ASTNode* node) {
+    // Create unique labels for the loop
+    std::string whileStartLabel = "while_start_" + std::to_string(labelCounter++);
+    std::string whileEndLabel = "while_end_" + std::to_string(labelCounter++);
+    
+    // Get the condition and body blocks
+    ASTNode* conditionNode = node->getLeftMostChild();
+    ASTNode* bodyNode = conditionNode ? conditionNode->getRightSibling() : nullptr;
+    
+    // Label for the start of the loop (condition evaluation)
+    emitLabel(whileStartLabel);
+    emitComment("while loop - evaluating condition");
+    
+    // Process the condition
+    if (conditionNode) {
+        conditionNode->accept(this);
+        
+        // Get the register or memory location holding the condition result
+        int condReg = allocateRegister();
+        int condOffset;
+        
+        if (conditionNode->getMetadata("reg").empty()) {
+            // Condition result is in memory, load it
+            condOffset = std::stoi(conditionNode->getMetadata("offset"));
+            emit("lw r" + std::to_string(condReg) + "," + std::to_string(condOffset) + "(r14)");
+        } else {
+            // Condition result is already in a register
+            int sourceReg = std::stoi(conditionNode->getMetadata("reg"));
+            emit("add r" + std::to_string(condReg) + ",r" + std::to_string(sourceReg) + ",r0");
+        }
+        
+        // Branch to end if condition is false (0)
+        emit("bz r" + std::to_string(condReg) + "," + whileEndLabel);
+        freeRegister(condReg);
+    }
+    
+    // Process the loop body
+    emitComment("while loop - executing body");
+    if (bodyNode) {
+        bodyNode->accept(this);
+    }
+    
+    // Jump back to the start of the loop
+    emit("j " + whileStartLabel);
+    
+    // Label for the end of the loop
+    emitLabel(whileEndLabel);
+    emitComment("end while loop");
 }
