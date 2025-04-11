@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Generating MOON machine code..." << std::endl;
     
     // Create code generation visitor with the memory-sized symbol table
-    CodeGenVisitor codeGenVisitor(symbolTableVisitor.getGlobalTable());
+    CodeGenVisitor codeGenVisitor(memSizeVisitor.getGlobalTable());
     
     // Process the AST with the code generation visitor
     codeGenVisitor.processAST(root);

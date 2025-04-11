@@ -1,4 +1,4 @@
 === Semantic Errors/Warnings for ../tests/data/codegen/test.src ===
 
-Warning at line 57: SymTab Warning: Member 'evaluate' in class 'LINEAR' shadows inherited member from class 'POLYNOMIAL'
-Warning at line 65: SymTab Warning: Member 'evaluate' in class 'QUADRATIC' shadows inherited member from class 'POLYNOMIAL'
+Error at line 27: SemCheck Error: Use of undeclared variable: z3
+Warning at line 27: SemCheck Warning: Writing non-standard type: error

@@ -6,8 +6,13 @@
 #include <iomanip>
 
 CodeGenVisitor::CodeGenVisitor(std::shared_ptr<SymbolTable> symbolTable) 
-    : symbolTable(symbolTable), currentTable(symbolTable), 
-      labelCounter(0), stringLiteralCounter(0) {  // Remove tempVarCounter
+    : labelCounter(0), stringLiteralCounter(0) {
+    
+    // Create a deep copy of the symbol table
+    this->symbolTable = std::make_shared<SymbolTable>(*symbolTable);
+    
+    // Set the current table to point to our copy of the symbol table
+    currentTable = this->symbolTable;
     
     // Initialize register pool with registers r1-r12 (r0, r13-r15 are reserved)
     for (int i = 12; i >= 1; i--) {
@@ -556,7 +561,43 @@ void CodeGenVisitor::visitFunction(ASTNode* node) {
     std::shared_ptr<SymbolTable> previousTable = currentTable;
     
     // Find and set the function's symbol table as current
-    auto nestedTable = symbolTable->getNestedTable(functionName);
+    // Fix the table lookup to use the correct naming convention with parameter types
+    auto funcSymbols = symbolTable->lookupFunctions(functionName);
+    std::shared_ptr<SymbolTable> nestedTable = nullptr;
+
+    if (!funcSymbols.empty()) {
+        // Format the unique key using the same convention as in SymbolTableVisitor
+        std::string uniqueKey = functionName;
+        const auto& paramTypes = funcSymbols[0]->getParams();
+        
+        if (!paramTypes.empty()) {
+            uniqueKey += "_";
+            for (size_t i = 0; i < paramTypes.size(); ++i) {
+                // Replace any special characters that might cause issues in table names
+                std::string cleanType = paramTypes[i];
+                std::replace(cleanType.begin(), cleanType.end(), '[', '_');
+                std::replace(cleanType.begin(), cleanType.end(), ']', '_');
+                std::replace(cleanType.begin(), cleanType.end(), ' ', '_');
+                
+                uniqueKey += cleanType;
+                if (i < paramTypes.size() - 1) {
+                    uniqueKey += "_";
+                }
+            }
+        }
+        
+        // Now try to get the table with the formatted key
+        nestedTable = symbolTable->getNestedTable(uniqueKey);
+        
+        if (!nestedTable) {
+            // Fallback: try with just the function name (for simple cases)
+            nestedTable = symbolTable->getNestedTable(functionName);
+        }
+    } else {
+        // Fallback to just the function name if no symbols found
+        nestedTable = symbolTable->getNestedTable(functionName);
+    }
+
     if (nestedTable) {
         currentTable = nestedTable;
         emitComment("Entering function scope: " + functionName);
@@ -587,7 +628,6 @@ void CodeGenVisitor::visitFunction(ASTNode* node) {
     
     // Restore previous table when leaving function scope
     currentTable = previousTable;
-    emitComment("Exiting function scope: " + functionName);
 }
 
 void CodeGenVisitor::visitWriteStatement(ASTNode* node) {
@@ -917,8 +957,12 @@ void CodeGenVisitor::visitFunctionCall(ASTNode* node) {
     
     // Step 2: Evaluate parameters and push them onto the stack
     emitComment("Pushing parameters onto stack");
-    int paramSizes = 0;
-    
+        
+    // First, find function to determine return type size
+    auto funcSymbols = symbolTable->lookupFunctions(functionName);
+
+    int paramOffset = currentScopeOffset;
+
     // Process parameters in reverse order
     for (auto it = params.rbegin(); it != params.rend(); ++it) {
         ASTNode* param = *it;
@@ -928,45 +972,69 @@ void CodeGenVisitor::visitFunctionCall(ASTNode* node) {
         
         // Get parameter value
         int paramReg = allocateRegister();
-        
+        int offset;
         // Load parameter value (could be from variable or temp)
         if (param->getNodeEnum() == NodeType::IDENTIFIER) {
-            int paramOffset = getSymbolOffset(param->getNodeValue());
-            emit("lw r" + std::to_string(paramReg) + "," + std::to_string(paramOffset) + "(r14)");
+            offset = getSymbolOffset(param->getNodeValue());
+            emit("lw r" + std::to_string(paramReg) + "," + std::to_string(offset) + "(r14)");
         } else {
             // Expression result is in a temporary variable
-            int exprOffset = std::stoi(param->getMetadata("offset"));
-            emit("lw r" + std::to_string(paramReg) + "," + std::to_string(exprOffset) + "(r14)");
+            offset = std::stoi(param->getMetadata("offset"));
+            emit("lw r" + std::to_string(paramReg) + "," + std::to_string(offset) + "(r14)");
         }
+        // Push parameter onto the stack at the correct offset
+        emit("sw " + std::to_string(paramOffset+offset) + "(r14),r" + std::to_string(paramReg));
         
-        // Push parameter onto the stack (adjust stack pointer and store value)
-        // Assuming 4-byte parameters for simplicity - adjust based on actual types
-        emit("sw " + std::to_string(paramSizes) + "(r14),r" + std::to_string(paramReg));
-        paramSizes += 4; // Increment by parameter size (4 bytes for int)
         
         freeRegister(paramReg);
     }
-    
-    // Step 3: Save current frame information for the callee
-    // Adjust stack pointer for new activation record
+
+    // Adjust frame pointer for function call - total offset includes parameters and reserved space
     emitComment("Setting up activation record for function call");
-    emit("addi r14,r14," + std::to_string(paramSizes));
+    emit("addi r14,r14," + std::to_string(paramOffset));
     
     // Step 4: Jump to function with link
     emit("jl r15," + functionName);
     
     // Step 5: Restore stack frame after function returns
     emitComment("Function " + functionName + " returned, restoring stack");
-    emit("subi r14,r14," + std::to_string(paramSizes));
+    emit("subi r14,r14," + std::to_string(paramOffset));
     
     // Step 6: Handle return value if the function returns something
     // Look up function in symbol table to determine its return type
-    auto funcSymbols = symbolTable->lookupFunctions(functionName);
+    //auto funcSymbols = symbolTable->lookupFunctions(functionName)[0];
     if (!funcSymbols.empty() && funcSymbols[0]->getType() != "void") {
         // For non-void functions, the return value is in r13
-        // Store it in a temporary variable
-        std::string retVarName = node->getMetadata("moonVarName");
-        int retOffset = std::stoi(node->getMetadata("offset"));
+        
+        // Get temporary variable name from metadata if available
+        std::string retVarName;
+        int retOffset;
+        
+        if (!node->getMetadata("moonVarName").empty()) {
+            retVarName = node->getMetadata("moonVarName");
+            
+            // Look up the symbol in the current table
+            auto tempSymbol = currentTable->lookupSymbol(retVarName);
+            if (tempSymbol) {
+                retOffset = getSymbolOffset(retVarName);
+            } else {
+                // Fallback: check if offset is directly available
+                if (!node->getMetadata("offset").empty()) {
+                    retOffset = std::stoi(node->getMetadata("offset"));
+                } else {
+                    // Emergency fallback - create a temporary location in the stack
+                    emitComment("Warning: No temp var found for return value");
+                    retOffset = -8; // Use a common temporary area
+                }
+            }
+        } else if (!node->getMetadata("offset").empty()) {
+            // Direct offset available
+            retOffset = std::stoi(node->getMetadata("offset"));
+        } else {
+            // No metadata available
+            emitComment("Warning: No temp var found for return value");
+            retOffset = -8; // Use a common temporary area
+        }
         
         emitComment("Storing return value from r13");
         emit("sw " + std::to_string(retOffset) + "(r14),r13");
@@ -979,30 +1047,52 @@ void CodeGenVisitor::visitFunctionCall(ASTNode* node) {
 void CodeGenVisitor::visitReturnStatement(ASTNode* node) {
     // Get the return value expression, if any
     ASTNode* exprNode = node->getLeftMostChild();
-    
-    // If there's a return value, process it
     if (exprNode) {
+        // Process the expression to evaluate it
         exprNode->accept(this);
         
-        // Load return value into r13 (by convention)
-        int returnReg = allocateRegister();
+        // Get current function
+        std::string funcName = currentFunction;
+        auto funcSymbol = symbolTable->lookupFunctions(funcName)[0];
         
-        // Get the value from variable or expression
-        if (exprNode->getNodeEnum() == NodeType::IDENTIFIER) {
-            int valueOffset = getSymbolOffset(exprNode->getNodeValue());
-            emit("lw r" + std::to_string(returnReg) + "," + std::to_string(valueOffset) + "(r14)");
-        } else {
-            // Expression result is in a temporary variable
-            int valueOffset = std::stoi(exprNode->getMetadata("offset"));
-            emit("lw r" + std::to_string(returnReg) + "," + std::to_string(valueOffset) + "(r14)");
+        // Get return value offset
+        int returnOffset = -8; // Default if metadata not found
+        if (funcSymbol && !funcSymbol->getMetadata("return_offset").empty()) {
+            returnOffset = std::stoi(funcSymbol->getMetadata("return_offset"));
         }
         
-        // Copy to r13 (return value register by convention)
-        emit("add r13,r" + std::to_string(returnReg) + ",r0");
-        freeRegister(returnReg);
+        // Load return value into register
+        int retReg = allocateRegister();
+        
+        // Handle different types of return expressions
+        if (exprNode->getNodeEnum() == NodeType::IDENTIFIER) {
+            int valOffset = getSymbolOffset(exprNode->getNodeValue());
+            emit("lw r" + std::to_string(retReg) + "," + std::to_string(valOffset) + "(r14)");
+        } else {
+            // Expression result is in a temporary variable
+            int valOffset = std::stoi(exprNode->getMetadata("offset"));
+            emit("lw r" + std::to_string(retReg) + "," + std::to_string(valOffset) + "(r14)");
+        }
+        
+        // Store the value in the designated return area
+        emit("sw " + std::to_string(returnOffset) + "(r14),r" + std::to_string(retReg));
+        
+        // Also put the return value in r13 by convention
+        emit("add r13,r" + std::to_string(retReg) + ",r0");
+        
+        freeRegister(retReg);
     }
     
-    // Return to caller
-    emitComment("Return to caller");
+    // Get the link register offset
+    std::string funcName = currentFunction;
+    auto funcSymbol = symbolTable->lookupFunctions(funcName)[0];
+    int linkOffset = -4; // Default
+    
+    if (funcSymbol && !funcSymbol->getMetadata("link_register_offset").empty()) {
+        linkOffset = std::stoi(funcSymbol->getMetadata("link_register_offset"));
+    }
+    
+    // Restore return address and return
+    emit("lw r15," + std::to_string(linkOffset) + "(r14)");
     emit("jr r15");
 }

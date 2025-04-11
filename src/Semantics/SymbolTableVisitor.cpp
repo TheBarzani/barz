@@ -29,10 +29,64 @@ namespace std {
 // Symbol implementation
 Symbol::Symbol(const std::string& name, const std::string& type, SymbolKind kind)
     : name(name), type(type), kind(kind) {}
-
+// Copy constructor implementation
+Symbol::Symbol(const Symbol& other)
+    : name(other.name),
+      type(other.type),
+      kind(other.kind),
+      visibility(other.visibility),
+      inheritedClasses(other.inheritedClasses),
+      params(other.params),
+      defined(other.defined),
+      declared(other.declared),
+      arrayDimensions(other.arrayDimensions),
+      declarationLine(other.declarationLine),
+      definitionLine(other.definitionLine),
+      metadata(other.metadata)
+{
+    // All member variables copied directly
+}
 // SymbolTable implementation
 SymbolTable::SymbolTable(const std::string& scopeName, SymbolTable* parent)
     : scopeName(scopeName), parent(parent) {}
+
+// Deep copy constructor implementation
+SymbolTable::SymbolTable(const SymbolTable& other)
+    : scopeName(other.scopeName), 
+      parent(other.parent),
+      symbolInsertionOrder(other.symbolInsertionOrder),
+      metadata(other.metadata)
+{
+    // Deep copy all symbols
+    for (const auto& [name, symbol] : other.symbols) {
+        auto symbolCopy = std::make_shared<Symbol>(*symbol); // Copy the Symbol object
+        symbols[name] = symbolCopy;
+    }
+    
+    // Deep copy the function symbol if it exists
+    if (other.functionSymbol) {
+        functionSymbol = std::make_shared<Symbol>(*other.functionSymbol);
+    }
+    
+    // Deep copy the functions map
+    for (const auto& [sig, symbol] : other.functions) {
+        // Find the corresponding symbol in our new symbols map
+        auto it = symbols.find(symbol->getName());
+        if (it != symbols.end()) {
+            functions[sig] = it->second;
+        } else {
+            // If not in symbols (unlikely), create a new copy
+            functions[sig] = std::make_shared<Symbol>(*symbol);
+        }
+    }
+    
+    // Deep copy nested tables (recursively)
+    for (const auto& [name, nestedTable] : other.nestedTables) {
+        auto tableCopy = std::make_shared<SymbolTable>(*nestedTable); // Recursive copy
+        tableCopy->parent = this; // Update parent pointer to point to this table
+        nestedTables[name] = tableCopy;
+    }
+}
     
 bool SymbolTable::addSymbol(std::shared_ptr<Symbol> symbol) {
     const std::string& name = symbol->getName();
@@ -363,6 +417,7 @@ void SymbolTableVisitor::visitFunction(ASTNode* node) {
             // Create a new table if one doesn't exist yet
             functionTable = std::make_shared<SymbolTable>(funcTableName, currentTable.get());
             currentTable->addNestedTable(uniqueKey, functionTable);
+            functionTable->setFunctionSymbol(existingFunction);
         }
         
         // Store the function symbol with this subtable for overload resolution
@@ -429,6 +484,7 @@ void SymbolTableVisitor::visitFunction(ASTNode* node) {
             std::string funcTableName = (currentClassName.empty() ? "::" : currentClassName + "::") + currentFunctionName;
             functionTable = std::make_shared<SymbolTable>(funcTableName, currentTable.get());
             currentTable->addNestedTable(uniqueKey, functionTable);
+            functionTable->setFunctionSymbol(functionSymbol);
         }
         
         // Change scope to function table
@@ -1644,6 +1700,8 @@ void SymbolTableVisitor::createFunctionSubtable(std::shared_ptr<SymbolTable> par
     
     // Use the unique key when adding to nestedTables
     parentTable->addNestedTable(uniqueKey, functionTable);
+    
+    
 }
 
 // Helper function to format parameter types for table name

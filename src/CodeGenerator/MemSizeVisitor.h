@@ -92,6 +92,10 @@ public:
     void visitInt(ASTNode* node) override;
     void visitAttribute(ASTNode* node) override;
     void visitImplementationId(ASTNode* node) override;
+    // Get the generated global symbol table (returns a deep copy)
+    std::shared_ptr<SymbolTable> getGlobalTable() const { 
+        return std::make_shared<SymbolTable>(*symbolTable); 
+    }
 
 private:
     // Symbol table and tracking
@@ -125,6 +129,12 @@ private:
     // Extensions to SymbolTable class
     void setTableScopeOffset(std::shared_ptr<SymbolTable> table, int offset);
     int getTableScopeOffset(std::shared_ptr<SymbolTable> table);
+
+    // Helper method to determine a node's type
+    std::string determineNodeType(ASTNode* node);
+
+    // Helper method to remove local variables from tables
+    void removeLocalVariables(std::shared_ptr<SymbolTable> table);
 };
 
 #endif // MEM_SIZE_VISITOR_H

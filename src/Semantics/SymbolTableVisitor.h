@@ -56,7 +56,8 @@ namespace std {
 class Symbol {
 public:
     Symbol(const std::string& name, const std::string& type, SymbolKind kind);
-    
+    // Copy constructor
+    Symbol(const Symbol& other);
     // Getters and setters
     std::string getName() const { return name; }
     std::string getType() const { return type; }
@@ -163,7 +164,10 @@ private:
 class SymbolTable {
 public:
     SymbolTable(const std::string& scopeName, SymbolTable* parent = nullptr);
-    
+
+    // Deep copy constructor
+    SymbolTable(const SymbolTable& other);
+
     // Add a symbol to this table
     bool addSymbol(std::shared_ptr<Symbol> symbol);
     
@@ -252,8 +256,10 @@ public:
     // Output the symbol table to a file
     void outputSymbolTable(const std::string& filename);
     
-    // Get the generated global symbol table
-    std::shared_ptr<SymbolTable> getGlobalTable() const { return globalTable; }
+    // Get the generated global symbol table (returns a deep copy)
+    std::shared_ptr<SymbolTable> getGlobalTable() const { 
+        return std::make_shared<SymbolTable>(*globalTable); 
+    }
 
     // Implementation of all visitor methods
     void visitEmpty(ASTNode* node) override;

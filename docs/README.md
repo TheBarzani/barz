@@ -272,9 +272,9 @@ NOTE:
 - [x] 1.2. Allocate memory for arrays of basic types.
 - [x] 1.3. Allocate memory for objects.
 - [x] 1.4. Allocate memory for arrays of objects.
-- [ ] 2.1. Branch to a function’s code block, execute the code block, branch back to the calling function.
-- [ ] 2.2. Pass parameters as local values to the function’s code block.
-- [ ] 2.3. Upon execution of a return statement, pass the return value back to the calling function.
+- [x] 2.1. Branch to a function’s code block, execute the code block, branch back to the calling function.
+- [x] 2.2. Pass parameters as local values to the function’s code block.
+- [x] 2.3. Upon execution of a return statement, pass the return value back to the calling function.
 - [ ] 2.4. Call to member functions that can use their object’s data members.
 - [x] 3.1. Assignment statement: assignment of the resulting value of an expression to a variable, independently of what is the expression to the right of the assignment operator.
 - [x] 3.2. Conditional statement: implementation of a branching mechanism.
