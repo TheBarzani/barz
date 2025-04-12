@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <sstream>
 #include <set>
+#include <iomanip> // Required for std::setw
 
 // Since we need to extend Symbol and SymbolTable with additional properties,
 // we'll use custom metadata fields to store size and offset information
@@ -117,240 +118,220 @@ int MemSizeVisitor::getTableScopeOffset(std::shared_ptr<SymbolTable> table) {
     return 0; // Default
 }
 
-int MemSizeVisitor::getTypeSize(const std::string& type) {
-    // Basic types
-    if (type == "int") return TypeSize::INT_SIZE;
-    if (type == "float") return TypeSize::FLOAT_SIZE;
-    if (type == "void") return TypeSize::VOID_SIZE;
-    
-    // Check for arrays
-    size_t bracketPos = type.find('[');
+// Helper to extract base type from a type string possibly containing dimensions
+std::string MemSizeVisitor::getBaseType(const std::string& typeWithDimensions) {
+    size_t bracketPos = typeWithDimensions.find('[');
     if (bracketPos != std::string::npos) {
-        // Extract the dimension and base type
-        std::string baseType = type.substr(0, bracketPos);
-        
-        // Extract dimension size between [ and ]
-        size_t closeBracketPos = type.find(']', bracketPos);
-        if (closeBracketPos == std::string::npos) {
-            return TypeSize::POINTER_SIZE; // Malformed array type
-        }
-        
-        std::string dimStr = type.substr(bracketPos + 1, closeBracketPos - bracketPos - 1);
-        int dimension = 1; // Default to 1 if no size specified
-        
-        if (!dimStr.empty()) {
-            try {
-                dimension = std::stoi(dimStr);
-            } catch (const std::exception&) {
-                // If not a number, default to 1
-                dimension = 1;
-            }
-        }
-        
-        // Calculate base element size (which could be another array)
-        int elementSize = getTypeSize(baseType);
-        
-        // Total size is element size multiplied by dimension
-        return elementSize * dimension;
+        return typeWithDimensions.substr(0, bracketPos);
     }
-    
-    // Check for user-defined classes
-    auto classTable = symbolTable->getNestedTable(type);
+    return typeWithDimensions; // No brackets found, return the original string
+}
+
+// Updated getTypeSize to primarily handle base types and class names
+int MemSizeVisitor::getTypeSize(const std::string& baseType) {
+    if (baseType == "int") return TypeSize::INT_SIZE;
+    if (baseType == "float") return TypeSize::FLOAT_SIZE;
+    if (baseType == "void") return TypeSize::VOID_SIZE;
+
+    // Check for user-defined classes by looking up the name in the global scope
+    // Assuming class definitions are always in the global scope's nested tables.
+    auto classTable = symbolTable->getNestedTable(baseType);
     if (classTable) {
-        // Calculate class size as sum of member variable sizes
-        int totalSize = 0;
-        for (const auto& symbolPair : classTable->getSymbols()) {
-            auto symbol = symbolPair.second;
-            if (symbol && symbol->getKind() == SymbolKind::VARIABLE) {
-                int memberSize = 0;
-                
-                // Check if the member is an array
-                if (symbol->isArray()) {
-                    // For arrays in classes, calculate size based on type and dimensions
-                    std::string memberType = symbol->getType();
-                    memberSize = getTypeSize(memberType);
-                    
-                    // Multiply by each dimension
-                    for (int dim : symbol->getArrayDimensions()) {
-                        memberSize *= dim;
-                    }
-                } else {
-                    // Normal member, just get its type size
-                    memberSize = getTypeSize(symbol->getType());
-                }
-                
-                totalSize += memberSize;
-            }
+        // If the size is already calculated and stored, use it
+        std::string sizeMeta = classTable->getMetadata("size");
+        if (!sizeMeta.empty()) {
+            try {
+                return std::stoi(sizeMeta);
+            } catch (...) { /* ignore error, recalculate */ }
         }
-        return totalSize > 0 ? totalSize : TypeSize::POINTER_SIZE;
+
+        // Calculate class size recursively if not already done
+        // Note: This might lead to infinite recursion if classes contain each other directly.
+        // A better approach involves multiple passes or storing sizes during a dedicated class pass.
+        // For now, we rely on calculateTableOffsets handling nested class tables.
+        // We return POINTER_SIZE here as a placeholder if size isn't pre-calculated.
+        // The actual size calculation happens in calculateTableOffsets for members.
+        // When used for parameters/variables of class type, we often just need pointer size anyway.
+        return TypeSize::POINTER_SIZE; // Or calculate recursively if safe
     }
-    
-    // Default size for unknown types
+
+    // Default size for unknown types (treat as pointers or handle error)
     return TypeSize::POINTER_SIZE;
 }
 
+// Helper to check if a table represents a function scope
+bool MemSizeVisitor::isFunctionTable(std::shared_ptr<SymbolTable> table) {
+    // Method 1: Check for function symbol
+    auto funcSymbol = table->getFunctionSymbol();
+    if (funcSymbol && funcSymbol->getKind() == SymbolKind::FUNCTION) {
+        return true;
+    }
+    
+    // Method 2: Check table name patterns for function tables
+    if (table->getScopeName().find("::") == 0 ||          // Global function like "::main"
+        table->getScopeName().find("_int") != std::string::npos ||  // Function with int params
+        table->getScopeName().find("_float") != std::string::npos) { // Function with float params
+        return true;
+    }
+    
+    // Method 3: Check if table contains parameters
+    for (const auto& symbolPair : table->getSymbols()) {
+        if (symbolPair.second && symbolPair.second->getKind() == SymbolKind::PARAMETER) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+// Helper to calculate initial offset for function tables (return value + link register)
+int MemSizeVisitor::calculateFunctionInitialOffset(std::shared_ptr<SymbolTable> table) {
+    int offset = 0;
+    auto funcSymbol = table->getFunctionSymbol();
+    
+    // Get return type
+    std::string returnType = "void";
+    if (funcSymbol) {
+        returnType = funcSymbol->getType();
+    } else {
+        std::string returnTypeMetadata = table->getMetadata("return_type");
+        if (!returnTypeMetadata.empty()) {
+            returnType = returnTypeMetadata;
+        }
+    }
+    
+    // Reserve space for return value if not void
+    std::string baseReturnType = getBaseType(returnType);
+    if (baseReturnType != "void") {
+        int returnSize = getTypeSize(baseReturnType);
+        int alignment = (returnSize >= 8) ? 8 : 4;
+        offset = ((offset - returnSize) / alignment) * alignment;
+    }
+    
+    // Reserve space for link register
+    offset -= 4;
+    
+    // Set metadata
+    table->setMetadata("return_offset", std::to_string(offset + 4));
+    table->setMetadata("link_register_offset", std::to_string(offset));
+    if (funcSymbol) {
+        funcSymbol->setMetadata("return_offset", std::to_string(offset + 4));
+        funcSymbol->setMetadata("link_register_offset", std::to_string(offset));
+    }
+    
+    return offset;
+}
+
+// Main method to calculate offsets for a table and its contents
 void MemSizeVisitor::calculateTableOffsets(std::shared_ptr<SymbolTable> table) {
     if (!table) return;
     
-    // Determine if this is a function table using multiple methods
-    bool isFunctionTable = false;
-    auto funcSymbol = table->getFunctionSymbol();
     
-    // Method 1: Check function symbol
-    if (funcSymbol && funcSymbol->getKind() == SymbolKind::FUNCTION) {
-        isFunctionTable = true;
-    }
-    // Method 2: Check table name pattern
-    else if (table->getScopeName().find("::") == 0 ||
-             table->getScopeName().find("_int") != std::string::npos ||
-             table->getScopeName().find("_float") != std::string::npos) {
-        isFunctionTable = true;
-    }
-    // Method 3: Check if table contains parameters
-    else {
-        for (const auto& symbolPair : table->getSymbols()) {
-            if (symbolPair.second && symbolPair.second->getKind() == SymbolKind::PARAMETER) {
-                isFunctionTable = true;
-                break;
+    // Determine if this table represents a function
+    bool isFunction = isFunctionTable(table);
+    
+    // PASS 1: Calculate sizes for class tables first
+    // Process class tables first so their sizes are available when needed
+    for (const auto& [name, nestedTable] : table->getNestedTables()) {
+        // Skip global table and function tables - only process class tables
+        bool isClassTable = !isFunction && 
+                          nestedTable->getScopeName() != "global" && 
+                          !isFunctionTable(nestedTable);
+        
+        if (isClassTable && nestedTable->getMetadata("size").empty()) {
+            // Recursively calculate offsets for the class members
+            calculateTableOffsets(nestedTable);
+            
+            // Calculate total class size (from 0 to lowest offset)
+            int classTotalSize = -getTableScopeOffset(nestedTable);
+            
+            // Ensure minimum size for empty classes
+            if (classTotalSize <= 0) {
+                classTotalSize = TypeSize::POINTER_SIZE;
             }
+            
+            // Store class size in metadata
+            nestedTable->setMetadata("size", std::to_string(classTotalSize));
         }
     }
     
-    int initialOffset = 0;
+    // Calculate initial offset (0 for classes, function-specific for functions)
+    int initialOffset = isFunction ? calculateFunctionInitialOffset(table) : 0;
+    int currentOffset = initialOffset;
     
-    // For function tables, reserve space for return value and jump register
-    if (isFunctionTable) {
-        std::string returnType = "void"; // Default
-        
-        // Try to get return type from function symbol
-        if (funcSymbol) {
-            returnType = funcSymbol->getType();
-        } else {
-            // Fallback: Check if we can find a return type in metadata
-            std::string returnTypeMetadata = table->getMetadata("return_type");
-            if (!returnTypeMetadata.empty()) {
-                returnType = returnTypeMetadata;
-            }
-        }
-        
-        if (returnType != "void") {
-            int returnSize = getTypeSize(returnType);
-            // Align return value properly
-            int alignment = (returnSize >= 8) ? 8 : 4;
-            initialOffset = ((initialOffset - returnSize) / alignment) * alignment;
-        }
-        
-        // Space for jump register (return address) always 4 bytes
-        initialOffset -= 4;
-        
-        // Store this information in table metadata since funcSymbol might be nullptr
-        table->setMetadata("return_offset", std::to_string(initialOffset + 4));
-        table->setMetadata("link_register_offset", std::to_string(initialOffset));
-        
-        // If we have a function symbol, also store it there
-        if (funcSymbol) {
-            funcSymbol->setMetadata("return_offset", std::to_string(initialOffset + 4));
-            funcSymbol->setMetadata("link_register_offset", std::to_string(initialOffset));
-        }
-    }
-    
-    // Start parameters after the return value and jump register space
-    int paramOffset = initialOffset;
-    
-    // First process parameters with proper sequential offsets
-    std::vector<std::shared_ptr<Symbol>> parameters;
+    // PASS 2: Process symbols in this table, calculating offsets
     for (const auto& symbolName : table->getSymbolInsertionOrder()) {
         auto symbol = table->lookupSymbol(symbolName, true);
-        if (symbol && symbol->getKind() == SymbolKind::PARAMETER) {
-            parameters.push_back(symbol);
-        }
-    }
-    
-    // Parameters start at the initial offset
-    for (size_t i = 0; i < parameters.size(); i++) {
-        auto param = parameters[i];
+        if (!symbol) continue;
         
-        // Calculate size based on type and array dimensions
-        int size = getTypeSize(param->getType());
+        // Calculate symbol size based on type and dimensions
+        std::string baseType = getBaseType(symbol->getType());
+        int size = getTypeSize(baseType);
         
-        setSymbolSize(param, size);
-        
-        // Proper alignment for parameters
-        int alignment = (size >= 8 || param->isArray()) ? 8 : 4;
-        paramOffset = ((paramOffset - size) / alignment) * alignment;
-        setSymbolOffset(param, paramOffset);
-    }
-    
-    // Process non-parameters in exact insertion order
-    int currentOffset = paramOffset;
-    if (currentOffset == initialOffset && parameters.empty()) {
-        // If we have no parameters, start local vars after initial offset
-        currentOffset = initialOffset;
-    }
-    
-    for (const auto& symbolName : table->getSymbolInsertionOrder()) {
-        auto symbol = table->lookupSymbol(symbolName, true);
-        if (symbol && symbol->getKind() == SymbolKind::VARIABLE) {
-            // Calculate size based on type and array dimensions
-            int size = getTypeSize(symbol->getType());
-            if (symbol->isArray()) {
-                // For arrays, multiply base size by all dimensions
-                for (int dim : symbol->getArrayDimensions()) {
+        // For arrays, multiply size by all dimensions
+        if (symbol->isArray()) {
+            for (int dim : symbol->getArrayDimensions()) {
+                if (dim > 0) {
                     size *= dim;
+                } else {
+                    size = TypeSize::POINTER_SIZE; // Dynamic array
+                    break;
                 }
             }
-            
-            setSymbolSize(symbol, size);
-            
-            // Calculate offset with proper alignment
-            int alignment = (size >= 8 || symbol->isArray()) ? 8 : 4;
-            currentOffset = ((currentOffset - size) / alignment) * alignment;
-            setSymbolOffset(symbol, currentOffset);
         }
+        
+        setSymbolSize(symbol, size);
+        
+        // Calculate aligned offset
+        int alignment = (size >= 8 || symbol->isArray()) ? 8 : 4;
+        currentOffset = ((currentOffset - size) / alignment) * alignment;
+        setSymbolOffset(symbol, currentOffset);
     }
     
     // Save the total scope offset
     setTableScopeOffset(table, currentOffset);
     
-    // Process nested tables
+    // PASS 3: Process remaining nested function tables
     for (const auto& [name, nestedTable] : table->getNestedTables()) {
-        calculateTableOffsets(nestedTable);
+        // Skip tables already processed in PASS 1
+        if (nestedTable->getMetadata("size").empty()) {
+            calculateTableOffsets(nestedTable);
+        }
     }
 }
 
+// Updated createTempVar to use the refined offset calculation
 std::string MemSizeVisitor::createTempVar(const std::string& type, const std::string& kind, ASTNode* node) {
-    // Generate unique temp var name
     std::string tempName = "t" + std::to_string(tempVarCounter++);
-    
-    // Create a symbol for the temp var
     auto tempSymbol = std::make_shared<Symbol>(tempName, type, SymbolKind::VARIABLE);
     setSymbolTempVarKind(tempSymbol, kind);
-    
-    // Add it to the current table
+
     if (currentTable) {
-        currentTable->addSymbol(tempSymbol);
-        
-        // Calculate size and offset
+        currentTable->addSymbol(tempSymbol); // Add to table AND insertion order
+
+        // Calculate size (only base type needed for temps)
         int size = getTypeSize(type);
         setSymbolSize(tempSymbol, size);
-        calculateTableOffsets(currentTable);
-        // Get current scope offset
-        int currentOffset = getTableScopeOffset(currentTable);
-        // Calculate offset with proper alignment
-        setSymbolOffset(tempSymbol, currentOffset);
-        
-        // Update table scope offset
-        setTableScopeOffset(currentTable, currentOffset);
-        
+
+        // Get current scope offset *before* adding this temp var
+        int currentScopeEndOffset = getTableScopeOffset(currentTable);
+
+        // Calculate offset for this new temp var
+        int alignment = (size >= 8) ? 8 : 4;
+        int newOffset = ((currentScopeEndOffset - size) / alignment) * alignment;
+        setSymbolOffset(tempSymbol, newOffset);
+
+        // Update table's total scope offset
+        setTableScopeOffset(currentTable, newOffset);
+
         // Attach metadata to the AST node if provided
         if (node) {
             node->setMetadata("moonVarName", tempName);
-            node->setMetadata("offset", std::to_string(currentOffset));
+            node->setMetadata("offset", std::to_string(newOffset));
             node->setMetadata("size", std::to_string(size));
             node->setMetadata("type", type);
         }
     }
-    
     return tempName;
 }
 
@@ -366,7 +347,7 @@ void MemSizeVisitor::outputSymbolTable(const std::string& filename) {
     outFile.close();
 }
 
-// Fixed writeTableToFile to maintain insertion order
+// writeTableToFile to maintain insertion order
 void MemSizeVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<SymbolTable> table, int indent) {
     // Table header code unchanged
     std::string indentStr(indent, ' ');
@@ -410,20 +391,26 @@ void MemSizeVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Symbol
             << std::left << std::setw(6) << offset << "|" << std::endl;
     }
     
-    // Rest of method unchanged
-    // Collect nested tables in a vector to process them
-    std::vector<std::pair<std::string, std::shared_ptr<SymbolTable>>> nestedTables;
-    for (const auto& tablePair : table->getNestedTables()) {
-        nestedTables.push_back(tablePair);
+    // Process nested tables in proper insertion order
+    // ----------- CHANGED CODE STARTS HERE -----------
+    
+    // Use the table's getNestedTableInsertionOrder() method if available
+    // If not available, we'll need a fallback
+    std::vector<std::string> nestedTableOrder;
+    
+
+    nestedTableOrder = table->getNestedTableInsertionOrder();
+    
+    // Process nested tables in the determined order
+    for (const auto& tableName : nestedTableOrder) {
+        auto nestedTable = table->getNestedTable(tableName);
+        if (nestedTable) {
+            // Print nested table with increased indentation
+            writeTableToFile(out, nestedTable, indent + 4);
+        }
     }
     
-    // Process nested tables in reversed order
-    std::reverse(nestedTables.begin(), nestedTables.end());
-    for (const auto& [name, nestedTable] : nestedTables) {
-        // Print nested table with increased indentation
-        writeTableToFile(out, nestedTable, indent + 4);
-    }
-    
+    // ----------- CHANGED CODE ENDS HERE -----------
     // Close table
     out << indentStr << "========================================================" << std::endl;
 }
@@ -439,61 +426,22 @@ void MemSizeVisitor::visitProgram(ASTNode* node) {
     }
 }
 
+// Updated visitFunction to handle new Param structure indirectly
+// Updated visitFunction to properly handle function table lookup with parameter types
 void MemSizeVisitor::visitFunction(ASTNode* node) {
-    // Get function signature
+    // Get function name and signature
     ASTNode* signatureNode = node->getLeftMostChild();
     if (!signatureNode) return;
-    
-    // Get function ID
     ASTNode* funcIdNode = signatureNode->getLeftMostChild();
     if (!funcIdNode) return;
-    
     std::string funcName = funcIdNode->getNodeValue();
     currentFunctionName = funcName;
-    
-    // Get param types to build complete function key with proper array dimensions
-    std::vector<std::string> paramTypes;
-    ASTNode* paramListNode = funcIdNode->getRightSibling();
-    if (paramListNode && paramListNode->getNodeEnum() == NodeType::PARAM_LIST) {
-        ASTNode* paramNode = paramListNode->getLeftMostChild();
-        while (paramNode) {
-            ASTNode* paramIdNode = paramNode->getLeftMostChild();
-            ASTNode* typeNode = paramIdNode ? paramIdNode->getRightSibling() : nullptr;
-            
-            if (typeNode) {
-                // Clear array dimensions for each parameter
-                currentArrayDimensions.clear();
-                
-                // For array types, process recursively
-                if (typeNode->getNodeEnum() == NodeType::ARRAY_TYPE) {
-                    // Process array type to populate currentType and currentArrayDimensions
-                    typeNode->accept(this);
-                    
-                    // Now format the type with array dimensions
-                    std::string formattedType = currentType;
-                    for (int dim : currentArrayDimensions) {
-                        formattedType += "[" + (dim == -1 ? "" : std::to_string(dim)) + "]";
-                    }
-                    
-                    paramTypes.push_back(formattedType);
-                } else {
-                    // For simple types, just get the value
-                    paramTypes.push_back(typeNode->getNodeValue());
-                }
-            }
-            
-            paramNode = paramNode->getRightSibling();
-        }
-    }
-    
-    // Check if this is a class method based on parent nodes (unchanged)
+
+    // Check if class method context needs to be established
     bool isClassMethod = false;
     std::string className = "";
-    
-    // Check parent structure to determine if it's a member function
     ASTNode* parentNode = node->getParent();
     if (parentNode && parentNode->getNodeEnum() == NodeType::IMPLEMENTATION_FUNCTION_LIST) {
-        // Implementation details unchanged...
         ASTNode* grandParent = parentNode->getParent();
         if (grandParent && grandParent->getNodeEnum() == NodeType::IMPLEMENTATION) {
             ASTNode* implIdNode = grandParent->getLeftMostChild();
@@ -503,7 +451,6 @@ void MemSizeVisitor::visitFunction(ASTNode* node) {
             }
         }
     } else if (parentNode && parentNode->getNodeEnum() == NodeType::MEMBER) {
-        // Implementation details unchanged...
         isClassMethod = true;
         ASTNode* memberListNode = parentNode->getParent();
         if (memberListNode && memberListNode->getNodeEnum() == NodeType::MEMBER_LIST) {
@@ -516,37 +463,130 @@ void MemSizeVisitor::visitFunction(ASTNode* node) {
             }
         }
     }
+
+    auto prevTable = currentTable;
+    std::shared_ptr<SymbolTable> funcTable = nullptr;
     
-    // Build table key based on whether it's a class method
-    std::string tableKey = funcName;
+    // Extract parameter types from function signature
+    std::vector<std::string> paramTypes;
+    ASTNode* paramListNode = nullptr;
     
-    // Add parameter types if any - using the properly formatted array types
-    if (!paramTypes.empty()) {
-        tableKey += "_";
-        for (size_t i = 0; i < paramTypes.size(); i++) {
-            if (i > 0) tableKey += "_";
-            // Remove brackets and convert to snake_case for table naming
-            std::string paramType = paramTypes[i];
-            std::replace(paramType.begin(), paramType.end(), '[', '_');
-            std::replace(paramType.begin(), paramType.end(), ']', '_');
-            tableKey += paramType;
+    // Find the parameter list node
+    ASTNode* child = signatureNode->getLeftMostChild(); // Skip function ID
+    while (child) {
+        if (child->getNodeEnum() == NodeType::PARAM_LIST) {
+            paramListNode = child;
+            break;
+        }
+        child = child->getRightSibling();
+    }
+    
+    // Process parameter types
+    if (paramListNode) {
+        ASTNode* paramNode = paramListNode->getLeftMostChild();
+        while (paramNode) {
+            // Get parameter type
+            ASTNode* paramIdNode = paramNode->getLeftMostChild();
+            ASTNode* typeNode = paramIdNode ? paramIdNode->getRightSibling() : nullptr;
+            
+            if (typeNode) {
+                std::string paramType = typeNode->getNodeValue();
+                // Convert to simplified type for table key
+                if (paramType == "int" || paramType == "float") {
+                    paramTypes.push_back(paramType);
+                } else {
+                    // Custom types are typically treated as "class" in the table key
+                    paramTypes.push_back("class");
+                }
+            }
+            
+            paramNode = paramNode->getRightSibling();
         }
     }
     
-    // Find function/method table
-    auto prevTable = currentTable;
-    auto funcTable = currentTable->getNestedTable(tableKey);
-    
-    if (funcTable) {
-        currentTable = funcTable;
+    // Format the function name with parameter types
+    std::string formattedFuncName = funcName;
+    if (!paramTypes.empty()) {
+        formattedFuncName += "_" + paramTypes[0];
+        for (size_t i = 1; i < paramTypes.size(); ++i) {
+            formattedFuncName += "_" + paramTypes[i];
+        }
     }
     
+    // For class methods, try multiple possible table key formats
+    if (isClassMethod && !className.empty()) {
+        auto classTable = symbolTable->getNestedTable(className); // Always use global scope to find class
+        
+        if (classTable) {
+            // Try different naming conventions for method tables
+            std::vector<std::string> possibleKeys = {
+                className + "::" + formattedFuncName,    // Standard format with params: CLASS::method_int_float
+                className + "::" + funcName,             // Standard format without params: CLASS::method
+                formattedFuncName,                       // Just formatted name: method_int_float
+                funcName,                                // Just method name: method
+                funcIdNode->getMetadata("table_key")     // Metadata if available
+            };
+            
+            // Try each key format
+            for (const auto& key : possibleKeys) {
+                if (!key.empty()) {
+                    funcTable = classTable->getNestedTable(key);
+                    if (funcTable) {
+                        // std::cout << "Found method table with key: " << key << std::endl;
+                        break;
+                    }
+                }
+            }
+            
+            if (funcTable) {
+                currentTable = funcTable;
+            } else {
+                // Could not find method table - error case
+                std::cerr << "Could not find symbol table for method " << funcName 
+                          << " in class " << className << std::endl;
+                std::cerr << "Tried keys with param types: " << formattedFuncName << std::endl;
+            }
+        }
+    } else {
+        // For global functions
+        std::string tableKey = funcIdNode->getMetadata("table_key");
+        
+        if (tableKey.empty()) {
+            // Try standard formats for global functions
+            std::vector<std::string> possibleKeys = {
+                "::" + formattedFuncName,    // With parameter types: ::func_int_float
+                "::" + funcName,             // Just function name: ::func
+                formattedFuncName,           // Formatted name without :: prefix
+                funcName                     // Just func name without prefix
+            };
+            
+            for (const auto& key : possibleKeys) {
+                funcTable = symbolTable->getNestedTable(key);
+                if (funcTable) {
+                    std::cout << "Found global function table with key: " << key << std::endl;
+                    break;
+                }
+            }
+        } else {
+            funcTable = symbolTable->getNestedTable(tableKey);
+        }
+        
+        if (funcTable) currentTable = funcTable;
+    }
+
+    if (!funcTable) {
+        // Error: Function table not found, cannot process body
+        std::cerr << "Could not find table for function: " << formattedFuncName << std::endl;
+        currentTable = prevTable; // Restore previous table
+        return;
+    }
+
     // Process function body
     ASTNode* bodyNode = signatureNode->getRightSibling();
     if (bodyNode) {
         bodyNode->accept(this);
     }
-    
+
     // Restore previous table
     currentTable = prevTable;
 }
@@ -880,66 +920,127 @@ void MemSizeVisitor::visitImplementationFunctionList(ASTNode* node) {
     }
 }
 
+// Updated visitLocalVariable to just visit the child Variable node
 void MemSizeVisitor::visitLocalVariable(ASTNode* node) {
-    // Get variable ID and type nodes
+    // The only child should be a Variable node
+    ASTNode* variableNode = node->getLeftMostChild();
+    if (variableNode && variableNode->getNodeEnum() == NodeType::VARIABLE) {
+        // Process the underlying variable declaration
+        // This will add/update the symbol in the currentTable's insertion order
+        variableNode->accept(this);
+    } else {
+        // reportError("LocalVariable node expects a Variable node as its child.", node);
+    }
+}
+
+void MemSizeVisitor::visitVariable(ASTNode* node) {
+    // Child 1: Variable ID
     ASTNode* varIdNode = node->getLeftMostChild();
-    ASTNode* typeNode = varIdNode ? varIdNode->getRightSibling() : nullptr;
+    if (!varIdNode) return;
+    std::string varName = varIdNode->getNodeValue();
+
+    // Child 2: Type
+    ASTNode* typeNode = varIdNode->getRightSibling();
+    if (!typeNode) return;
+    // Visit type to potentially set currentType (though not strictly needed here)
+    typeNode->accept(this);
+    std::string baseTypeName = typeNode->getNodeValue(); // Get base type name directly
+
+    // Child 3: Dimension List (optional)
+    ASTNode* dimListNode = typeNode->getRightSibling();
+    currentArrayDimensions.clear(); // Reset dimensions for this variable
+    bool isArray = false;
+    if (dimListNode && dimListNode->getNodeEnum() == NodeType::DIM_LIST) {
+        if (dimListNode->getLeftMostChild()) {
+            isArray = true;
+            dimListNode->accept(this); // Populates currentArrayDimensions
+        }
+    }
+
+    // --- Symbol Handling ---
+    // Check if this is a class attribute by examining the node's parent chain
+    bool isClassAttribute = false;
+    ASTNode* parent = node->getParent();
     
-    if (varIdNode && typeNode) {
-        // Clear array dimensions before processing the type
-        currentArrayDimensions.clear();
+    // Check if this is coming from an Attribute node (indicates class member)
+    if (parent && parent->getNodeEnum() == NodeType::ATTRIBUTE) {
+        isClassAttribute = true;
+    }
+
+    // Find the appropriate table for this variable
+    std::shared_ptr<SymbolTable> targetTable = currentTable;
+    
+    // If this is a class attribute but we're in the global table,
+    // find the appropriate class table instead
+    if (isClassAttribute && currentTable == symbolTable) {
+        // Try to determine which class this attribute belongs to
+        ASTNode* attributeNode = parent;
+        ASTNode* memberNode = attributeNode ? attributeNode->getParent() : nullptr;
+        ASTNode* memberListNode = memberNode ? memberNode->getParent() : nullptr;
+        ASTNode* classNode = memberListNode ? memberListNode->getParent() : nullptr;
+        ASTNode* classIdNode = classNode ? classNode->getLeftMostChild() : nullptr;
         
-        // Get the variable name
-        std::string varName = varIdNode->getNodeValue();
-        
-        // Process the type node - this will set currentArrayDimensions if it's an array
-        if (typeNode->getNodeEnum() == NodeType::ARRAY_TYPE) {
-            typeNode->accept(this);
-            // After visiting array type, currentArrayDimensions should be populated
-        } else {
-            // For non-array types, just get the type name
-            typeNode->accept(this);
+        if (classIdNode && classIdNode->getNodeEnum() == NodeType::CLASS_ID) {
+            std::string className = classIdNode->getNodeValue();
+            auto classTable = symbolTable->getNestedTable(className);
+            if (classTable) {
+                // Use the class table instead of currentTable
+                targetTable = classTable;
+            }
         }
         
-        // Look it up in the current table - it should already exist
-        auto varSymbol = currentTable->lookupSymbol(varName, true); // localOnly=true
-        std::string typeName = typeNode->getNodeValue();
-        
-        if (!varSymbol) {
-            // If it doesn't exist, create it
-            if (typeNode->getNodeEnum() == NodeType::ARRAY_TYPE) {
-                // For array types, get the base type from the first child
-                ASTNode* baseTypeNode = typeNode->getLeftMostChild();
-                if (baseTypeNode) {
-                    typeName = currentType;
-                }
+        // If we couldn't determine the class table, keep the attribute in its
+        // original table (probably a class table) but skip adding to global
+        if (targetTable == symbolTable) {
+            return; // Skip adding this attribute to the global table
+        }
+    }
+    
+    // Now handle the symbol in the appropriate table
+    auto existingSymbol = targetTable->lookupSymbol(varName, true);
+    if (existingSymbol) {
+        // Re-add the symbol to update its position in the insertion order
+        if (isArray) {
+            existingSymbol->clearArrayDimensions();
+            for(int dim : currentArrayDimensions) {
+                existingSymbol->addArrayDimension(dim);
             }
-            
-            auto newSymbol = std::make_shared<Symbol>(varName, typeName, SymbolKind::VARIABLE);
-            
-            // Add array dimensions if any
-            for (int dim : currentArrayDimensions) {
+        } else {
+            existingSymbol->clearArrayDimensions();
+        }
+        targetTable->removeSymbol(varName);
+        targetTable->addSymbol(existingSymbol);
+    } else {
+        // Create a new symbol only if it doesn't exist in the target table
+        auto newSymbol = std::make_shared<Symbol>(varName, baseTypeName, SymbolKind::VARIABLE);
+        if (isArray) {
+            for(int dim : currentArrayDimensions) {
                 newSymbol->addArrayDimension(dim);
             }
-            
-            currentTable->addSymbol(newSymbol);
-        } else {
-            // Important: Re-add it to the symbol table to update its position in insertion order
-            // AND make sure array dimensions are preserved
-            
-            // Update dimensions if it's an array
-            if (!currentArrayDimensions.empty()) {
-                // Clear existing dimensions first to avoid duplicates
-                varSymbol->clearArrayDimensions();
-                for (int dim : currentArrayDimensions) {
-                    varSymbol->addArrayDimension(dim);
-                }
-            }
-            
-            // Re-add to update position
-            currentTable->removeSymbol(varName);
-            currentTable->addSymbol(varSymbol);
         }
+        targetTable->addSymbol(newSymbol);
+    }
+    // --- End Symbol Handling ---
+}
+
+// visitParam is primarily handled by SymbolTableVisitor for symbol creation.
+// MemSizeVisitor uses the symbol table populated by SymbolTableVisitor.
+// We just need a basic traversal here if needed.
+void MemSizeVisitor::visitParam(ASTNode* node) {
+    // Basic traversal, symbol already exists from SymbolTableVisitor
+    ASTNode* child = node->getLeftMostChild();
+    while(child) {
+        child->accept(this);
+        child = child->getRightSibling();
+    }
+}
+
+// visitAttribute just visits its child Variable node
+void MemSizeVisitor::visitAttribute(ASTNode* node) {
+    ASTNode* variableNode = node->getLeftMostChild();
+    if (variableNode && variableNode->getNodeEnum() == NodeType::VARIABLE) {
+        // Process the underlying variable declaration within the class scope
+        variableNode->accept(this);
     }
 }
 
@@ -959,11 +1060,6 @@ void MemSizeVisitor::visitRelOp(ASTNode* node) {
     // Create a temporary variable to store the comparison result (boolean as int)
     createTempVar("int", "tempvar", node);
 }
-
-
-// For simplicity, I'm just implementing the main visitor methods
-// All other visitor methods would just traverse the AST without special handling
-// Implement the rest of the visitor methods as needed
 
 // Default implementation for other visitor methods that just traverse the AST
 #define DEFAULT_VISITOR_METHOD(method) \
@@ -987,17 +1083,13 @@ DEFAULT_VISITOR_METHOD(Empty)
 DEFAULT_VISITOR_METHOD(FunctionList)
 DEFAULT_VISITOR_METHOD(ImplementationList)
 DEFAULT_VISITOR_METHOD(Member)
-DEFAULT_VISITOR_METHOD(Variable)
 DEFAULT_VISITOR_METHOD(VariableId)
 DEFAULT_VISITOR_METHOD(FunctionId)
 DEFAULT_VISITOR_METHOD(FunctionSignature)
 DEFAULT_VISITOR_METHOD(ConstructorSignature)
 DEFAULT_VISITOR_METHOD(ParamList)
-DEFAULT_VISITOR_METHOD(Param)
 DEFAULT_VISITOR_METHOD(ParamId)
 DEFAULT_VISITOR_METHOD(Type)
-// DEFAULT_VISITOR_METHOD(ArrayType)
-// DEFAULT_VISITOR_METHOD(ArrayDimension)
 DEFAULT_VISITOR_METHOD(Block)
 DEFAULT_VISITOR_METHOD(StatementsList)
 DEFAULT_VISITOR_METHOD(IfStatement)
@@ -1017,8 +1109,6 @@ DEFAULT_VISITOR_METHOD(ArrayAccess)
 DEFAULT_VISITOR_METHOD(Expr)
 DEFAULT_VISITOR_METHOD(Factor)
 DEFAULT_VISITOR_METHOD(AssignOp)
-// DEFAULT_VISITOR_METHOD(RelOp)
-DEFAULT_VISITOR_METHOD(Attribute)
 DEFAULT_VISITOR_METHOD(ImplementationId)
 
 // Add this new helper method to remove local variables

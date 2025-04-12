@@ -138,6 +138,9 @@ private:
 
     // Helper method to remove local variables from tables
     void removeLocalVariables(std::shared_ptr<SymbolTable> table);
+    std::string getBaseType(const std::string& typeWithDimensions);
+    bool isFunctionTable(std::shared_ptr<SymbolTable> table);
+    int calculateFunctionInitialOffset(std::shared_ptr<SymbolTable> table);
 };
 
 #endif // MEM_SIZE_VISITOR_H

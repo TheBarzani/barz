@@ -1,8 +1,4 @@
 === Semantic Errors/Warnings for ../tests/data/codegen/test.src ===
 
-Error at line 18: SemCheck Error: Array index used on non-array type: int
-Error at line 18: SemCheck Error: Type mismatch in assignment. Left side is error but right side is int
-Error at line 19: SemCheck Error: Array index used on non-array type: int
-Warning at line 19: SemCheck Warning: Writing non-standard type: error
-Error at line 23: SemCheck Error: Array index used on non-array type: int
-Error at line 23: SemCheck Error: Type mismatch in assignment. Left side is int but right side is error
+Warning at line 47: SymTab Warning: Member 'evaluate' in class 'LINEAR' shadows inherited member from class 'POLYNOMIAL'
+Warning at line 54: SymTab Warning: Member 'evaluate' in class 'QUADRATIC' shadows inherited member from class 'POLYNOMIAL'

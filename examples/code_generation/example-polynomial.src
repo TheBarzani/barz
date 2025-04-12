@@ -45,7 +45,7 @@
 // 5.3: |  X  |     |
 //      -------------
 
-// ====== struct declarations ====== //
+// ======================== struct declarations ============================== //
 class POLYNOMIAL {
   public function evaluate (x: float) => float;                    
 };
@@ -60,7 +60,7 @@ class LINEAR isa POLYNOMIAL {
 class QUADRATIC isa POLYNOMIAL {
   private attribute a: float;
   private attribute b: float;
-  private attribute c: float;
+  private attribute c: float[2][3];
   public  function build(A: float, B: float, C: float) => QUADRATIC;
   public  function evaluate(x: float) => float;
 };
@@ -81,6 +81,7 @@ implementation LINEAR {
     local new_function: LINEAR;                                     // 1.1
     new_function.a := A;                                            // 3.1, 5.3
     new_function.b := B;                                            // 3.1, 5.3
+    a := A;
     return (new_function);
   }
 
@@ -92,14 +93,14 @@ implementation LINEAR {
     return (result);                                                // 2.3
   }
 }
- 
+
 implementation QUADRATIC { 
   function evaluate(x: float) => float
   {
     local result: float;                                            // 1.1
     result := a;                                                    // 3.1       
     result := result * x + b;                                       // 3.1, 5.1
-    result := result * x + c;                                       // 3.1, 5.1
+    result := result * x + c[1][1];                                       // 3.1, 5.1
     return (result);                                                // 2.3
   }
 
@@ -108,7 +109,7 @@ implementation QUADRATIC {
     local new_function: QUADRATIC ;                                 // 1.1
     new_function.a := A;                                            // 3.1, 5.3
     new_function.b := B;                                            // 3.1, 5.3
-    new_function.c := C;                                            // 3.1, 5.3
+    new_function.c[1][1] := C;                                            // 3.1, 5.3
     return (new_function);
   }
 }

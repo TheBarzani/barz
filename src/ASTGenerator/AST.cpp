@@ -280,8 +280,8 @@ void AST::performAction(std::string action, std::string value, int line) {
         ASTStack.push_back(variable);
     }
     else if (action == "_createLocalVariable") {
-        ASTNode* variable = ASTStack.back();
-        variable->setNodeType(NodeType::LOCAL_VARIABLE);
+        ASTNode* variable = ASTStack.back(); ASTStack.pop_back();
+        ASTStack.push_back(makeFamily(NodeType::LOCAL_VARIABLE, variable));
     }
 
     // Statement Actions
@@ -333,8 +333,7 @@ void AST::performAction(std::string action, std::string value, int line) {
     }
     else if (action == "_createAttribute") {
         ASTNode* attribute = ASTStack.back(); ASTStack.pop_back();
-        attribute->setNodeType(NodeType::ATTRIBUTE);
-        ASTStack.push_back(attribute);
+        ASTStack.push_back(makeFamily(NodeType::ATTRIBUTE, attribute));
     }
     else if (action == "_createSingleStatement") {
         ASTNode* statement = ASTStack.back(); ASTStack.pop_back();
@@ -519,7 +518,7 @@ void AST::performAction(std::string action, std::string value, int line) {
         // }
     }
     else if (action == "_processDotAccess") {
-        if (ASTStack.back()->getNodeEnum() != NodeType::DOT_IDENTIFIER && ASTStack.back()->getNodeEnum() != NodeType::FUNCTION_CALL) {
+        if (ASTStack.back()->getNodeEnum() != NodeType::DOT_IDENTIFIER && ASTStack.back()->getNodeEnum() != NodeType::FUNCTION_CALL & ASTStack.back()->getNodeEnum() != NodeType::ARRAY_ACCESS) {
             return;
         }
         ASTNode* identifier = ASTStack.back(); ASTStack.pop_back();// Create DOT_IDENTIFIER node

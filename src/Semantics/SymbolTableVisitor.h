@@ -238,6 +238,9 @@ public:
     const std::vector<std::string>& getSymbolInsertionOrder() const {
         return symbolInsertionOrder;
     }
+    const std::vector<std::string>& getNestedTableInsertionOrder() const {
+        return nestedTableInsertionOrder;
+    }
 
 private:
     std::string scopeName;
@@ -248,6 +251,7 @@ private:
     std::shared_ptr<Symbol> functionSymbol = nullptr;  // For function tables
     std::unordered_map<std::string, std::string> metadata;
     std::vector<std::string> symbolInsertionOrder; // To maintain insertion order
+    std::vector<std::string> nestedTableInsertionOrder; // For nested tables
 };
 
 // Symbol Table Visitor implementation

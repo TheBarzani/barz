@@ -3,27 +3,39 @@
 #include <sstream>
 #include <algorithm> 
 
-// FunctionSignature implementation
+
+// Equality comparison
 bool FunctionSignature::operator==(const FunctionSignature& other) const {
-    if (name != other.name || paramTypes.size() != other.paramTypes.size())
+    // Names must match
+    if (name != other.name) {
         return false;
-    
-    for (size_t i = 0; i < paramTypes.size(); i++) {
-        if (paramTypes[i] != other.paramTypes[i])
-            return false;
     }
+    
+    // Parameter counts must match
+    if (paramTypes.size() != other.paramTypes.size()) {
+        return false;
+    }
+    
+    // Each parameter type must match in order
+    for (size_t i = 0; i < paramTypes.size(); i++) {
+        if (paramTypes[i] != other.paramTypes[i]) {
+            return false;
+        }
+    }
+    
     return true;
 }
 
-// Hash function implementation for FunctionSignature
-namespace std {
-    std::size_t hash<FunctionSignature>::operator()(const FunctionSignature& sig) const {
-        std::size_t h = std::hash<std::string>{}(sig.name);
-        for (const auto& param : sig.paramTypes) {
-            h ^= std::hash<std::string>{}(param) + 0x9e3779b9 + (h << 6) + (h >> 2);
-        }
-        return h;
+// Also implement the hash function for unordered maps
+std::size_t std::hash<FunctionSignature>::operator()(const FunctionSignature& sig) const {
+    std::size_t h = std::hash<std::string>{}(sig.name);
+    
+    // Combine hash with parameter types
+    for (const auto& paramType : sig.paramTypes) {
+        h ^= std::hash<std::string>{}(paramType) + 0x9e3779b9 + (h << 6) + (h >> 2);
     }
+    
+    return h;
 }
 
 // Symbol implementation
@@ -55,7 +67,8 @@ SymbolTable::SymbolTable(const SymbolTable& other)
     : scopeName(other.scopeName), 
       parent(other.parent),
       symbolInsertionOrder(other.symbolInsertionOrder),
-      metadata(other.metadata)
+      metadata(other.metadata),
+      nestedTableInsertionOrder(other.nestedTableInsertionOrder)
 {
     // Deep copy all symbols
     for (const auto& [name, symbol] : other.symbols) {
@@ -176,6 +189,7 @@ std::vector<std::shared_ptr<Symbol>> SymbolTable::lookupFunctions(const std::str
 
 void SymbolTable::addNestedTable(const std::string& name, std::shared_ptr<SymbolTable> table) {
     nestedTables[name] = table;
+    nestedTableInsertionOrder.push_back(name);
 }
 
 std::shared_ptr<SymbolTable> SymbolTable::getNestedTable(const std::string& name) {
@@ -599,62 +613,85 @@ void SymbolTableVisitor::visitImplementationFunctionList(ASTNode* node) {
 }
 
 void SymbolTableVisitor::visitMember(ASTNode* node) {
-    // Either a function or variable
+    // Either a function, attribute (variable), or visibility specifier
     ASTNode* child = node->getLeftMostChild();
-    
-    // Check if there's a visibility specifier
+
+    // Check if there's a visibility specifier first
     if (child && child->getNodeEnum() == NodeType::VISIBILITY) {
-        child->accept(this);
-        child = child->getRightSibling();
+        child->accept(this); // Sets currentVisibility
+        child = child->getRightSibling(); // Move to the actual member
+    } else {
+        // Reset to default visibility if not specified for this member
+        // Assuming default is private based on your visitClass logic
+        currentVisibility = Visibility::PRIVATE;
     }
-    
-    // Process the actual member
+
+    // Process the actual member (FunctionDeclaration or Attribute)
     if (child) {
+        // The child node (FunctionDeclaration or Attribute) will handle
+        // creating the symbol and setting its visibility based on currentVisibility.
         child->accept(this);
     }
 }
 
 void SymbolTableVisitor::visitVariable(ASTNode* node) {
-    // Reset array dimensions
+    // Reset array dimensions for this variable
     currentArrayDimensions.clear();
-    
-    // Get the variable id node (first child)
+
+    // Child 1: Variable ID
     ASTNode* varIdNode = node->getLeftMostChild();
-    if (!varIdNode) {
+    if (!varIdNode || varIdNode->getNodeEnum() != NodeType::VARIABLE_ID) {
         reportError("Variable declaration missing identifier.", node);
         return;
     }
-    
     std::string varName = varIdNode->getNodeValue();
-    
-    // Get the type node (second child)
+
+    // Child 2: Type
     ASTNode* typeNode = varIdNode->getRightSibling();
-    if (!typeNode) {
+    if (!typeNode || typeNode->getNodeEnum() != NodeType::TYPE) {
         reportError("Variable declaration missing type.", node);
         return;
     }
-    typeNode->accept(this);  // This will set currentType
-    
+    typeNode->accept(this); // Sets currentType
+
+    // Child 3: Dimension List (optional)
+    ASTNode* dimListNode = typeNode->getRightSibling();
+    bool isArray = false;
+    if (dimListNode && dimListNode->getNodeEnum() == NodeType::DIM_LIST) {
+        // Check if the dimlist actually has dimensions
+        if (dimListNode->getLeftMostChild()) {
+            isArray = true;
+            dimListNode->accept(this); // Populates currentArrayDimensions
+        }
+    } else if (dimListNode) {
+         reportError("Expected DimList node after type in variable declaration.", node);
+         return; // Or handle as non-array? Depends on grammar strictness.
+    }
+    // If dimListNode is null, it's definitely not an array.
+
     // Check if variable is already defined in this scope
     if (currentTable->lookupSymbol(varName, true)) {
-        if (currentClassName.empty()) {
-            reportError("Multiple declared local variable: " + varName, node);
-        } else {
-            reportError("Multiple declared data member: " + varName + " in class " + currentClassName, node);
+        if (currentClassName.empty() || currentTable->getScopeName().find("::") != std::string::npos) { // Check if in function or global
+             reportError("Multiple declared local variable: " + varName, node);
+        } else { // Must be a class member
+             reportError("Multiple declared data member: " + varName + " in class " + currentClassName, node);
         }
         return;
     }
-    
+
     // Create a new symbol for this variable
+    // Use the base type for the symbol's type field
     auto varSymbol = std::make_shared<Symbol>(varName, currentType, SymbolKind::VARIABLE);
-    varSymbol->setVisibility(currentVisibility);
+    varSymbol->setVisibility(currentVisibility); // Visibility set by parent (Member or default)
     varSymbol->setDeclarationLine(node->getLineNumber()); // Store line number
-    
-    // Add array dimensions if any
-    for (int dim : currentArrayDimensions) {
-        varSymbol->addArrayDimension(dim);
+
+    // Add array dimensions if it was an array
+    if (isArray) {
+        for (int dim : currentArrayDimensions) {
+            varSymbol->addArrayDimension(dim);
+        }
     }
-    
+
     // Add variable to current table
     currentTable->addSymbol(varSymbol);
 }
@@ -665,56 +702,14 @@ void SymbolTableVisitor::visitVariableId(ASTNode* node) {
 }
 
 void SymbolTableVisitor::visitLocalVariable(ASTNode* node) {
-    // Get the variable node
-    ASTNode* variableNode = node;
-    if (!variableNode) {
-        reportError("Local variable declaration missing variable node.", node);
-        return;
+    // The only child should be a Variable node
+    ASTNode* variableNode = node->getLeftMostChild();
+    if (variableNode && variableNode->getNodeEnum() == NodeType::VARIABLE) {
+        // Process the underlying variable declaration
+        variableNode->accept(this);
+    } else {
+        reportError("LocalVariable node expects a Variable node as its child.", node);
     }
-    
-    // Get variable id node and type node
-    ASTNode* varIdNode = variableNode->getLeftMostChild();
-    ASTNode* typeNode = varIdNode ? varIdNode->getRightSibling() : nullptr;
-    
-    if (!varIdNode || !typeNode) {
-        reportError("Incomplete local variable declaration.", node);
-        return;
-    }
-    
-    // Get variable name and type
-    std::string varName = varIdNode->getNodeValue();
-    currentArrayDimensions.clear();
-    typeNode->accept(this);  // Sets currentType and potentially currentArrayDimensions
-    
-    // Check if the type is valid (int, float, or defined class)
-    bool validType = (currentType == "int" || currentType == "float");
-    if (!validType) {
-        // Check if it's a defined class
-        auto classSymbol = globalTable->lookupSymbol(currentType);
-        validType = (classSymbol && classSymbol->getKind() == SymbolKind::CLASS);
-        
-        if (!validType) {
-            reportError("Undefined type '" + currentType + "' for variable '" + varName + "'", node);
-            return;
-        }
-    }
-    
-    // Check for duplicates in current function scope
-    if (currentTable->lookupSymbol(varName, true)) {
-        reportError("Multiple declared identifier '" + varName + "' in function", node);
-        return;
-    }
-    
-    // Create variable symbol
-    auto varSymbol = std::make_shared<Symbol>(varName, currentType, SymbolKind::VARIABLE);
-    
-    // Add array dimensions if any
-    for (int dim : currentArrayDimensions) {
-        varSymbol->addArrayDimension(dim);
-    }
-    
-    // Add variable to current table
-    currentTable->addSymbol(varSymbol);
 }
 
 void SymbolTableVisitor::visitFunctionId(ASTNode* node) {
@@ -782,83 +777,92 @@ void SymbolTableVisitor::visitParamList(ASTNode* node) {
 }
 
 void SymbolTableVisitor::visitParam(ASTNode* node) {
-    // Reset array dimensions
+    // Reset array dimensions for this parameter
     currentArrayDimensions.clear();
-    
-    // Get parameter id (first child)
+
+    // Child 1: Parameter ID
     ASTNode* paramIdNode = node->getLeftMostChild();
-    if (!paramIdNode) {
+    if (!paramIdNode || paramIdNode->getNodeEnum() != NodeType::PARAM_ID) {
         reportError("Parameter missing identifier.", node);
         return;
     }
-    
     std::string paramName = paramIdNode->getNodeValue();
-    
-    // Store parameter name for later
-    currentParamNames.push_back(paramName);
-    
-    // Get parameter type (second child)
+
+    // Child 2: Type
     ASTNode* typeNode = paramIdNode->getRightSibling();
-    if (!typeNode) {
+    if (!typeNode || typeNode->getNodeEnum() != NodeType::TYPE) {
         reportError("Parameter missing type.", node);
         return;
     }
-    
-    // Process type node and array dimensions
-    if (typeNode->getNodeEnum() == NodeType::ARRAY_TYPE) {
-        // Handle array type
-        typeNode->accept(this);
-    } else {
-        // This is a normal (non-array) type
-        typeNode->accept(this);
-    }
-    
-    // Format the type with array dimensions
-    std::string typeWithDimensions = currentType;
-    // Reverse array dimensions to ensure correct order in the type string
-    // (innermost dimension should appear first)
-    std::vector<int> reversedDimensions = currentArrayDimensions;
-    std::reverse(reversedDimensions.begin(), reversedDimensions.end());
+    typeNode->accept(this); // Sets currentType
 
-    // Format the type with array dimensions
-    for (int dim : reversedDimensions) {
-        if (dim > 0) {
-            typeWithDimensions += "[" + std::to_string(dim) + "]";
-        } else {
-            typeWithDimensions += "[]"; // For dynamic arrays
+    // Child 3: Dimension List (optional)
+    ASTNode* dimListNode = typeNode->getRightSibling();
+    bool isArray = false;
+    if (dimListNode && dimListNode->getNodeEnum() == NodeType::DIM_LIST) {
+        if (dimListNode->getLeftMostChild()) {
+            isArray = true;
+            dimListNode->accept(this); // Populates currentArrayDimensions
         }
+    } else if (dimListNode) {
+         reportError("Expected DimList node after type in parameter declaration.", node);
+         // Decide how to proceed, maybe treat as non-array
     }
-    
-    // Add formatted type to currentParamTypes for function signature
+    // If dimListNode is null, it's not an array.
+
+    // Store parameter name for function signature
+    currentParamNames.push_back(paramName);
+
+    // Format the type string including dimensions for the signature
+    std::string typeWithDimensions = currentType;
+    if (isArray) {
+        // Use the helper to format correctly
+        // Create a temporary symbol just for formatting helper
+        auto tempSymbol = std::make_shared<Symbol>("temp", currentType, SymbolKind::PARAMETER);
+        for(int dim : currentArrayDimensions) tempSymbol->addArrayDimension(dim);
+        typeWithDimensions = formatTypeWithDimensions(tempSymbol); // Use helper
+    }
+
+    // Add formatted type to currentParamTypes for function signature matching
     currentParamTypes.push_back(typeWithDimensions);
-    
-    // Check if we're in a function implementation
-    bool isImplementation = false;
-    if (currentTable && !currentClassName.empty() && 
-        currentTable->getScopeName().find("::") != std::string::npos) {
-        auto parentTable = currentTable->getParent();
-        if (parentTable && parentTable->getScopeName() == currentClassName) {
-            isImplementation = true;
+
+    // Add parameter symbol to the function's symbol table
+    // This should happen when processing the function body or declaration context
+    if (currentTable && currentTable->getScopeName().find("::") != std::string::npos) { // Check if inside a function table
+        // Determine if this is a function implementation or declaration
+        bool isImplementation = false;
+        ASTNode* funcNode = node->getParent();  // PARAM_LIST
+        if (funcNode) funcNode = funcNode->getParent();  // FUNCTION_SIGNATURE
+        if (funcNode) funcNode = funcNode->getParent();  // FUNCTION
+        if (funcNode && funcNode->getParent()) {
+            ASTNode* parentOfFunc = funcNode->getParent();
+            if (parentOfFunc->getNodeEnum() == NodeType::IMPLEMENTATION_FUNCTION_LIST) {
+                isImplementation = true;
+            }
         }
-    }
-    
-    // Only add parameter to symbol table if not in implementation
-    if (!isImplementation && currentTable && currentTable->getScopeName().find("::") != std::string::npos) {
-        // Use typeWithDimensions instead of just currentType for the symbol
-        auto paramSymbol = std::make_shared<Symbol>(paramName, typeWithDimensions, SymbolKind::PARAMETER);
-        
-        // Add array dimensions to the parameter symbol for internal representation
-        for (int dim : currentArrayDimensions) {
-            paramSymbol->addArrayDimension(dim);
-        }
-        
-        // Check for duplicate parameter
+
+        // For implementations, we don't report duplicate parameters since they were
+        // already added during the class definition phase
         if (currentTable->lookupSymbol(paramName, true)) {
-            reportError("Multiple declared parameter: " + paramName, node);
+            if (!isImplementation) {
+                reportError("Multiple declared parameter: " + paramName, node);
+                return;
+            }
+            // For implementation, just return without error - parameter already exists
             return;
         }
-        
-        // Add parameter to current table
+
+        // Create the symbol using the formatted type string
+        auto paramSymbol = std::make_shared<Symbol>(paramName, typeWithDimensions, SymbolKind::PARAMETER);
+
+        // Add array dimensions to the symbol itself if it's an array
+        if (isArray) {
+            for (int dim : currentArrayDimensions) {
+                paramSymbol->addArrayDimension(dim);
+            }
+        }
+
+        // Add parameter symbol to the current function's table
         currentTable->addSymbol(paramSymbol);
     }
 }
@@ -1244,10 +1248,14 @@ void SymbolTableVisitor::visitInt(ASTNode* node) {
 }
 
 void SymbolTableVisitor::visitAttribute(ASTNode* node) {
-    // Process the variable reference for attributes
-    ASTNode* child = node->getLeftMostChild();
-    if (child) {
-        child->accept(this);
+    // The only child should be a Variable node
+    ASTNode* variableNode = node->getLeftMostChild();
+    if (variableNode && variableNode->getNodeEnum() == NodeType::VARIABLE) {
+        // Process the underlying variable declaration
+        // Visibility is typically set before calling accept on the Member node containing this Attribute
+        variableNode->accept(this);
+    } else {
+        reportError("Attribute node expects a Variable node as its child.", node);
     }
 }
 
@@ -1413,12 +1421,12 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
             // Print data members first
             for (const auto& [memberName, memberSymbol] : dataMembers) {
                 out << indentStr << "|    | data      | " << memberName;
-                spaces = 10 - memberName.length();
+                spaces = 20 - memberName.length();
                 if (spaces > 0) {
                     for (int i = 0; i < spaces; i++) out << " ";
                 }
                 out << "| " << formatTypeWithDimensions(memberSymbol);
-                spaces = 27 - memberSymbol->getType().length();
+                spaces = 23 - formatTypeWithDimensions(memberSymbol).length();
                 if (spaces > 0) {
                     for (int i = 0; i < spaces; i++) out << " ";
                 }
