@@ -138,20 +138,12 @@ int MemSizeVisitor::getTypeSize(const std::string& baseType) {
     auto classTable = symbolTable->getNestedTable(baseType);
     if (classTable) {
         // If the size is already calculated and stored, use it
-        std::string sizeMeta = classTable->getMetadata("size");
+        std::string sizeMeta = classTable->getMetadata("scope_offset");
         if (!sizeMeta.empty()) {
             try {
-                return std::stoi(sizeMeta);
+                return (std::stoi(sizeMeta)*-1);
             } catch (...) { /* ignore error, recalculate */ }
         }
-
-        // Calculate class size recursively if not already done
-        // Note: This might lead to infinite recursion if classes contain each other directly.
-        // A better approach involves multiple passes or storing sizes during a dedicated class pass.
-        // For now, we rely on calculateTableOffsets handling nested class tables.
-        // We return POINTER_SIZE here as a placeholder if size isn't pre-calculated.
-        // The actual size calculation happens in calculateTableOffsets for members.
-        // When used for parameters/variables of class type, we often just need pointer size anyway.
         return TypeSize::POINTER_SIZE; // Or calculate recursively if safe
     }
 
@@ -204,18 +196,29 @@ int MemSizeVisitor::calculateFunctionInitialOffset(std::shared_ptr<SymbolTable> 
     std::string baseReturnType = getBaseType(returnType);
     if (baseReturnType != "void") {
         int returnSize = getTypeSize(baseReturnType);
+        offset -= returnSize; // First subtract the size
+        
+        // Align to appropriate boundary (8 for large types, 4 for others)
         int alignment = (returnSize >= 8) ? 8 : 4;
-        offset = ((offset - returnSize) / alignment) * alignment;
+        offset = (offset / alignment) * alignment; // Integer division rounds toward 0
+        // For negative numbers, we need to explicitly round down if not aligned
+        if (offset % alignment != 0) {
+            offset -= alignment - ((-offset) % alignment);
+        }
     }
     
-    // Reserve space for link register
+    // Reserve space for link register (always 4 bytes)
     offset -= 4;
+    // Link register should be aligned to 4-byte boundary
+    offset = (offset / 4) * 4;
     
-    // Set metadata
-    table->setMetadata("return_offset", std::to_string(offset + 4));
+    // Set metadata with corrected offsets
+    int returnOffset = offset; // If void, there's no return value
+    table->setMetadata("return_offset", std::to_string(returnOffset));
     table->setMetadata("link_register_offset", std::to_string(offset));
+    
     if (funcSymbol) {
-        funcSymbol->setMetadata("return_offset", std::to_string(offset + 4));
+        funcSymbol->setMetadata("return_offset", std::to_string(returnOffset));
         funcSymbol->setMetadata("link_register_offset", std::to_string(offset));
     }
     
@@ -226,6 +229,7 @@ int MemSizeVisitor::calculateFunctionInitialOffset(std::shared_ptr<SymbolTable> 
 void MemSizeVisitor::calculateTableOffsets(std::shared_ptr<SymbolTable> table) {
     if (!table) return;
     
+    bool isGlobalTable = (table == symbolTable && table->getScopeName() == "global");
     
     // Determine if this table represents a function
     bool isFunction = isFunctionTable(table);
@@ -264,6 +268,11 @@ void MemSizeVisitor::calculateTableOffsets(std::shared_ptr<SymbolTable> table) {
         auto symbol = table->lookupSymbol(symbolName, true);
         if (!symbol) continue;
         
+        // Skip function symbols - they don't need stack space allocation
+        if (symbol->getKind() == SymbolKind::FUNCTION) {
+            continue;
+        }
+        
         // Calculate symbol size based on type and dimensions
         std::string baseType = getBaseType(symbol->getType());
         int size = getTypeSize(baseType);
@@ -282,15 +291,17 @@ void MemSizeVisitor::calculateTableOffsets(std::shared_ptr<SymbolTable> table) {
         
         setSymbolSize(symbol, size);
         
-        // Calculate aligned offset
-        int alignment = (size >= 8 || symbol->isArray()) ? 8 : 4;
-        currentOffset = ((currentOffset - size) / alignment) * alignment;
+        currentOffset = ((currentOffset - size));
         setSymbolOffset(symbol, currentOffset);
     }
     
     // Save the total scope offset
-    setTableScopeOffset(table, currentOffset);
-    
+    // For global table, always set to 0
+    if (isGlobalTable) {
+        setTableScopeOffset(table, 0);  // Global table always has offset 0
+    } else {
+        setTableScopeOffset(table, currentOffset); // Other tables use calculated offset
+    }
     // PASS 3: Process remaining nested function tables
     for (const auto& [name, nestedTable] : table->getNestedTables()) {
         // Skip tables already processed in PASS 1

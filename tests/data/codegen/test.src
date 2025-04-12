@@ -37,7 +37,7 @@ function main() => void
 
 // ======================== struct declarations ============================== //
 class POLYNOMIAL {
-  public function evaluate (x: float) => float;                    
+  public function evaluate (x: int) => int;                    
 };
 
 class LINEAR isa POLYNOMIAL {
@@ -57,9 +57,9 @@ class QUADRATIC isa POLYNOMIAL {
 
 // ====== member function implementations ====== //  
 implementation POLYNOMIAL {
-  function evaluate(x: float) => float                              // 2.1, 2.2
+  function evaluate(x: int) => int                              // 2.1, 2.2
   {
-    return (0.0);                                                   // 2.3
+    return (0);                                                   // 2.3
   }
 }
 

@@ -1,93 +1,93 @@
 ========================================================
-| table: global                | scope offset: -104    |
+| table: global                | scope offset: 0       |
 ========================================================
     ========================================================
-    | table: POLYNOMIAL            | scope offset: -8      |
+    | table: POLYNOMIAL            | scope offset: 0       |
     ========================================================
         ========================================================
-        | table: POLYNOMIAL::evaluate  | scope offset: -24     |
+        | table: POLYNOMIAL::evaluate  | scope offset: -16     |
         ========================================================
-        | var       | x            | float     | 8     | -16   |
-        | litval    | t1           | float     | 8     | -24   |
-        ========================================================
-    ========================================================
-    ========================================================
-    | table: LINEAR                | scope offset: -24     |
-    ========================================================
-    | var       | a            | float     | 8     | -16   |
-    | var       | b            | float     | 8     | -24   |
-        ========================================================
-        | table: LINEAR::build         | scope offset: -44     |
-        ========================================================
-        | var       | A            | float     | 8     | -16   |
-        | var       | B            | float     | 8     | -24   |
-        | var       | c            | int       | 4     | -28   |
-        | litval    | t2           | int       | 4     | -32   |
-        | litval    | t3           | int       | 4     | -36   |
-        | tempvar   | t4           | int       | 4     | -40   |
-        | var       | new_function | LINEAR    | 4     | -44   |
-        ========================================================
-        ========================================================
-        | table: LINEAR::evaluate      | scope offset: -40     |
-        ========================================================
-        | var       | x            | float     | 8     | -16   |
-        | var       | result       | float     | 8     | -24   |
-        | litval    | t5           | float     | 8     | -32   |
-        | tempvar   | t6           | int       | 4     | -36   |
-        | tempvar   | t7           | int       | 4     | -40   |
+        | var       | x            | int       | 4     | -12   |
+        | litval    | t1           | int       | 4     | -16   |
         ========================================================
     ========================================================
     ========================================================
-    | table: QUADRATIC             | scope offset: -72     |
+    | table: LINEAR                | scope offset: -16     |
     ========================================================
-    | var       | a            | float     | 8     | -16   |
-    | var       | b            | float     | 8     | -24   |
-    | var       | c            | float     | 48    | -72   |
+    | var       | a            | float     | 8     | -8    |
+    | var       | b            | float     | 8     | -16   |
         ========================================================
-        | table: QUADRATIC::evaluate   | scope offset: -48     |
+        | table: LINEAR::build         | scope offset: -68     |
         ========================================================
-        | var       | x            | float     | 8     | -16   |
-        | var       | result       | float     | 8     | -24   |
-        | tempvar   | t8           | int       | 4     | -28   |
-        | tempvar   | t9           | int       | 4     | -32   |
-        | tempvar   | t10          | int       | 4     | -36   |
-        | litval    | t11          | int       | 4     | -40   |
-        | litval    | t12          | int       | 4     | -44   |
-        | tempvar   | t13          | int       | 4     | -48   |
+        | var       | A            | float     | 8     | -28   |
+        | var       | B            | float     | 8     | -36   |
+        | var       | c            | int       | 4     | -40   |
+        | litval    | t2           | int       | 4     | -44   |
+        | litval    | t3           | int       | 4     | -48   |
+        | tempvar   | t4           | int       | 4     | -52   |
+        | var       | new_function | LINEAR    | 16    | -68   |
         ========================================================
         ========================================================
-        | table: QUADRATIC::build      | scope offset: -44     |
+        | table: LINEAR::evaluate      | scope offset: -44     |
         ========================================================
-        | var       | A            | float     | 8     | -16   |
-        | var       | B            | float     | 8     | -24   |
-        | var       | C            | float     | 8     | -32   |
-        | var       | new_function | QUADRATIC | 4     | -36   |
-        | litval    | t14          | int       | 4     | -40   |
-        | litval    | t15          | int       | 4     | -44   |
+        | var       | x            | float     | 8     | -20   |
+        | var       | result       | float     | 8     | -28   |
+        | litval    | t5           | float     | 8     | -36   |
+        | tempvar   | t6           | int       | 4     | -40   |
+        | tempvar   | t7           | int       | 4     | -44   |
         ========================================================
     ========================================================
     ========================================================
-    | table: ::main                | scope offset: -400    |
+    | table: QUADRATIC             | scope offset: -64     |
     ========================================================
-    | var       | arr          | int       | 120   | -120  |
-    | var       | f1           | LINEAR    | 24    | -144  |
-    | var       | f2           | QUADRATIC | 72    | -216  |
-    | var       | counter      | int       | 4     | -220  |
-    | litval    | t16          | float     | 8     | -224  |
-    | litval    | t17          | float     | 8     | -232  |
-    | retval    | t18          | LINEAR    | 24    | -256  |
-    | litval    | t19          | float     | 8     | -264  |
-    | litval    | t20          | float     | 8     | -272  |
-    | litval    | t21          | float     | 8     | -280  |
-    | retval    | t22          | QUADRATIC | 72    | -352  |
-    | litval    | t23          | int       | 4     | -356  |
-    | litval    | t24          | int       | 4     | -360  |
-    | tempvar   | t25          | int       | 4     | -364  |
-    | litval    | t26          | float     | 8     | -368  |
-    | retval    | t27          | float     | 8     | -376  |
-    | litval    | t28          | float     | 8     | -384  |
-    | retval    | t29          | float     | 8     | -392  |
-    | litval    | t30          | int       | 4     | -396  |
-    | tempvar   | t31          | int       | 4     | -400  |
+    | var       | a            | float     | 8     | -8    |
+    | var       | b            | float     | 8     | -16   |
+    | var       | c            | float     | 48    | -64   |
+        ========================================================
+        | table: QUADRATIC::evaluate   | scope offset: -52     |
+        ========================================================
+        | var       | x            | float     | 8     | -20   |
+        | var       | result       | float     | 8     | -28   |
+        | tempvar   | t8           | int       | 4     | -32   |
+        | tempvar   | t9           | int       | 4     | -36   |
+        | tempvar   | t10          | int       | 4     | -40   |
+        | litval    | t11          | int       | 4     | -44   |
+        | litval    | t12          | int       | 4     | -48   |
+        | tempvar   | t13          | int       | 4     | -52   |
+        ========================================================
+        ========================================================
+        | table: QUADRATIC::build      | scope offset: -164    |
+        ========================================================
+        | var       | A            | float     | 8     | -76   |
+        | var       | B            | float     | 8     | -84   |
+        | var       | C            | float     | 8     | -92   |
+        | var       | new_function | QUADRATIC | 64    | -156  |
+        | litval    | t14          | int       | 4     | -160  |
+        | litval    | t15          | int       | 4     | -164  |
+        ========================================================
+    ========================================================
+    ========================================================
+    | table: ::main                | scope offset: -380    |
+    ========================================================
+    | var       | arr          | int       | 120   | -124  |
+    | var       | f1           | LINEAR    | 16    | -140  |
+    | var       | f2           | QUADRATIC | 64    | -204  |
+    | var       | counter      | int       | 4     | -208  |
+    | litval    | t16          | float     | 8     | -216  |
+    | litval    | t17          | float     | 8     | -224  |
+    | retval    | t18          | LINEAR    | 16    | -240  |
+    | litval    | t19          | float     | 8     | -248  |
+    | litval    | t20          | float     | 8     | -256  |
+    | litval    | t21          | float     | 8     | -264  |
+    | retval    | t22          | QUADRATIC | 64    | -328  |
+    | litval    | t23          | int       | 4     | -332  |
+    | litval    | t24          | int       | 4     | -336  |
+    | tempvar   | t25          | int       | 4     | -340  |
+    | litval    | t26          | float     | 8     | -348  |
+    | retval    | t27          | float     | 8     | -356  |
+    | litval    | t28          | float     | 8     | -364  |
+    | retval    | t29          | float     | 8     | -372  |
+    | litval    | t30          | int       | 4     | -376  |
+    | tempvar   | t31          | int       | 4     | -380  |
     ========================================================
 ========================================================
