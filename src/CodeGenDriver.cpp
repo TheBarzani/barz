@@ -93,58 +93,58 @@ int main(int argc, char* argv[]) {
     symbolTableVisitor.outputSymbolTable(symbolTableFile);
     std::cout << "Symbol table generated: " << symbolTableFile << std::endl;
 
-    // // Phase 2: Semantic Checking
-    // std::cout << "Performing semantic checking..." << std::endl;
-    // SemanticCheckingVisitor semanticChecker(symbolTableVisitor.getGlobalTable());
+    // Phase 2: Semantic Checking
+    std::cout << "Performing semantic checking..." << std::endl;
+    SemanticCheckingVisitor semanticChecker(symbolTableVisitor.getGlobalTable());
 
-    // // Import errors from the symbol table visitor
-    // semanticChecker.importSymbolTableErrors(symbolTableVisitor);
+    // Import errors from the symbol table visitor
+    semanticChecker.importSymbolTableErrors(symbolTableVisitor);
 
-    // // Continue with semantic checking
-    // root->accept(&semanticChecker);
+    // Continue with semantic checking
+    root->accept(&semanticChecker);
 
-    // // Output semantic errors to file
-    // std::string semanticErrorsFile = inputFile;
-    // semanticChecker.outputErrors(semanticErrorsFile);
+    // Output semantic errors to file
+    std::string semanticErrorsFile = inputFile;
+    semanticChecker.outputErrors(semanticErrorsFile);
 
-    // if (semanticChecker.hasErrors()) {
-    //     std::cout << "Semantic errors found. See " << semanticErrorsFile << " for details." << std::endl;
-    //     return 1;
-    // } else {
-    //     std::cout << "No semantic errors found." << std::endl;
-    // }
+    if (semanticChecker.hasErrors()) {
+        std::cout << "Semantic errors found. See " << semanticErrorsFile << " for details." << std::endl;
+        return 1;
+    } else {
+        std::cout << "No semantic errors found." << std::endl;
+    }
 
-    // // Phase 3: Memory Size Calculation
-    // std::cout << "Calculating memory sizes and offsets..." << std::endl;
-    // MemSizeVisitor memSizeVisitor(symbolTableVisitor.getGlobalTable());
+    // Phase 3: Memory Size Calculation
+    std::cout << "Calculating memory sizes and offsets..." << std::endl;
+    MemSizeVisitor memSizeVisitor(symbolTableVisitor.getGlobalTable());
     
-    // // Process the AST to identify temporary variables and expressions
-    // memSizeVisitor.processAST(root);
+    // Process the AST to identify temporary variables and expressions
+    memSizeVisitor.processAST(root);
     
-    // // Calculate memory sizes and offsets for all symbols
-    // memSizeVisitor.calculateMemorySizes();
+    // Calculate memory sizes and offsets for all symbols
+    memSizeVisitor.calculateMemorySizes();
     
-    // // Output the updated symbol table with memory sizes
-    // std::string sizeSymbolTableFile = inputFile + ".sizesymboltable";
-    // memSizeVisitor.outputSymbolTable(sizeSymbolTableFile);
-    // std::cout << "Memory-sized symbol table generated: " << sizeSymbolTableFile << std::endl;
+    // Output the updated symbol table with memory sizes
+    std::string sizeSymbolTableFile = inputFile + ".sizesymboltable";
+    memSizeVisitor.outputSymbolTable(sizeSymbolTableFile);
+    std::cout << "Memory-sized symbol table generated: " << sizeSymbolTableFile << std::endl;
 
-    // // Phase 4: Code Generation
-    // std::cout << "Generating MOON machine code..." << std::endl;
+    // Phase 4: Code Generation
+    std::cout << "Generating MOON machine code..." << std::endl;
     
-    // // Create code generation visitor with the memory-sized symbol table
-    // CodeGenVisitor codeGenVisitor(memSizeVisitor.getGlobalTable());
+    // Create code generation visitor with the memory-sized symbol table
+    CodeGenVisitor codeGenVisitor(memSizeVisitor.getGlobalTable());
     
-    // // Process the AST with the code generation visitor
-    // codeGenVisitor.processAST(root);
+    // Process the AST with the code generation visitor
+    codeGenVisitor.processAST(root);
 
-    // // Output MOON code to file
-    // // std::string moonCodeFile = fs::path(outputDir) / (fs::path(inputFile).stem().string() + ".m");
-    // std::string moonCodeFile = inputFile + ".m";
-    // codeGenVisitor.generateOutputFile(moonCodeFile);
-    // std::cout << "MOON machine code generated: " << moonCodeFile << std::endl;
+    // Output MOON code to file
+    // std::string moonCodeFile = fs::path(outputDir) / (fs::path(inputFile).stem().string() + ".m");
+    std::string moonCodeFile = inputFile + ".m";
+    codeGenVisitor.generateOutputFile(moonCodeFile);
+    std::cout << "MOON machine code generated: " << moonCodeFile << std::endl;
 
-    // std::cout << "-------------------------------------------++" << std::endl;
+    std::cout << "-------------------------------------------++" << std::endl;
 
     return 0;
 }

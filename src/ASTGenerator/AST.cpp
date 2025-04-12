@@ -263,10 +263,20 @@ void AST::performAction(std::string action, std::string value, int line) {
         ASTStack.push_back(createNode(NodeType::TYPE, value, line));
     }
     else if (action == "_createVariable") {
-        ASTNode* type = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* id = ASTStack.back(); ASTStack.pop_back();
-        
-        ASTNode* variable = makeFamily(NodeType::VARIABLE, id, type);
+        ASTNode* variable;
+        if(ASTStack.back()->getNodeEnum() == NodeType::ARRAY_TYPE){
+            ASTNode* array_type = ASTStack.back(); ASTStack.pop_back();
+            ASTNode* type = array_type->getLeftMostChild();
+            ASTNode* array_dimension_list  = array_type->getRightSibling();
+            ASTNode* id = ASTStack.back(); ASTStack.pop_back();
+            variable = makeFamily(NodeType::VARIABLE, id, type, array_dimension_list);
+        }
+        else{
+            ASTNode* type = ASTStack.back(); ASTStack.pop_back();
+            ASTNode* id = ASTStack.back(); ASTStack.pop_back();
+            variable = makeFamily(NodeType::VARIABLE, id, type);
+        }
+
         ASTStack.push_back(variable);
     }
     else if (action == "_createLocalVariable") {
@@ -322,8 +332,8 @@ void AST::performAction(std::string action, std::string value, int line) {
         ASTStack.push_back(functionDeclaration);
     }
     else if (action == "_createAttribute") {
-        ASTNode* variable = ASTStack.back(); ASTStack.pop_back();
-        ASTNode* attribute = makeFamily(NodeType::ATTRIBUTE, variable);
+        ASTNode* attribute = ASTStack.back(); ASTStack.pop_back();
+        attribute->setNodeType(NodeType::ATTRIBUTE);
         ASTStack.push_back(attribute);
     }
     else if (action == "_createSingleStatement") {
@@ -398,11 +408,12 @@ void AST::performAction(std::string action, std::string value, int line) {
     }
     else if (action == "_createParam") {
             ASTNode* param;
-            if(ASTStack.back()->getNodeEnum() == NodeType::ARRAY_DIMENSION){
-                ASTNode* array_dimension = ASTStack.back(); ASTStack.pop_back();
-                ASTNode* type = ASTStack.back(); ASTStack.pop_back();
+            if(ASTStack.back()->getNodeEnum() == NodeType::ARRAY_TYPE){
+                ASTNode* array_type = ASTStack.back(); ASTStack.pop_back();
+                ASTNode* type = array_type->getLeftMostChild();
+                ASTNode* array_dimension_list  = array_type->getRightSibling();
                 ASTNode* id = ASTStack.back(); ASTStack.pop_back();
-                param = makeFamily(NodeType::PARAM, id, type, array_dimension);
+                param = makeFamily(NodeType::PARAM, id, type, array_dimension_list);
             }
             else{
                 ASTNode* type = ASTStack.back(); ASTStack.pop_back();
@@ -430,11 +441,17 @@ void AST::performAction(std::string action, std::string value, int line) {
             ASTNode* functionCall = makeFamily(NodeType::FUNCTION_CALL, id, params);
             ASTStack.push_back(functionCall);
     }
-    else if (action == "_addIndex") {
-            // ASTNode* indices = ASTStack.back(); ASTStack.pop_back();
-            // ASTNode* variable = ASTStack.back(); ASTStack.pop_back();
-            // ASTNode* arrayAccess = makeFamily(NodeType::ARRAY_ACCESS, variable, indices);
-            // ASTStack.push_back(arrayAccess);
+    else if (action == "_processIndexList") {
+            if (ASTStack.at(ASTStack.size() - 2)->getNodeEnum() == NodeType::INDEX_LIST) {
+                ASTNode* index = ASTStack.back(); ASTStack.pop_back();
+                ASTStack.back()->adoptChildren(index);
+            }
+            else {
+                ASTNode* indexList = createNode(NodeType::INDEX_LIST, "indexList", line);
+                ASTNode* index = ASTStack.back(); ASTStack.pop_back();
+                indexList->adoptChildren(index);
+                ASTStack.push_back(indexList);
+            }
     }
     else if (action == "_pushIdentifier") {
             ASTNode* identifier = createNode(NodeType::IDENTIFIER, value, line);
@@ -585,24 +602,13 @@ void AST::performAction(std::string action, std::string value, int line) {
     }
     else if (action == "_processArrayAccess") {
         
-        // Get all indices from the stack (in reverse order since we're popping from the end)
-        ASTNode* indexListNode = createNode(NodeType::INDEX_LIST, "indexList", line);
-        while (!ASTStack.empty() && (ASTStack.back()->getNodeEnum() != NodeType::IDENTIFIER && 
-                                    ASTStack.back()->getNodeEnum() != NodeType::DOT_ACCESS)) {
-            ASTNode* index = ASTStack.back(); ASTStack.pop_back();
-            indexListNode->adoptChildren(index);
-        }
-        
-        // Get the array identifier
-        if (ASTStack.empty()) {
-            std::cerr << "Error: Array identifier not found on stack for _processArrayAccess" << std::endl;
-            return;
-        }
-        
-        ASTNode* arrayIdentifier = ASTStack.back();
-        ASTStack.pop_back();
+        if (ASTStack.back()->getNodeEnum() == NodeType::INDEX_LIST) {
+                    // Get all indices from the stack (in reverse order since we're popping from the end)
+        ASTNode* indexListNode = ASTStack.back(); ASTStack.pop_back();
+        ASTNode* arrayIdentifier = ASTStack.back(); ASTStack.pop_back();
         // Push the completed array access node back onto the stack
-        ASTStack.push_back(makeFamily(NodeType::ARRAY_ACCESS, arrayIdentifier, indexListNode));
+        ASTStack.push_back(makeFamily(NodeType::ARRAY_ACCESS, arrayIdentifier, indexListNode));     
+        } else;
     }
 
     // Debug output

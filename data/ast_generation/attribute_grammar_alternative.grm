@@ -46,7 +46,7 @@ FACTOR -> IDORSELF FACTOR2 REPTVARIABLEORFUNCTIONCALL _finishFactor
 | not FACTOR _createNotExpr
 | SIGN FACTOR _applySign .
 FACTOR2 -> lpar APARAMS rpar _createFunctionCall | INDICES .
-INDICES -> INDICE _addIndex INDICES | _processArrayAccess .
+INDICES -> INDICE _processIndexList INDICES | _processArrayAccess .
 REPTVARIABLEORFUNCTIONCALL -> IDNEST _processDotAccess REPTVARIABLEORFUNCTIONCALL | .
 VARIABLE -> IDORSELF VARIABLE2 _finishVariable .
 VARIABLE2 -> INDICES REPTVARIABLE | lpar APARAMS rpar _createFunctionCall VARIDNEST .

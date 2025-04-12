@@ -324,6 +324,8 @@ public:
     void visitImplementationFunctionList(ASTNode* node) override;
     void visitCondition(ASTNode* node) override;
     void visitArrayType(ASTNode* node) override;
+    void visitIndexList(ASTNode* node) override;
+    void visitDimList(ASTNode* node) override;
 
     /**
      * @brief Gets all errors reported during symbol table generation

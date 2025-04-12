@@ -89,6 +89,8 @@ public:
     void visitImplementationFunctionList(ASTNode* node) override;
     void visitCondition(ASTNode* node) override;
     void visitArrayType(ASTNode* node) override;
+    void visitIndexList(ASTNode* node) override;
+    void visitDimList(ASTNode* node) override;
 
     // Helper methods for semantic checking
     void reportError(const std::string& message, ASTNode* node);

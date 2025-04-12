@@ -92,6 +92,8 @@ public:
     void visitInt(ASTNode* node) override;
     void visitAttribute(ASTNode* node) override;
     void visitImplementationId(ASTNode* node) override;
+    void visitIndexList(ASTNode* node) override;
+    void visitDimList(ASTNode* node) override;
     // Get the generated global symbol table (returns a deep copy)
     std::shared_ptr<SymbolTable> getGlobalTable() const { 
         return std::make_shared<SymbolTable>(*symbolTable); 

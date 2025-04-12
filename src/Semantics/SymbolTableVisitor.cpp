@@ -872,18 +872,30 @@ void SymbolTableVisitor::visitType(ASTNode* node) {
 }
 
 void SymbolTableVisitor::visitArrayType(ASTNode* node) {
-    // Process base type
-    ASTNode* typeNode = node->getLeftMostChild();
-    typeNode->accept(this);
+    // Clear existing array dimensions
+    currentArrayDimensions.clear();
     
-    // Process dimensions
-    ASTNode* dimNode = typeNode->getRightSibling();
-    while (dimNode) {
-        dimNode->accept(this);
-        dimNode = dimNode->getRightSibling();
+    // Process base type (first child)
+    ASTNode* typeNode = node->getLeftMostChild();
+    if (typeNode) {
+        typeNode->accept(this);
+    }
+    
+    // Get dimension list node (second child)
+    ASTNode* dimListNode = typeNode ? typeNode->getRightSibling() : nullptr;
+    if (dimListNode && dimListNode->getNodeEnum() == NodeType::DIM_LIST) {
+        // Process dimension list to collect all dimensions
+        dimListNode->accept(this);
+    } else {
+        // For backward compatibility - handle direct dimension nodes
+        // This can be removed once all code is updated
+        ASTNode* dimNode = typeNode ? typeNode->getRightSibling() : nullptr;
+        while (dimNode) {
+            dimNode->accept(this);
+            dimNode = dimNode->getRightSibling();
+        }
     }
 }
-
 void SymbolTableVisitor::visitArrayDimension(ASTNode* node) {
     std::string dimensionValue = node->getNodeValue();
     
@@ -1406,7 +1418,7 @@ void SymbolTableVisitor::writeTableToFile(std::ofstream& out, std::shared_ptr<Sy
                     for (int i = 0; i < spaces; i++) out << " ";
                 }
                 out << "| " << formatTypeWithDimensions(memberSymbol);
-                spaces = 33 - memberSymbol->getType().length();
+                spaces = 27 - memberSymbol->getType().length();
                 if (spaces > 0) {
                     for (int i = 0; i < spaces; i++) out << " ";
                 }
@@ -1717,4 +1729,23 @@ std::string SymbolTableVisitor::formatParamTypesForTableName(const std::vector<s
         result += cleaned;
     }
     return result;
+}
+
+
+void SymbolTableVisitor::visitIndexList(ASTNode* node) {
+    // Process the list
+    ASTNode* child = node->getLeftMostChild();
+    if (child) {
+        child->accept(this);
+    }
+}
+
+void SymbolTableVisitor::visitDimList(ASTNode* node) {
+    // Process each dimension node in the list
+    ASTNode* dimNode = node->getLeftMostChild();
+    while (dimNode) {
+        // Process dimension node - this will add to currentArrayDimensions
+        dimNode->accept(this);
+        dimNode = dimNode->getRightSibling();
+    }
 }

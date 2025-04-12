@@ -83,6 +83,8 @@ public:
     void visitCondition(ASTNode* node) override;
     void visitArrayType(ASTNode* node) override;
     void visitEmpty(ASTNode* node) override;
+    void visitIndexList(ASTNode* node) override;
+    void visitDimList(ASTNode* node) override;
 
 private:
     // Symbol table and tracking

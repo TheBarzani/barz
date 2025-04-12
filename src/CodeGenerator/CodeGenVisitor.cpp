@@ -443,7 +443,7 @@ void CodeGenVisitor::visitMultOp(ASTNode* node) {
     // Don't free reg3 as parent will use it
 }
 
-// Example implementation for assignment
+// Implementation for assignment
 void CodeGenVisitor::visitAssignment(ASTNode* node) {
     // Get variable node and expression node
     ASTNode* varNode = node->getLeftMostChild();
@@ -502,6 +502,224 @@ void CodeGenVisitor::visitAssignment(ASTNode* node) {
     
     // Free the register
     freeRegister(valueReg);
+}
+
+void CodeGenVisitor::visitArrayAccess(ASTNode* node) {
+    emitComment("Processing array access");
+
+    ASTNode* arrayBaseNode = node->getLeftMostChild();
+    ASTNode* indexListNode = arrayBaseNode ? arrayBaseNode->getRightSibling() : nullptr;
+
+    if (!arrayBaseNode || !indexListNode || indexListNode->getNodeEnum() != NodeType::INDEX_LIST) {
+        emitComment("Error: Invalid ArrayAccess structure");
+        return;
+    }
+
+    // --- Get Array Base Address ---
+    int baseAddrReg = allocateRegister();
+    if (arrayBaseNode->getNodeEnum() == NodeType::IDENTIFIER) {
+        std::string arrayName = arrayBaseNode->getNodeValue();
+        auto arraySymbol = currentTable->lookupSymbol(arrayName);
+        if (!arraySymbol) {
+            emitComment("Error: Array symbol not found: " + arrayName);
+            freeRegister(baseAddrReg);
+            return;
+        }
+        int arrayMemOffset = getSymbolOffset(arrayName); // Get offset from stack frame
+        emit("addi r" + std::to_string(baseAddrReg) + ",r14," + std::to_string(arrayMemOffset)); // Calculate base address
+    }
+    else if (arrayBaseNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+        // Assume visitDotIdentifier calculates the address and stores it
+        // in a temporary location, providing the offset via metadata "address_location".
+        arrayBaseNode->accept(this); // Process the dot identifier first
+        std::string memberAddrLocStr = arrayBaseNode->getMetadata("address_location");
+        if (memberAddrLocStr.empty()) {
+             emitComment("Error: Dot identifier did not provide address location");
+             freeRegister(baseAddrReg);
+             return;
+        }
+        emit("lw r" + std::to_string(baseAddrReg) + "," + memberAddrLocStr + "(r14)"); // Load the base address
+    }
+    else {
+        // Handle other potential base expressions if necessary
+        emitComment("Error: Unsupported array base type");
+        freeRegister(baseAddrReg);
+        return;
+    }
+    // --- End Get Array Base Address ---
+
+
+    // --- Calculate Byte Offset ---
+    // Process the index list - this will calculate the total byte offset
+    // and store its *location* in indexListNode's "byte_offset_loc" metadata.
+    indexListNode->accept(this);
+    std::string byteOffsetLocStr = indexListNode->getMetadata("byte_offset_loc");
+    if (byteOffsetLocStr.empty()) {
+        emitComment("Error: IndexList did not calculate byte offset location");
+        freeRegister(baseAddrReg);
+        return;
+    }
+    int byteOffsetLoc = std::stoi(byteOffsetLocStr);
+
+    // Load the calculated byte offset
+    int byteOffsetReg = allocateRegister();
+    emit("lw r" + std::to_string(byteOffsetReg) + "," + std::to_string(byteOffsetLoc) + "(r14)");
+    // --- End Calculate Byte Offset ---
+
+
+    // --- Calculate Final Address ---
+    // Final Address = Base Address - Byte Offset (since stack grows down)
+    int finalAddrReg = allocateRegister();
+    emit("sub r" + std::to_string(finalAddrReg) + ",r" + std::to_string(baseAddrReg) + ",r" + std::to_string(byteOffsetReg));
+    // --- End Calculate Final Address ---
+
+
+    // --- Store Final Address ---
+    // Store the calculated *final address* (which is a memory address)
+    // into a *new* temporary variable on the stack.
+    int finalAddrLoc = getScopeOffset(currentTable); // Get next available stack offset
+    emit("sw " + std::to_string(finalAddrLoc) + "(r14),r" + std::to_string(finalAddrReg));
+
+    // Store the *location* (offset on stack) of the final address
+    // in the ArrayAccess node's metadata. This is what the parent (e.g., assignment) needs.
+    node->setMetadata("offset", std::to_string(finalAddrLoc));
+    // Mark that this location holds an address, not a direct value
+    node->setMetadata("is_address", "1");
+    // --- End Store Final Address ---
+
+    // Free temporary registers
+    freeRegister(baseAddrReg);
+    freeRegister(byteOffsetReg);
+    freeRegister(finalAddrReg); // We stored the result, so we can free this
+}
+
+void CodeGenVisitor::visitIndexList(ASTNode* node) {
+    emitComment("Calculating array byte offset");
+
+    // Get the parent ArrayAccess node to access array info
+    ASTNode* arrayAccessNode = node->getParent();
+    if (!arrayAccessNode || arrayAccessNode->getNodeEnum() != NodeType::ARRAY_ACCESS) {
+        emitComment("Error: IndexList parent is not ArrayAccess");
+        return;
+    }
+
+    // Get array base node to find symbol and dimensions
+    ASTNode* arrayBaseNode = arrayAccessNode->getLeftMostChild();
+    if (!arrayBaseNode) {
+        emitComment("Error: ArrayAccess node missing base array child");
+        return;
+    }
+
+    // Retrieve dimensions and element size from the array symbol
+    std::vector<int> dimensions;
+    int elementSize = 4; // Default to int size (4 bytes)
+    std::shared_ptr<Symbol> arraySymbol = nullptr;
+
+    // --- Get Array Symbol and Type Info ---
+    // We need the symbol to know the dimensions and element size.
+    // This part might need adjustment if the base is a complex expression or dot_identifier
+    // For now, assume it's primarily an IDENTIFIER.
+    if (arrayBaseNode->getNodeEnum() == NodeType::IDENTIFIER) {
+         arraySymbol = currentTable->lookupSymbol(arrayBaseNode->getNodeValue());
+         if (arraySymbol) {
+             dimensions = arraySymbol->getArrayDimensions();
+             std::string baseType = arraySymbol->getType();
+             // Basic type extraction (remove brackets)
+             size_t bracketPos = baseType.find('[');
+             if (bracketPos != std::string::npos) {
+                 baseType = baseType.substr(0, bracketPos);
+             }
+             // TODO: Add proper size lookup based on type (e.g., float = 8)
+             if (baseType == "float") {
+                 elementSize = 8; // Assuming float size is 8
+             }
+         } else {
+             emitComment("Error: Array symbol not found for " + arrayBaseNode->getNodeValue());
+             return;
+         }
+    } else {
+        // TODO: Handle DOT_IDENTIFIER or other complex base expressions
+        // Need a way to get type info (dimensions, element size) propagated
+        // For now, assume int[?]... with size 4
+        emitComment("Warning: Assuming int array for non-identifier base");
+        // We might need dimensions from type checking phase metadata if symbol isn't directly available
+    }
+
+    if (dimensions.empty()) {
+        emitComment("Error: Cannot calculate offset for non-array or unknown dimensions");
+        return;
+    }
+    // --- End Get Array Symbol ---
+
+
+    int totalOffsetReg = allocateRegister();
+    emit("addi r" + std::to_string(totalOffsetReg) + ",r0,0"); // Initialize total byte offset = 0
+
+    ASTNode* indexNode = node->getLeftMostChild();
+    int dimIndex = 0; // Keep track of which dimension we are processing
+
+    while (indexNode && dimIndex < dimensions.size()) {
+        // 1. Get the offset of the temporary variable holding the index value
+        int indexValueOffset = -1; // Default to invalid offset
+        if (!indexNode->getMetadata("offset").empty()) {
+            indexValueOffset = std::stoi(indexNode->getMetadata("offset"));
+        } else {
+             emitComment("Error: Index node missing offset metadata");
+             // Handle error or skip this index
+             indexNode = indexNode->getRightSibling();
+             dimIndex++;
+             continue;
+        }
+
+        // 2. Load the index value from its temporary variable
+        int indexValueReg = allocateRegister();
+        emit("lw r" + std::to_string(indexValueReg) + "," + std::to_string(indexValueOffset) + "(r14)");
+
+        // 3. Calculate the size multiplier for this dimension
+        // multiplier = elementSize * product_of_sizes_of_subsequent_dimensions
+        int sizeMultiplier = elementSize;
+        for (size_t k = dimIndex + 1; k < dimensions.size(); ++k) {
+            if (dimensions[k] > 0) { // Ignore dynamic dimensions for static offset calc
+                 sizeMultiplier *= dimensions[k];
+            } else {
+                emitComment("Warning: Dynamic dimension encountered, offset calculation might be inaccurate");
+                // Handle dynamic arrays if needed - requires runtime info
+            }
+        }
+
+        // 4. Calculate the byte offset contribution for this index
+        int multiplierReg = allocateRegister();
+        int contributionReg = allocateRegister();
+        emit("addi r" + std::to_string(multiplierReg) + ",r0," + std::to_string(sizeMultiplier));
+        emit("mul r" + std::to_string(contributionReg) + ",r" + std::to_string(indexValueReg) + ",r" + std::to_string(multiplierReg));
+
+        // 5. Add contribution to the total offset
+        emit("add r" + std::to_string(totalOffsetReg) + ",r" + std::to_string(totalOffsetReg) + ",r" + std::to_string(contributionReg));
+
+        // Free temporary registers for this index
+        freeRegister(indexValueReg);
+        freeRegister(multiplierReg);
+        freeRegister(contributionReg);
+
+        // Move to the next index/dimension
+        indexNode = indexNode->getRightSibling();
+        dimIndex++;
+    }
+
+    // Check if the number of indices matched the dimensions used for calculation
+    if (dimIndex != dimensions.size() || indexNode != nullptr) {
+         // This check might be better placed in semantic analysis
+         // emitComment("Warning: Number of indices might not match array dimensions");
+    }
+
+    // Store the final calculated byte offset into a new temporary variable
+    int finalByteOffsetLoc = getScopeOffset(currentTable); // Get next available stack offset
+    emit("sw " + std::to_string(finalByteOffsetLoc) + "(r14),r" + std::to_string(totalOffsetReg));
+
+    // Store the *location* of the final byte offset in this node's metadata
+    node->setMetadata("byte_offset_loc", std::to_string(finalByteOffsetLoc));
+
+    freeRegister(totalOffsetReg);
 }
 
 // Example default visitor method for nodes that just traverse children
@@ -572,6 +790,7 @@ DEFAULT_VISITOR_METHOD(StatementsList)
 DEFAULT_VISITOR_METHOD(ImplementationFunctionList)
 // DEFAULT_VISITOR_METHOD(Condition)
 DEFAULT_VISITOR_METHOD(ArrayType)
+DEFAULT_VISITOR_METHOD(DimList)
 
 void CodeGenVisitor::visitFunction(ASTNode* node) {
     // Get function signature (first child)
@@ -1126,126 +1345,4 @@ void CodeGenVisitor::visitReturnStatement(ASTNode* node) {
     // Restore return address and return
     emit("lw r15," + std::to_string(linkOffset) + "(r14)");
     emit("jr r15");
-}
-
-void CodeGenVisitor::visitArrayAccess(ASTNode* node) {
-    // Get the base array identifier or another array access node
-    ASTNode* baseNode = node->getLeftMostChild();
-    if (!baseNode) return;
-    
-    // Get the index expression
-    ASTNode* indexNode = baseNode->getRightSibling();
-    if (!indexNode) return;
-    
-    emitComment("Processing array access");
-    
-    // First evaluate the index expression
-    indexNode->accept(this);
-    
-    // Get index register (result of index expression)
-    int indexReg = allocateRegister();
-    std::string indexOffset = indexNode->getMetadata("offset");
-    if (!indexOffset.empty()) {
-        emit("lw r" + std::to_string(indexReg) + "," + indexOffset + "(r14)");
-    } else if (indexNode->getNodeEnum() == NodeType::INT) {
-        // Direct integer index
-        emit("addi r" + std::to_string(indexReg) + ",r0," + indexNode->getNodeValue());
-    } else {
-        // Default handling for complex expressions
-        emit("lw r" + std::to_string(indexReg) + ",-4(r14)");
-    }
-    
-    // Process the base array expression - could be an identifier or another array access
-    int baseAddressReg = allocateRegister();
-    
-    if (baseNode->getNodeEnum() == NodeType::ARRAY_ACCESS) {
-        // Handle multi-dimensional array access (arr[i][j])
-        // Process the inner array access first
-        baseNode->accept(this);
-        
-        // Get the result of the inner array access (address)
-        std::string resultOffset = baseNode->getMetadata("offset");
-        if (!resultOffset.empty()) {
-            // Load the address calculated by the inner array access
-            emit("lw r" + std::to_string(baseAddressReg) + "," + resultOffset + "(r14)");
-        } else {
-            emitComment("Warning: No offset metadata for inner array access");
-            freeRegister(indexReg);
-            freeRegister(baseAddressReg);
-            return;
-        }
-    }
-    else if (baseNode->getNodeEnum() == NodeType::IDENTIFIER) {
-        // Simple variable array access
-        std::string arrayName = baseNode->getNodeValue();
-        auto arraySymbol = currentTable->lookupSymbol(arrayName);
-        
-        if (!arraySymbol) {
-            emitComment("Error: Array symbol not found: " + arrayName);
-            freeRegister(indexReg);
-            freeRegister(baseAddressReg);
-            return;
-        }
-        
-        // Get array base address
-        int arrayOffset = getSymbolOffset(arrayName);
-        emit("multi r" + std::to_string(baseAddressReg) + ",r" + std::to_string(indexReg) + "," + std::to_string(arrayOffset));
-    }
-    else if (baseNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
-        // Object member access (obj.arr)
-        baseNode->accept(this);
-        // Get member address from previous calculation
-        std::string resultOffset = baseNode->getMetadata("offset");
-        if (!resultOffset.empty()) {
-            emit("lw r" + std::to_string(baseAddressReg) + "," + resultOffset + "(r14)");
-        }
-    }
-    else {
-        // Some other expression that should evaluate to an array
-        baseNode->accept(this);
-        std::string resultOffset = baseNode->getMetadata("offset");
-        if (!resultOffset.empty()) {
-            emit("lw r" + std::to_string(baseAddressReg) + "," + resultOffset + "(r14)");
-        }
-    }
-    
-    // Determine element size for indexing - default is 4 bytes (int)
-    int elementSize = 4;
-    
-    // Try to get element size from the symbol table if we have a direct identifier
-    if (baseNode->getNodeEnum() == NodeType::IDENTIFIER) {
-        auto arraySymbol = currentTable->lookupSymbol(baseNode->getNodeValue());
-        if (arraySymbol) {
-            std::string baseType = arraySymbol->getType();
-            if (baseType == "float") {
-                elementSize = 8;
-            }
-        }
-    }
-    
-    // Calculate the element address: base + (index * element_size)
-    int elementSizeReg = allocateRegister();
-    emit("addi r" + std::to_string(elementSizeReg) + ",r0," + std::to_string(elementSize));
-    
-    int offsetReg = allocateRegister();
-    emit("mul r" + std::to_string(offsetReg) + ",r" + std::to_string(indexReg) + ",r" + std::to_string(elementSizeReg));
-    
-    // Final array element address
-    int addressReg = allocateRegister();
-    emit("add r" + std::to_string(addressReg) + ",r" + std::to_string(baseAddressReg) + ",r" + std::to_string(offsetReg));
-    
-    // Store the calculated address in a temporary variable
-    int tempOffset = getScopeOffset(currentTable);
-    emit("sw " + std::to_string(tempOffset) + "(r14),r" + std::to_string(addressReg));
-    
-    // Add metadata to the node for later use
-    node->setMetadata("offset", std::to_string(tempOffset));
-    node->setMetadata("is_address", "1"); // Mark as address, not value
-    
-    // Free registers
-    freeRegister(indexReg);
-    freeRegister(baseAddressReg);
-    freeRegister(elementSizeReg);
-    freeRegister(offsetReg);
-    freeRegister(addressReg);
 }

@@ -325,35 +325,52 @@ void SemanticCheckingVisitor::visitIdentifier(ASTNode* node) {
 
 // Array access visitor - for checking array access
 void SemanticCheckingVisitor::visitArrayAccess(ASTNode* node) {
-    // Process array identifier
+    // Get array variable (left child) - either an identifier or dot_access
     ASTNode* arrayNode = node->getLeftMostChild();
-    if (arrayNode) {
-        arrayNode->accept(this);
-        TypeInfo arrayType = currentExprType;
+    if (!arrayNode) {
+        reportError("Missing array variable in array access", node);
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Process the array variable to get its type
+    arrayNode->accept(this);
+    TypeInfo arrayType = currentExprType;
+    
+    // Check if this is actually an array
+    if (arrayType.dimensions.empty()) {
+        reportError("Array index used on non-array type: " + arrayType.type, node);
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Process the index list (right child)
+    ASTNode* indexListNode = arrayNode->getRightSibling();
+    if (indexListNode) {
+        // Process index list - this will check individual indices
+        indexListNode->accept(this);
         
-        // Check if this is actually an array
-        if (arrayType.dimensions.empty()) {
-            reportError("Array index used on non-array type: " + arrayType.type, node);
-            currentExprType.type = "error";
-            return;
-        }
-        
-        // Process the current dimension's index
-        ASTNode* indexNode = arrayNode->getRightSibling();
-        if (indexNode) {
-            indexNode->accept(this);
-            TypeInfo indexType = currentExprType;
-            
-            // Index must be an integer
-            if (indexType.type != "int") {
-                reportError("Array index must be of integer type, got: " + indexType.type, node);
-            }
-        }
-        
-        // Reduce array dimensions by one for this level of access
+        // After processing all indices, update the result type
+        // Remove the used dimensions based on how many indices were processed
         currentExprType = arrayType;
-        if (!currentExprType.dimensions.empty()) {
-            currentExprType.dimensions.erase(currentExprType.dimensions.begin());
+        
+        // Count the indices
+        int indexCount = 0;
+        ASTNode* indexNode = indexListNode->getLeftMostChild();
+        while (indexNode) {
+            indexCount++;
+            indexNode = indexNode->getRightSibling();
+        }
+        
+        // Remove dimensions based on indices used
+        if (indexCount <= currentExprType.dimensions.size()) {
+            currentExprType.dimensions.erase(
+                currentExprType.dimensions.begin(), 
+                currentExprType.dimensions.begin() + indexCount
+            );
+        } else {
+            // This is an error case, but it was already reported in visitIndexList
+            currentExprType.dimensions.clear();
         }
     }
 }
@@ -1865,4 +1882,51 @@ void SemanticCheckingVisitor::reportWarning(const std::string& message, int line
     
     std::cerr << "Warning" << (line > 0 ? " at line " + std::to_string(line) : "") 
               << ": " << message << std::endl;
+}
+
+void SemanticCheckingVisitor::visitDimList(ASTNode* node) {
+    // Clear any existing array dimensions before processing
+    currentArrayDimensions.clear();
+    
+    // Process each dimension node in the list
+    ASTNode* dimNode = node->getLeftMostChild();
+    while (dimNode) {
+        // Process this dimension
+        dimNode->accept(this);
+        // Each dimension's visit will add to the currentArrayDimensions vector
+        
+        // Move to next dimension
+        dimNode = dimNode->getRightSibling();
+    }
+}
+
+void SemanticCheckingVisitor::visitIndexList(ASTNode* node) {
+    // Count the number of index expressions in the list
+    int indexCount = 0;
+    ASTNode* indexNode = node->getLeftMostChild();
+    
+    // Process each index expression and count them
+    while (indexNode) {
+        // Process this index expression
+        indexNode->accept(this);
+        
+        indexCount++;
+        indexNode = indexNode->getRightSibling();
+    }
+    
+    // Get the array variable node (sibling of the index list in the parent ARRAY_ACCESS node)
+    ASTNode* arrayNode = node->getLeftMostSibling();
+    if (arrayNode) {
+        // Visit the array variable to get its type information
+        arrayNode->accept(this);
+        
+        // Check if the number of indices matches the number of dimensions
+        int dimensionsCount = currentExprType.dimensions.size();
+        
+        if (indexCount != dimensionsCount) {
+            reportError("Incorrect number of array indices. Expected " + 
+                       std::to_string(dimensionsCount) + ", got " + 
+                       std::to_string(indexCount), node);
+        }
+    }
 }

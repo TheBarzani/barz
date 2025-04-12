@@ -1,5 +1,29 @@
+
+class CLASS {
+  public attribute a: int[10][1];
+};
+
+function hi(a: int[5], b: int, c: int[10][11]) => int  
+{
+  //local b: CLASS;
+  //local x: CLASS[4];
+  //x[1] := b;
+}
+
+
 function main() => void  
 {
-  local x: int[4][4][3];
-  x[1][2][1] := 2;
+
+  local x: int[5][4][3];
+  x[1][2][3] := 33;
+  write(x[1][2][3]);
+
+  
+  local z: int;
+  z := x[3][2][1];
+  local a: int;
+  local b: int;
+  a:=b;
+  // write(z);
+  
 }

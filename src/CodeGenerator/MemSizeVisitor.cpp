@@ -272,12 +272,6 @@ void MemSizeVisitor::calculateTableOffsets(std::shared_ptr<SymbolTable> table) {
         
         // Calculate size based on type and array dimensions
         int size = getTypeSize(param->getType());
-        if (param->isArray()) {
-            // For arrays, multiply base size by all dimensions
-            for (int dim : param->getArrayDimensions()) {
-                size *= dim;
-            }
-        }
         
         setSymbolSize(param, size);
         
@@ -454,37 +448,54 @@ void MemSizeVisitor::visitFunction(ASTNode* node) {
     ASTNode* funcIdNode = signatureNode->getLeftMostChild();
     if (!funcIdNode) return;
     
-    // Reset temp variable counter for each function
-    // tempVarCounter = 1;
-    
     std::string funcName = funcIdNode->getNodeValue();
     currentFunctionName = funcName;
     
-    // Get param types to build complete function key
+    // Get param types to build complete function key with proper array dimensions
     std::vector<std::string> paramTypes;
     ASTNode* paramListNode = funcIdNode->getRightSibling();
     if (paramListNode && paramListNode->getNodeEnum() == NodeType::PARAM_LIST) {
         ASTNode* paramNode = paramListNode->getLeftMostChild();
         while (paramNode) {
-            ASTNode* typeNode = paramNode->getLeftMostChild()->getRightSibling();
+            ASTNode* paramIdNode = paramNode->getLeftMostChild();
+            ASTNode* typeNode = paramIdNode ? paramIdNode->getRightSibling() : nullptr;
+            
             if (typeNode) {
-                paramTypes.push_back(typeNode->getNodeValue());
+                // Clear array dimensions for each parameter
+                currentArrayDimensions.clear();
+                
+                // For array types, process recursively
+                if (typeNode->getNodeEnum() == NodeType::ARRAY_TYPE) {
+                    // Process array type to populate currentType and currentArrayDimensions
+                    typeNode->accept(this);
+                    
+                    // Now format the type with array dimensions
+                    std::string formattedType = currentType;
+                    for (int dim : currentArrayDimensions) {
+                        formattedType += "[" + (dim == -1 ? "" : std::to_string(dim)) + "]";
+                    }
+                    
+                    paramTypes.push_back(formattedType);
+                } else {
+                    // For simple types, just get the value
+                    paramTypes.push_back(typeNode->getNodeValue());
+                }
             }
+            
             paramNode = paramNode->getRightSibling();
         }
     }
     
-    // Check if this is a class method based on parent nodes
+    // Check if this is a class method based on parent nodes (unchanged)
     bool isClassMethod = false;
     std::string className = "";
     
     // Check parent structure to determine if it's a member function
     ASTNode* parentNode = node->getParent();
     if (parentNode && parentNode->getNodeEnum() == NodeType::IMPLEMENTATION_FUNCTION_LIST) {
-        // Part of implementation function list - it's a class method
+        // Implementation details unchanged...
         ASTNode* grandParent = parentNode->getParent();
         if (grandParent && grandParent->getNodeEnum() == NodeType::IMPLEMENTATION) {
-            // Get class name from implementation ID
             ASTNode* implIdNode = grandParent->getLeftMostChild();
             if (implIdNode && implIdNode->getNodeEnum() == NodeType::IMPLEMENTATION_ID) {
                 className = implIdNode->getNodeValue();
@@ -492,10 +503,8 @@ void MemSizeVisitor::visitFunction(ASTNode* node) {
             }
         }
     } else if (parentNode && parentNode->getNodeEnum() == NodeType::MEMBER) {
-        // Direct member of class - it's a class method declaration
+        // Implementation details unchanged...
         isClassMethod = true;
-        
-        // Find containing class by traversing up
         ASTNode* memberListNode = parentNode->getParent();
         if (memberListNode && memberListNode->getNodeEnum() == NodeType::MEMBER_LIST) {
             ASTNode* classNode = memberListNode->getParent();
@@ -511,12 +520,16 @@ void MemSizeVisitor::visitFunction(ASTNode* node) {
     // Build table key based on whether it's a class method
     std::string tableKey = funcName;
     
-    // Add parameter types if any
+    // Add parameter types if any - using the properly formatted array types
     if (!paramTypes.empty()) {
         tableKey += "_";
         for (size_t i = 0; i < paramTypes.size(); i++) {
             if (i > 0) tableKey += "_";
-            tableKey += paramTypes[i];
+            // Remove brackets and convert to snake_case for table naming
+            std::string paramType = paramTypes[i];
+            std::replace(paramType.begin(), paramType.end(), '[', '_');
+            std::replace(paramType.begin(), paramType.end(), ']', '_');
+            tableKey += paramType;
         }
     }
     
@@ -1065,24 +1078,26 @@ void MemSizeVisitor::removeLocalVariables(std::shared_ptr<SymbolTable> table) {
 
 // Update visitArrayType to properly collect dimensions
 void MemSizeVisitor::visitArrayType(ASTNode* node) {
-    // Get dimension node (left child)
-    ASTNode* dimNode = node->getLeftMostChild();
-    if (dimNode) {
-        // Process dimension node to add it to currentArrayDimensions
-        dimNode->accept(this);
+    // Clear existing array dimensions
+    currentArrayDimensions.clear();
+    
+    // Get type node (left child)
+    ASTNode* typeNode = node->getLeftMostChild();
+    if (typeNode) {
+            // For simple types (e.g., int, float), just get the value
+            currentType = typeNode->getNodeValue();
     }
     
-    // Get type node (right child)
-    ASTNode* typeNode = dimNode ? dimNode->getRightSibling() : nullptr;
-    if (typeNode) {
-        // Check if this is another array type (multidimensional array)
-        if (typeNode->getNodeEnum() == NodeType::ARRAY_TYPE) {
-            // Process nested array type recursively - will collect inner dimensions
-            typeNode->accept(this);
-        } else {
-            // This is the base type (like int, float, etc.)
-            currentType = typeNode->getNodeValue();
-        }
+    // Get dimension list node (right child)
+    ASTNode* dimListNode = typeNode ? typeNode->getRightSibling() : nullptr;
+    if (dimListNode && dimListNode->getNodeEnum() == NodeType::DIM_LIST) {
+        // Process all dimensions in the list
+        dimListNode->accept(this);
+    } 
+    // For backward compatibility
+    else if (dimListNode && dimListNode->getNodeEnum() == NodeType::ARRAY_DIMENSION) {
+        // Direct dimension node (legacy format)
+        dimListNode->accept(this);
     }
 }
 
@@ -1109,5 +1124,53 @@ void MemSizeVisitor::visitArrayDimension(ASTNode* node) {
     } catch (const std::exception&) {
         // If not a number, default to dynamic array
         currentArrayDimensions.push_back(-1);
+    }
+}
+
+void MemSizeVisitor::visitDimList(ASTNode* node) {
+    // Clear existing array dimensions before processing
+    currentArrayDimensions.clear();
+    
+    // Process each dimension node in the list
+    ASTNode* dimNode = node->getLeftMostChild();
+    while (dimNode) {
+        // Process this dimension node
+        dimNode->accept(this);
+        
+        // Move to next dimension
+        dimNode = dimNode->getRightSibling();
+    }
+}
+
+void MemSizeVisitor::visitIndexList(ASTNode* node) {
+    // Process each index expression in the list
+    ASTNode* indexNode = node->getLeftMostChild();
+    int indexCount = 0;
+    
+    while (indexNode) {
+        // Process this index expression - might create temp vars for complex expressions
+        indexNode->accept(this);
+        
+        // If the index is a complex expression, we might need a temporary variable
+        if (indexNode->getNodeEnum() != NodeType::INT && 
+            indexNode->getNodeEnum() != NodeType::IDENTIFIER) {
+            
+            // Create a temp var to store the index value
+            std::string tempVarName = createTempVar("int", "index", indexNode);
+            
+            // Store the temp var name in the node's metadata for code generation
+            indexNode->setMetadata("indexVar", tempVarName);
+        }
+        
+        indexCount++;
+        indexNode = indexNode->getRightSibling();
+    }
+    
+    // Store the index count in the node's metadata
+    node->setMetadata("indexCount", std::to_string(indexCount));
+    
+    // If this is part of an array access, update the parent node's metadata
+    if (node->getParent() && node->getParent()->getNodeEnum() == NodeType::ARRAY_ACCESS) {
+        node->getParent()->setMetadata("indexCount", std::to_string(indexCount));
     }
 }
