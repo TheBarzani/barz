@@ -1260,7 +1260,7 @@ void MemSizeVisitor::visitIndexList(ASTNode* node) {
             indexNode->getNodeEnum() != NodeType::IDENTIFIER) {
             
             // Create a temp var to store the index value
-            std::string tempVarName = createTempVar("int", "index", indexNode);
+            std::string tempVarName = createTempVar("int", "tempvar", indexNode);
             
             // Store the temp var name in the node's metadata for code generation
             indexNode->setMetadata("indexVar", tempVarName);

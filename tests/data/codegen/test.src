@@ -3,11 +3,13 @@ function main() => void
 {
   
   local c: int; 
-  //local b: int;  
+  local b: int;  
   local brr: int[2][3][4];
   c := 77;
   //write (c);
                                          
-  brr[2][2][3] := c;
+  brr[1+1][2][3] := c;
+  b := brr[2][2][3]+3;
+  write(b);
   write (brr[2][2][3]);
 }
