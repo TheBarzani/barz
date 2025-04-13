@@ -518,7 +518,7 @@ void AST::performAction(std::string action, std::string value, int line) {
         // }
     }
     else if (action == "_processDotAccess") {
-        if (ASTStack.back()->getNodeEnum() != NodeType::DOT_IDENTIFIER && ASTStack.back()->getNodeEnum() != NodeType::FUNCTION_CALL & ASTStack.back()->getNodeEnum() != NodeType::ARRAY_ACCESS) {
+        if (ASTStack.back()->getNodeEnum() != NodeType::DOT_IDENTIFIER && ASTStack.back()->getNodeEnum() != NodeType::FUNCTION_CALL && (ASTStack.back()->getNodeEnum() != NodeType::ARRAY_ACCESS || ASTStack.at(ASTStack.size() - 2)->getNodeEnum() != NodeType::IDENTIFIER)) {
             return;
         }
         ASTNode* identifier = ASTStack.back(); ASTStack.pop_back();// Create DOT_IDENTIFIER node
