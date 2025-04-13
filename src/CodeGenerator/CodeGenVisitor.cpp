@@ -240,7 +240,20 @@ void CodeGenVisitor::visitInt(ASTNode* node) {
     
     // Get metadata that was set by MemSizeVisitor
     std::string tempVarName = node->getMetadata("moonVarName");
-    int offset = std::stoi(node->getMetadata("offset"));
+    // Look up symbol in the table to get the correct offset
+    int offset;
+    auto symbol = currentTable->lookupSymbol(tempVarName);
+    if (symbol && !symbol->getMetadata("offset").empty()) {
+        offset = std::stoi(symbol->getMetadata("offset"));
+    } else if (!node->getMetadata("offset").empty()) {
+        // Fallback: use offset from node metadata if symbol not found
+        offset = std::stoi(node->getMetadata("offset"));
+        emitComment("Warning: Symbol for " + tempVarName + " not found, using node metadata offset");
+    } else {
+        // Last resort: use a default offset with warning
+        offset = std::stoi(node->getMetadata("offset"));
+        emitComment("Warning: No offset found for " + tempVarName + ", using default");
+    }
     
     // Generate code to load the integer literal
     emitComment("processing: " + tempVarName + " := " + node->getNodeValue());
@@ -251,6 +264,8 @@ void CodeGenVisitor::visitInt(ASTNode* node) {
     
     // Store register info for parent nodes
     node->setMetadata("reg", std::to_string(reg));
+    // Store the offset in the node metadata
+    node->setMetadata("offset", std::to_string(offset));
 
     // Free the register
     freeRegister(reg);
@@ -267,7 +282,19 @@ void CodeGenVisitor::visitFloat(ASTNode* node) {
     
     // Get metadata that was set by MemSizeVisitor
     std::string tempVarName = node->getMetadata("moonVarName");
-    int offset = std::stoi(node->getMetadata("offset"));
+    int offset;
+    auto symbol = currentTable->lookupSymbol(tempVarName);
+    if (symbol && !symbol->getMetadata("offset").empty()) {
+        offset = std::stoi(symbol->getMetadata("offset"));
+    } else if (!node->getMetadata("offset").empty()) {
+        // Fallback: use offset from node metadata if symbol not found
+        offset = std::stoi(node->getMetadata("offset"));
+        emitComment("Warning: Symbol for " + tempVarName + " not found, using node metadata offset");
+    } else {
+        // Last resort: use a default offset with warning
+        offset = std::stoi(node->getMetadata("offset"));
+        emitComment("Warning: No offset found for " + tempVarName + ", using default");
+    }
     
     // Generate code to load the float literal
     emitComment("processing: " + tempVarName + " := " + node->getNodeValue());
@@ -454,9 +481,35 @@ void CodeGenVisitor::visitAssignment(ASTNode* node) {
     // Process the expression first to get its value
     exprNode->accept(this);
     
-    // Get the value from the expression into a register
+   // Get the value from the expression into a register
     int valueReg = allocateRegister();
-    int exprOffset = std::stoi(exprNode->getMetadata("offset"));
+    int exprOffset;
+
+    // Determine the offset based on node type and available metadata
+    if (exprNode->getNodeEnum() == NodeType::IDENTIFIER) {
+        // For identifiers, get offset from symbol table
+        exprOffset = getSymbolOffset(exprNode->getNodeValue());
+    } else if (!exprNode->getMetadata("offset").empty()) {
+        // For expressions with metadata, use that
+        exprOffset = std::stoi(exprNode->getMetadata("offset"));
+    } else {
+        // Handle complex expressions by trying to find a symbol
+        std::string nodeName = exprNode->getNodeValue();
+        if (!nodeName.empty()) {
+            // Try to find the symbol in the current table
+            auto symbol = currentTable->lookupSymbol(nodeName);
+            if (symbol && !symbol->getMetadata("offset").empty()) {
+                exprOffset = std::stoi(symbol->getMetadata("offset"));
+            } else {
+                emitComment("Warning: Could not determine offset for expression");
+                exprOffset = -8; // Use a default offset
+            }
+        } else {
+            emitComment("Warning: Could not determine offset for expression");
+            exprOffset = -8; // Use a default offset
+        }
+    }
+
     emit("lw r" + std::to_string(valueReg) + "," + std::to_string(exprOffset) + "(r14)");
     
     // Handle different types of left-side expressions
@@ -467,10 +520,12 @@ void CodeGenVisitor::visitAssignment(ASTNode* node) {
         // Get the address of the array element
         int addressReg = allocateRegister();
         int addrOffset = std::stoi(varNode->getMetadata("offset"));
-        emit("lw r" + std::to_string(addressReg) + "," + std::to_string(addrOffset) + "(r14)");
         
         // Store the value to the calculated address
         emitComment("Storing value into array element");
+        emit("add r" + std::to_string(addressReg) + ",r0,r0");
+        emit("lw r" + std::to_string(addressReg) + "," + std::to_string(addrOffset) + "(r14)");
+        //emit("add r" + std::to_string(addressReg) + ",r"+ std::to_string(addressReg) +",r14");
         emit("sw 0(r" + std::to_string(addressReg) + "),r" + std::to_string(valueReg));
         
         freeRegister(addressReg);
@@ -499,7 +554,7 @@ void CodeGenVisitor::visitAssignment(ASTNode* node) {
         emitComment("processing:: " + varName + " := " + exprNode->getMetadata("moonVarName"));
         emit("sw " + std::to_string(varOffset) + "(r14),r" + std::to_string(valueReg));
     }
-    
+    emitComment("Assignment completed");
     // Free the register
     freeRegister(valueReg);
 }
@@ -518,6 +573,7 @@ void CodeGenVisitor::visitArrayAccess(ASTNode* node) {
     // --- Get Array Base Address ---
     int baseAddrReg = allocateRegister();
     if (arrayBaseNode->getNodeEnum() == NodeType::IDENTIFIER) {
+        // Array base address calculation for simple variables
         std::string arrayName = arrayBaseNode->getNodeValue();
         auto arraySymbol = currentTable->lookupSymbol(arrayName);
         if (!arraySymbol) {
@@ -525,33 +581,31 @@ void CodeGenVisitor::visitArrayAccess(ASTNode* node) {
             freeRegister(baseAddrReg);
             return;
         }
-        int arrayMemOffset = getSymbolOffset(arrayName); // Get offset from stack frame
-        emit("addi r" + std::to_string(baseAddrReg) + ",r14," + std::to_string(arrayMemOffset)); // Calculate base address
+        int arrayMemOffset = getSymbolOffset(arrayName);
+        emit("subi r" + std::to_string(baseAddrReg) + ",r14," + std::to_string(arrayMemOffset*-1));
     }
     else if (arrayBaseNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
-        // Assume visitDotIdentifier calculates the address and stores it
-        // in a temporary location, providing the offset via metadata "address_location".
-        arrayBaseNode->accept(this); // Process the dot identifier first
+        // Array base address calculation for class members
+        arrayBaseNode->accept(this);
         std::string memberAddrLocStr = arrayBaseNode->getMetadata("address_location");
         if (memberAddrLocStr.empty()) {
              emitComment("Error: Dot identifier did not provide address location");
              freeRegister(baseAddrReg);
              return;
         }
-        emit("lw r" + std::to_string(baseAddrReg) + "," + memberAddrLocStr + "(r14)"); // Load the base address
+        emit("lw r" + std::to_string(baseAddrReg) + "," + memberAddrLocStr + "(r14)");
     }
     else {
-        // Handle other potential base expressions if necessary
         emitComment("Error: Unsupported array base type");
         freeRegister(baseAddrReg);
         return;
     }
-    // --- End Get Array Base Address ---
 
+    // --- Calculate Byte Offset via Index List ---
+    int totalOffsetReg = allocateRegister();
 
-    // --- Calculate Byte Offset ---
-    // Process the index list - this will calculate the total byte offset
-    // and store its *location* in indexListNode's "byte_offset_loc" metadata.
+    // Pass the register to IndexList via metadata
+    indexListNode->setMetadata("total_offset_reg", std::to_string(totalOffsetReg));
     indexListNode->accept(this);
     std::string byteOffsetLocStr = indexListNode->getMetadata("byte_offset_loc");
     if (byteOffsetLocStr.empty()) {
@@ -559,38 +613,37 @@ void CodeGenVisitor::visitArrayAccess(ASTNode* node) {
         freeRegister(baseAddrReg);
         return;
     }
+    emitComment("Array byte offset calculated");
     int byteOffsetLoc = std::stoi(byteOffsetLocStr);
 
-    // Load the calculated byte offset
-    int byteOffsetReg = allocateRegister();
-    emit("lw r" + std::to_string(byteOffsetReg) + "," + std::to_string(byteOffsetLoc) + "(r14)");
-    // --- End Calculate Byte Offset ---
-
-
     // --- Calculate Final Address ---
-    // Final Address = Base Address - Byte Offset (since stack grows down)
     int finalAddrReg = allocateRegister();
-    emit("sub r" + std::to_string(finalAddrReg) + ",r" + std::to_string(baseAddrReg) + ",r" + std::to_string(byteOffsetReg));
-    // --- End Calculate Final Address ---
+    emit("sub r" + std::to_string(finalAddrReg) + ",r" + std::to_string(baseAddrReg) + ",r" + std::to_string(totalOffsetReg));
 
+    int finalAddrOffsetTemp;
+    if (indexListNode->getMetadata("moonVarName").empty()) {
+        emitComment("Error: No offset metadata for array access");
+        freeRegister(baseAddrReg);
+        freeRegister(totalOffsetReg);
+        freeRegister(finalAddrReg);
+        return;
+    } else {
+        auto symbol = currentTable->lookupSymbol(indexListNode->getMetadata("moonVarName"));
+        if (symbol) {
+            finalAddrOffsetTemp = getSymbolOffset(symbol->getName());
+        } else {
+            std::cerr << "Error: Symbol not found for " << indexListNode->getMetadata("moonVarName") << std::endl;
+            finalAddrOffsetTemp = -1; // Default or error value
+        }
+    }
 
-    // --- Store Final Address ---
-    // Store the calculated *final address* (which is a memory address)
-    // into a *new* temporary variable on the stack.
-    int finalAddrLoc = getScopeOffset(currentTable); // Get next available stack offset
-    emit("sw " + std::to_string(finalAddrLoc) + "(r14),r" + std::to_string(finalAddrReg));
-
-    // Store the *location* (offset on stack) of the final address
-    // in the ArrayAccess node's metadata. This is what the parent (e.g., assignment) needs.
-    node->setMetadata("offset", std::to_string(finalAddrLoc));
-    // Mark that this location holds an address, not a direct value
-    node->setMetadata("is_address", "1");
-    // --- End Store Final Address ---
-
+    emit("sw " + std::to_string(finalAddrOffsetTemp) + "(r14),r" + std::to_string(finalAddrReg));
+    node->setMetadata("offset", std::to_string(finalAddrOffsetTemp));
+    emitComment("Array access address stored in " + std::to_string(finalAddrOffsetTemp) + "(r14)");
     // Free temporary registers
+    freeRegister(totalOffsetReg);
     freeRegister(baseAddrReg);
-    freeRegister(byteOffsetReg);
-    freeRegister(finalAddrReg); // We stored the result, so we can free this
+    freeRegister(finalAddrReg);
 }
 
 void CodeGenVisitor::visitIndexList(ASTNode* node) {
@@ -652,23 +705,50 @@ void CodeGenVisitor::visitIndexList(ASTNode* node) {
     // --- End Get Array Symbol ---
 
 
-    int totalOffsetReg = allocateRegister();
+    int totalOffsetReg;
+    if (!node->getMetadata("total_offset_reg").empty()) {
+        totalOffsetReg = std::stoi(node->getMetadata("total_offset_reg"));
+    } else {
+        emitComment("Error: No offset register provided by ArrayAccess");
+        return; // Cannot proceed without proper register management
+    }
     emit("addi r" + std::to_string(totalOffsetReg) + ",r0,0"); // Initialize total byte offset = 0
 
     ASTNode* indexNode = node->getLeftMostChild();
     int dimIndex = 0; // Keep track of which dimension we are processing
 
     while (indexNode && dimIndex < dimensions.size()) {
-        // 1. Get the offset of the temporary variable holding the index value
+        // First, visit the index node to evaluate any expressions
+        indexNode->accept(this);
+        
+        // Now get the offset of the temporary variable holding the index value
         int indexValueOffset = -1; // Default to invalid offset
-        if (!indexNode->getMetadata("offset").empty()) {
+
+        // For simple identifiers, just use the variable name directly
+        if (indexNode->getNodeEnum() == NodeType::IDENTIFIER) {
+            indexValueOffset = getSymbolOffset(indexNode->getNodeValue());
+        } 
+        // For temporary variables, first get the moonVarName and then look it up
+        else if (!indexNode->getMetadata("moonVarName").empty()) {
+            std::string tempVarName = indexNode->getMetadata("moonVarName");
+            indexValueOffset = getSymbolOffset(tempVarName);
+            
+            // If lookup failed, emit warning
+            if (indexValueOffset == 0) {
+                emitComment("Warning: Temp var " + tempVarName + " not found in symbol table");
+            }
+        }
+        // Last resort: use direct offset metadata if available
+        else if (!indexNode->getMetadata("offset").empty()) {
             indexValueOffset = std::stoi(indexNode->getMetadata("offset"));
-        } else {
-             emitComment("Error: Index node missing offset metadata");
-             // Handle error or skip this index
-             indexNode = indexNode->getRightSibling();
-             dimIndex++;
-             continue;
+        } 
+        // If all methods fail, issue error and skip
+        else {
+            emitComment("Error: Cannot determine index value location for " + 
+                        (indexNode->getNodeValue().empty() ? "expression" : indexNode->getNodeValue()));
+            indexNode = indexNode->getRightSibling();
+            dimIndex++;
+            continue;
         }
 
         // 2. Load the index value from its temporary variable
@@ -678,7 +758,7 @@ void CodeGenVisitor::visitIndexList(ASTNode* node) {
         // 3. Calculate the size multiplier for this dimension
         // multiplier = elementSize * product_of_sizes_of_subsequent_dimensions
         int sizeMultiplier = elementSize;
-        for (size_t k = dimIndex + 1; k < dimensions.size(); ++k) {
+        for (size_t k = 0; k < dimensions.size()-dimIndex-1; ++k) {
             if (dimensions[k] > 0) { // Ignore dynamic dimensions for static offset calc
                  sizeMultiplier *= dimensions[k];
             } else {
@@ -688,17 +768,14 @@ void CodeGenVisitor::visitIndexList(ASTNode* node) {
         }
 
         // 4. Calculate the byte offset contribution for this index
-        int multiplierReg = allocateRegister();
         int contributionReg = allocateRegister();
-        emit("addi r" + std::to_string(multiplierReg) + ",r0," + std::to_string(sizeMultiplier));
-        emit("mul r" + std::to_string(contributionReg) + ",r" + std::to_string(indexValueReg) + ",r" + std::to_string(multiplierReg));
+        emit("muli r" + std::to_string(contributionReg) + ",r" + std::to_string(indexValueReg) + "," + std::to_string(sizeMultiplier));
 
         // 5. Add contribution to the total offset
         emit("add r" + std::to_string(totalOffsetReg) + ",r" + std::to_string(totalOffsetReg) + ",r" + std::to_string(contributionReg));
 
         // Free temporary registers for this index
         freeRegister(indexValueReg);
-        freeRegister(multiplierReg);
         freeRegister(contributionReg);
 
         // Move to the next index/dimension
@@ -714,12 +791,11 @@ void CodeGenVisitor::visitIndexList(ASTNode* node) {
 
     // Store the final calculated byte offset into a new temporary variable
     int finalByteOffsetLoc = getScopeOffset(currentTable); // Get next available stack offset
-    emit("sw " + std::to_string(finalByteOffsetLoc) + "(r14),r" + std::to_string(totalOffsetReg));
+    //emit("sw " + std::to_string(finalByteOffsetLoc) + "(r14),r" + std::to_string(totalOffsetReg));
 
     // Store the *location* of the final byte offset in this node's metadata
     node->setMetadata("byte_offset_loc", std::to_string(finalByteOffsetLoc));
-
-    freeRegister(totalOffsetReg);
+    node->setMetadata("offset_reg", std::to_string(totalOffsetReg));
 }
 
 // Example default visitor method for nodes that just traverse children
@@ -894,12 +970,82 @@ void CodeGenVisitor::visitWriteStatement(ASTNode* node) {
     
     // Get the output expression offset - handle identifiers correctly
     int exprOffset;
+    // Determine the offset based on node type and available metadata
     if (exprNode->getNodeEnum() == NodeType::IDENTIFIER) {
-        // For identifiers, get offset from symbol table
+        // For simple identifiers, get offset directly from symbol table
         exprOffset = getSymbolOffset(exprNode->getNodeValue());
-    } else {
-        // For expressions and literals, get from metadata
+    } 
+    else if (exprNode->getNodeEnum() == NodeType::ARRAY_ACCESS) {
+        // For array access, we need to get the calculated address from memory
+        // The array access node should have visited already and stored its offset
+        if (!exprNode->getMetadata("offset").empty()) {
+            // This offset contains the memory location where the array element address is stored
+            int arrayAddressOffset = std::stoi(exprNode->getMetadata("offset"));
+
+            // For reads, load from the address
+            int addrReg = allocateRegister();
+            emit("lw r" + std::to_string(addrReg) + "," + std::to_string(arrayAddressOffset) + "(r14)");
+            //emit("add r" + std::to_string(addrReg) + ",r"+std::to_string(addrReg)+",r14");
+            
+            // Create a new temporary for the value
+            int tempOffset = getScopeOffset(currentTable);
+            emit("lw r" + std::to_string(reg1) + ",0(r" + std::to_string(addrReg) + ")");
+            freeRegister(addrReg);  
+            exprOffset = tempOffset;
+        } else {
+            emitComment("Error: Array access missing offset metadata");
+            exprOffset = -8; // Use default
+        }
+    }
+    else if (exprNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+        // For object member access, similar to array access
+        if (!exprNode->getMetadata("offset").empty()) {
+            int memberAddressOffset = std::stoi(exprNode->getMetadata("offset"));
+            
+            // Determine if this is a read operation
+            ASTNode* parentNode = exprNode->getParent();
+            bool isAddressOnly = (parentNode && parentNode->getNodeEnum() == NodeType::ASSIGNMENT && 
+                                parentNode->getLeftMostChild() == exprNode);
+            
+            if (!isAddressOnly) {
+                // For reads, load from the member address
+                int addrReg = allocateRegister();
+                emit("lw r" + std::to_string(addrReg) + "," + std::to_string(memberAddressOffset) + "(r14)");
+                
+                // Create a new temporary for the value
+                int tempOffset = getScopeOffset(currentTable);
+                emit("lw r" + std::to_string(addrReg) + ",0(r" + std::to_string(addrReg) + ")");
+                emit("sw " + std::to_string(tempOffset) + "(r14),r" + std::to_string(addrReg));
+                freeRegister(addrReg);
+                
+                exprOffset = tempOffset;
+            } else {
+                // For writes, just use the stored address
+                exprOffset = memberAddressOffset;
+            }
+        } else {
+            emitComment("Error: Member access missing offset metadata");
+            exprOffset = -8; // Use default
+        }
+    }
+    else if (!exprNode->getMetadata("offset").empty()) {
+        // For expressions with metadata, use that directly
         exprOffset = std::stoi(exprNode->getMetadata("offset"));
+    }
+    else if (!exprNode->getMetadata("moonVarName").empty()) {
+        // Try to get offset from the symbol table using the moonVarName
+        std::string tempVarName = exprNode->getMetadata("moonVarName");
+        auto symbol = currentTable->lookupSymbol(tempVarName);
+        if (symbol && !symbol->getMetadata("offset").empty()) {
+            exprOffset = std::stoi(symbol->getMetadata("offset"));
+        } else {
+            emitComment("Warning: Symbol not found for " + tempVarName);
+            exprOffset = -8; // Use default
+        }
+    } 
+    else {
+        emitComment("Warning: Could not determine offset for expression");
+        exprOffset = -8; // Use a default offset
     }
     
     int scopeOffset = getScopeOffset(currentTable);
@@ -910,7 +1056,7 @@ void CodeGenVisitor::visitWriteStatement(ASTNode* node) {
                           exprNode->getMetadata("moonVarName");
     
     emitComment("processing: write(" + varName + ")");
-    emit("lw r" + std::to_string(reg1) + "," + std::to_string(exprOffset) + "(r14)");
+    if(exprNode->getNodeEnum() != NodeType::DOT_IDENTIFIER && exprNode->getNodeEnum() != NodeType::ARRAY_ACCESS)emit("lw r" + std::to_string(reg1) + "," + std::to_string(exprOffset) + "(r14)");
     
     // Rest of the method remains unchanged
     emitComment("put value on stack");

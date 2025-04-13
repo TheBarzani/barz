@@ -1273,8 +1273,15 @@ void MemSizeVisitor::visitIndexList(ASTNode* node) {
     // Store the index count in the node's metadata
     node->setMetadata("indexCount", std::to_string(indexCount));
     
+    // Create a temporary variable to store the total byte offset
+    std::string totalOffsetVarName = createTempVar("int", "tempvar", node);
+    
+    // Store metadata about the byte offset variable
+    node->setMetadata("byteOffsetVar", totalOffsetVarName);
+    
     // If this is part of an array access, update the parent node's metadata
     if (node->getParent() && node->getParent()->getNodeEnum() == NodeType::ARRAY_ACCESS) {
         node->getParent()->setMetadata("indexCount", std::to_string(indexCount));
+        node->getParent()->setMetadata("byteOffsetVar", totalOffsetVarName);
     }
 }
