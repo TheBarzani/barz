@@ -1,5 +1,0 @@
-AssignStatNode type error: x2(float) and +(int)
-MultOpNode type error: z3(float) and y3(int)
-AddOpNode type error:  x3(int) and *(typeerror)
-AssignStatNode type error: a3(int) and +(typeerror)
-
