@@ -236,7 +236,10 @@ void MemSizeVisitor::calculateTableOffsets(std::shared_ptr<SymbolTable> table) {
     
     // PASS 1: Calculate sizes for class tables first
     // Process class tables first so their sizes are available when needed
-    for (const auto& [name, nestedTable] : table->getNestedTables()) {
+    for (const auto& tableName : table->getNestedTableInsertionOrder()) {
+        auto nestedTable = table->getNestedTable(tableName);
+        if (!nestedTable) continue;
+        
         // Skip global table and function tables - only process class tables
         bool isClassTable = !isFunction && 
                           nestedTable->getScopeName() != "global" && 
