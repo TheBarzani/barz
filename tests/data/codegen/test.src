@@ -5,7 +5,7 @@ class CLAS {
 };
 
 class CLASS {
-  public attribute x : int[10][1];
+  public attribute x : int[10][11];
   public attribute y : int; 
   public attribute clas: CLAS;
 };
@@ -28,7 +28,7 @@ function main() => void
   local cc: CLASS;
   cc.clas.y := 9;
   cc.y := 10;
-  cc.x[10][10] := 1;
+  cc.x[10][1] := 1;
 
   
   local z: int;
@@ -46,8 +46,9 @@ function main() => void
   
 }
 
-/*
+
 // ======================== struct declarations ============================== //
+/*
 class POLYNOMIAL {
   public function evaluate (x: int) => int;                    
 };
@@ -83,7 +84,7 @@ implementation LINEAR {
     local new_function: LINEAR;                                     // 1.1
     new_function.a := A;                                            // 3.1, 5.3
     new_function.b := B;                                            // 3.1, 5.3
-    a := A;
+    self.a := A;
     return (new_function);
   }
 
@@ -134,4 +135,5 @@ function main() => void                                             // 2.1, 2.2
     write(f2.evaluate(1.0));                                    // 3.4, 2.1, 2.2, 2.4
     counter := counter + 1;                                          // 3.1
   };
-}*/
+}
+*/

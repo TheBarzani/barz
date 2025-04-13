@@ -34,7 +34,7 @@ digraph AST {
   node30 [label="VARIABLE_ID | x "];
   node31 [label="TYPE | int "];
   node34 [label="DIM_LIST | dimList "];
-  node33 [label="ARRAY_DIMENSION | 1 "];
+  node33 [label="ARRAY_DIMENSION | 11 "];
   node32 [label="ARRAY_DIMENSION | 10 "];
   node46 [label="MEMBER |  "];
   node39 [label="VISIBILITY | public "];
@@ -119,7 +119,7 @@ digraph AST {
   node124 [label="DOT_IDENTIFIER | x "];
   node126 [label="INDEX_LIST | indexList "];
   node125 [label="INTEGER | 10 "];
-  node127 [label="INTEGER | 10 "];
+  node127 [label="INTEGER | 1 "];
   node131 [label="INTEGER | 1 "];
   node138 [label="LOCAL_VARIABLE |  "];
   node137 [label="VARIABLE |  "];

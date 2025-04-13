@@ -22,6 +22,7 @@ struct TypeInfo {
     std::string type;
     std::vector<int> dimensions;
     bool isClassType = false;
+    int indexCount = 0;
 };
 
 class SemanticCheckingVisitor : public Visitor {
