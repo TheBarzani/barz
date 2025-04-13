@@ -36,19 +36,21 @@ function main() => void
   }; 
 }*/
 
-function plus(a: int, b: int) => int
-{
-  return(a+b);
-}
-
-function double(a: int) => int
-{
-  return (plus(a, a));
+function count(a: int, b: int) => int
+{ 
+  if (a==b) 
+  then
+  {
+    return(b);
+  }
+  else
+  {
+     write(a);
+  };
+  return(count(a+1, b));
 }
 
 function main() => void
 {
-  local x: int;
-  x := double(11);
-  write(double(200));
+  write(count(0,10));
 }

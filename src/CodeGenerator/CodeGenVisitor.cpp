@@ -1818,7 +1818,7 @@ void CodeGenVisitor::visitFunctionCall(ASTNode *node) {
                 auto symbolB = functionTable->lookupSymbol(b);
                 int offsetA = std::stoi(symbolA->getMetadata("offset"));
                 int offsetB = std::stoi(symbolB->getMetadata("offset"));
-                return offsetA > offsetB; // Sort by ascending offset
+                return offsetA < offsetB; // Sort by ascending offset
             });
             
         emitComment("Found " + std::to_string(paramNames.size()) + " parameters for function " + functionName);
