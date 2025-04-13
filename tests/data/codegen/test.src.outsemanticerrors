@@ -1,6 +1,5 @@
 === Semantic Errors/Warnings for ../tests/data/codegen/test.src ===
 
-Error at line 47: SemCheck Error: Use of undeclared variable: x
-Error at line 47: SemCheck Error: Type mismatch in assignment. Left side is error but right side is int
-Error at line 48: SemCheck Error: Use of undeclared variable: x
-Warning at line 48: SemCheck Warning: Writing non-standard type: error
+Error at line 75: SemCheck Error: Dot operator used on non-class type: AA
+Error at line 75: SemCheck Error: Type mismatch in assignment. Left side is error but right side is int
+Error at line 76: SemCheck Error: Dot operator used on non-class type: AA

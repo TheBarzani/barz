@@ -1118,7 +1118,7 @@ DEFAULT_VISITOR_METHOD(FunctionDeclaration)
 DEFAULT_VISITOR_METHOD(Identifier)
 DEFAULT_VISITOR_METHOD(SelfIdentifier)
 DEFAULT_VISITOR_METHOD(DotIdentifier)
-DEFAULT_VISITOR_METHOD(DotAccess)
+// DEFAULT_VISITOR_METHOD(DotAccess)
 DEFAULT_VISITOR_METHOD(ArrayAccess)
 DEFAULT_VISITOR_METHOD(Expr)
 DEFAULT_VISITOR_METHOD(Factor)
@@ -1274,7 +1274,7 @@ void MemSizeVisitor::visitIndexList(ASTNode* node) {
     node->setMetadata("indexCount", std::to_string(indexCount));
     
     // Create a temporary variable to store the total byte offset
-    std::string totalOffsetVarName = createTempVar("int", "tempvar", node);
+    std::string totalOffsetVarName = createTempVar("int", "addrvar", node);
     
     // Store metadata about the byte offset variable
     node->setMetadata("byteOffsetVar", totalOffsetVarName);
@@ -1284,4 +1284,46 @@ void MemSizeVisitor::visitIndexList(ASTNode* node) {
         node->getParent()->setMetadata("indexCount", std::to_string(indexCount));
         node->getParent()->setMetadata("byteOffsetVar", totalOffsetVarName);
     }
+}
+
+void MemSizeVisitor::visitDotAccess(ASTNode* node) {
+    // Process children first (object expression and member identifier)
+    ASTNode* objExpr = node->getLeftMostChild();
+    ASTNode* memberNode = objExpr ? objExpr->getRightSibling() : nullptr;
+
+    if (objExpr) {
+        objExpr->accept(this);
+    }
+    if (memberNode) {
+        memberNode->accept(this);
+    }
+
+    // Determine the type of the member access
+    std::string memberType = "int";  // Default type
+    
+    // Try to determine actual type from symbol table if possible
+    if (objExpr && objExpr->getNodeEnum() == NodeType::IDENTIFIER) {
+        std::string objName = objExpr->getNodeValue();
+        auto objSymbol = currentTable->lookupSymbol(objName);
+        
+        if (objSymbol && memberNode && memberNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+            std::string className = objSymbol->getType();
+            std::string memberName = memberNode->getNodeValue();
+            
+            // Look up the member in the class table
+            auto classTable = symbolTable->getNestedTable(className);
+            if (classTable) {
+                auto memberSymbol = classTable->lookupSymbol(memberName);
+                if (memberSymbol) {
+                    memberType = memberSymbol->getType();
+                }
+            }
+        }
+    }
+    
+    // Create a temporary variable to store the address of the member
+    createTempVar(memberType, "addrvar", node);
+
+    // Track the type for parent nodes
+    node->setMetadata("type", memberType);
 }
