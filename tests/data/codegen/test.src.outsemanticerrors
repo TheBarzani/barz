@@ -1,4 +1,6 @@
-=== Semantic Errors/Warnings for /Users/test/Courses/comp6421/project/barz/tests/data/codegen/test.src ===
+=== Semantic Errors/Warnings for ../tests/data/codegen/test.src ===
 
-Error at line 11: SemCheck Error: Too many array indices. Expected at most 2, got 3
-Error at line 11: SemCheck Error: Type mismatch in assignment. Left side is int[3][2] but right side is int
+Error at line 47: SemCheck Error: Use of undeclared variable: x
+Error at line 47: SemCheck Error: Type mismatch in assignment. Left side is error but right side is int
+Error at line 48: SemCheck Error: Use of undeclared variable: x
+Warning at line 48: SemCheck Warning: Writing non-standard type: error

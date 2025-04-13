@@ -110,6 +110,7 @@ private:
     
     // Expression evaluation
     std::stack<int> exprStack;  // Stack of registers containing expression results
+    int currentTotalScopeOffset;
     
     // Helper methods for code generation
     
