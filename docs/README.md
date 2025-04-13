@@ -280,7 +280,7 @@ NOTE:
 - [x] 3.2. Conditional statement: implementation of a branching mechanism.
 - [x] 3.3. Loop statement: implementation of a branching mechanism.
 - [x] 3.4. Input/output statement: Moon machine keyboard input/console output.
-- [ ] 4.1. For arrays of basic types (integer and float), access to an array’s elements.
+- [x] 4.1. For arrays of basic types (integer and float), access to an array’s elements.
 - [ ] 4.2. For arrays of objects, access to an array’s element’s data members.
 - [ ] 4.3. For objects, access to members of basic types.
 - [ ] 4.4. For objects, access to members of array or object types.
@@ -290,7 +290,7 @@ NOTE:
 - [x] 5.1.4. Computing expressions with multiplication (*) operator.
 - [x] 5.1.5. Computing expressions with division (/) operator.
 - [x] 5.1.6. Computing expressions with and operator.
-- [ ] 5.2. Expression involving an array factor whose indexes are themselves expressions.
+- [x] 5.2. Expression involving an array factor whose indexes are themselves expressions.
 - [ ] 5.3. Expression involving an object factor referring to object members.
 
 

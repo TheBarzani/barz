@@ -324,26 +324,73 @@ void CodeGenVisitor::visitAddOp(ASTNode* node) {
     int reg3 = allocateRegister();
     
     // Get offsets for the operands - handle identifiers separately
+    // Handle left operand offset
     int leftOffset;
-    int rightOffset;
-    
-    // Handle left operand
     if (leftChild->getNodeEnum() == NodeType::IDENTIFIER) {
-        // For identifiers, get offset from symbol table
+        // For simple identifiers, get offset directly from symbol table
         leftOffset = getSymbolOffset(leftChild->getNodeValue());
-    } else {
-        // For expressions and literals, get from metadata
+    } else if (leftChild->getNodeEnum() == NodeType::ARRAY_ACCESS || 
+            leftChild->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+        // For array access and dot identifier, get from metadata first
+        if (!leftChild->getMetadata("offset").empty()) {
+            leftOffset = std::stoi(leftChild->getMetadata("offset"));
+        } else {
+            emitComment("Error: Cannot determine offset for complex left expression");
+            leftOffset = -8;
+        }
+    } else if (!leftChild->getMetadata("moonVarName").empty()) {
+        // For expressions, lookup the temporary variable in symbol table
+        std::string tempVarName = leftChild->getMetadata("moonVarName");
+        auto leftSymbol = currentTable->lookupSymbol(tempVarName);
+        if (leftSymbol && !leftSymbol->getMetadata("offset").empty()) {
+            leftOffset = std::stoi(leftSymbol->getMetadata("offset"));
+        } else {
+            emitComment("Warning: Symbol not found for " + tempVarName);
+            leftOffset = (!leftChild->getMetadata("offset").empty()) ? 
+                    std::stoi(leftChild->getMetadata("offset")) : -8;
+        }
+    } else if (!leftChild->getMetadata("offset").empty()) {
+        // Last resort: use direct metadata
         leftOffset = std::stoi(leftChild->getMetadata("offset"));
+    } else {
+        emitComment("Error: Cannot determine left operand offset");
+        leftOffset = -8; // Default
     }
     
-    // Handle right operand
+    // Handle right operand offset
+    int rightOffset;
     if (rightChild->getNodeEnum() == NodeType::IDENTIFIER) {
-        // For identifiers, get offset from symbol table
+        // For simple identifiers, get offset directly from symbol table
         rightOffset = getSymbolOffset(rightChild->getNodeValue());
-    } else {
-        // For expressions and literals, get from metadata
+    } else if (rightChild->getNodeEnum() == NodeType::ARRAY_ACCESS || 
+            rightChild->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+        // For array access and dot identifier, get from metadata first
+        if (!rightChild->getMetadata("offset").empty()) {
+            rightOffset = std::stoi(rightChild->getMetadata("offset"));
+        } else {
+            emitComment("Error: Cannot determine offset for complex right expression");
+            rightOffset = -8;
+        }
+    } else if (!rightChild->getMetadata("moonVarName").empty()) {
+        // For expressions, lookup the temporary variable in symbol table
+        std::string tempVarName = rightChild->getMetadata("moonVarName");
+        auto rightSymbol = currentTable->lookupSymbol(tempVarName);
+        if (rightSymbol && !rightSymbol->getMetadata("offset").empty()) {
+            rightOffset = std::stoi(rightSymbol->getMetadata("offset"));
+        } else {
+            emitComment("Warning: Symbol not found for " + tempVarName);
+            rightOffset = (!rightChild->getMetadata("offset").empty()) ? 
+                    std::stoi(rightChild->getMetadata("offset")) : -8;
+        }
+    } else if (!rightChild->getMetadata("offset").empty()) {
+        // Last resort: use direct metadata
         rightOffset = std::stoi(rightChild->getMetadata("offset"));
+    } else {
+        emitComment("Error: Cannot determine right operand offset");
+        rightOffset = -8; // Default
     }
+    
+
     
     // Get result metadata (already set by MemSizeVisitor)
     int resultOffset;
@@ -446,26 +493,32 @@ void CodeGenVisitor::visitMultOp(ASTNode* node) {
     int reg2 = allocateRegister();
     int reg3 = allocateRegister();
     
-    // Get offsets for the operands - handle identifiers separately
-    int leftOffset;
-    int rightOffset;
+    // Get operand values into registers using improved offset lookup
+    int leftOffset = getNodeOffset(leftChild);
+    int rightOffset = getNodeOffset(rightChild);
     
-    // Handle left operand
-    if (leftChild->getNodeEnum() == NodeType::IDENTIFIER) {
-        // For identifiers, get offset from symbol table
-        leftOffset = getSymbolOffset(leftChild->getNodeValue());
+    // Load left operand into register with special handling for complex types
+    if (leftChild->getNodeEnum() == NodeType::ARRAY_ACCESS || 
+        leftChild->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+        // For array/member access, we need to do a double load:
+        // 1. Load the address from the offset
+        // 2. Load the value from that address
+        emit("lw r" + std::to_string(reg1) + "," + std::to_string(leftOffset) + "(r14)");
+        emit("lw r" + std::to_string(reg1) + ",0(r" + std::to_string(reg1) + ")");
     } else {
-        // For expressions and literals, get from metadata
-        leftOffset = std::stoi(leftChild->getMetadata("offset"));
+        // For simple variables or temporary values
+        emit("lw r" + std::to_string(reg1) + "," + std::to_string(leftOffset) + "(r14)");
     }
-    
-    // Handle right operand
-    if (rightChild->getNodeEnum() == NodeType::IDENTIFIER) {
-        // For identifiers, get offset from symbol table
-        rightOffset = getSymbolOffset(rightChild->getNodeValue());
+
+    // Load right operand into register with special handling for complex types
+    if (rightChild->getNodeEnum() == NodeType::ARRAY_ACCESS || 
+        rightChild->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+        // For array/member access, do a double load
+        emit("lw r" + std::to_string(reg2) + "," + std::to_string(rightOffset) + "(r14)");
+        emit("lw r" + std::to_string(reg2) + ",0(r" + std::to_string(reg2) + ")");
     } else {
-        // For expressions and literals, get from metadata
-        rightOffset = std::stoi(rightChild->getMetadata("offset"));
+        // For simple variables or temporary values
+        emit("lw r" + std::to_string(reg2) + "," + std::to_string(rightOffset) + "(r14)");
     }
     
     // Get result metadata (already set by MemSizeVisitor)
@@ -490,7 +543,7 @@ void CodeGenVisitor::visitMultOp(ASTNode* node) {
     } else {
         // No metadata available at all
         resultOffset = -8;
-        emitComment("Warning: No offset found for comparison result, using default");
+        emitComment("Warning: No offset found for multiplication result, using default");
     }
     
     // Generate code for the operation
@@ -498,10 +551,6 @@ void CodeGenVisitor::visitMultOp(ASTNode* node) {
     emitComment("processing: " + resultVarName + " := " + 
              (leftChild->getNodeEnum() == NodeType::IDENTIFIER ? leftChild->getNodeValue() : leftChild->getMetadata("moonVarName")) + " " + opStr + " " + 
              (rightChild->getNodeEnum() == NodeType::IDENTIFIER ? rightChild->getNodeValue() : rightChild->getMetadata("moonVarName")));
-    
-    // Load values into registers
-    emit("lw r" + std::to_string(reg1) + "," + std::to_string(leftOffset) + "(r14)");
-    emit("lw r" + std::to_string(reg2) + "," + std::to_string(rightOffset) + "(r14)");
     
     // Perform multiplication/division/and
     if (opStr == "*") {
@@ -1056,18 +1105,14 @@ void CodeGenVisitor::visitWriteStatement(ASTNode* node) {
     int reg2 = allocateRegister();
     
     // Get the output expression offset - handle identifiers correctly
-    int exprOffset;
+    int exprOffset =  getNodeOffset(exprNode);
     // Determine the offset based on node type and available metadata
-    if (exprNode->getNodeEnum() == NodeType::IDENTIFIER) {
-        // For simple identifiers, get offset directly from symbol table
-        exprOffset = getSymbolOffset(exprNode->getNodeValue());
-    } 
-    else if (exprNode->getNodeEnum() == NodeType::ARRAY_ACCESS) {
+    if (exprNode->getNodeEnum() == NodeType::ARRAY_ACCESS) {
         // For array access, we need to get the calculated address from memory
         // The array access node should have visited already and stored its offset
         if (!exprNode->getMetadata("offset").empty()) {
             // This offset contains the memory location where the array element address is stored
-            int arrayAddressOffset = std::stoi(exprNode->getMetadata("offset"));
+            int arrayAddressOffset = exprOffset;
 
             // For reads, load from the address
             int addrReg = allocateRegister();
@@ -1075,10 +1120,10 @@ void CodeGenVisitor::visitWriteStatement(ASTNode* node) {
             //emit("add r" + std::to_string(addrReg) + ",r"+std::to_string(addrReg)+",r14");
             
             // Create a new temporary for the value
-            int tempOffset = getScopeOffset(currentTable);
+            //int tempOffset = getScopeOffset(currentTable);
             emit("lw r" + std::to_string(reg1) + ",0(r" + std::to_string(addrReg) + ")");
             freeRegister(addrReg);  
-            exprOffset = tempOffset;
+            //exprOffset = tempOffset;
         } else {
             emitComment("Error: Array access missing offset metadata");
             exprOffset = -8; // Use default
@@ -1114,25 +1159,6 @@ void CodeGenVisitor::visitWriteStatement(ASTNode* node) {
             emitComment("Error: Member access missing offset metadata");
             exprOffset = -8; // Use default
         }
-    }
-    else if (!exprNode->getMetadata("offset").empty()) {
-        // For expressions with metadata, use that directly
-        exprOffset = std::stoi(exprNode->getMetadata("offset"));
-    }
-    else if (!exprNode->getMetadata("moonVarName").empty()) {
-        // Try to get offset from the symbol table using the moonVarName
-        std::string tempVarName = exprNode->getMetadata("moonVarName");
-        auto symbol = currentTable->lookupSymbol(tempVarName);
-        if (symbol && !symbol->getMetadata("offset").empty()) {
-            exprOffset = std::stoi(symbol->getMetadata("offset"));
-        } else {
-            emitComment("Warning: Symbol not found for " + tempVarName);
-            exprOffset = -8; // Use default
-        }
-    } 
-    else {
-        emitComment("Warning: Could not determine offset for expression");
-        exprOffset = -8; // Use a default offset
     }
     
     int scopeOffset = getScopeOffset(currentTable);
@@ -1314,31 +1340,38 @@ void CodeGenVisitor::visitRelOp(ASTNode* node) {
     int reg2 = allocateRegister();
     int resultReg = allocateRegister();
     
-    // Get operand values into registers - handle identifiers separately
-    int leftOffset, rightOffset;
+    // Get operand values into registers using improved offset lookup
+    int leftOffset = getNodeOffset(leftExpr);
+    int rightOffset = getNodeOffset(rightExpr);
     
-    // Handle left operand
-    if (leftExpr->getNodeEnum() == NodeType::IDENTIFIER) {
-        leftOffset = getSymbolOffset(leftExpr->getNodeValue());
+    // Load left operand into register with special handling for complex types
+    if (leftExpr->getNodeEnum() == NodeType::ARRAY_ACCESS || 
+        leftExpr->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+        // For array/member access, we need to do a double load:
+        // 1. Load the address from the offset
+        // 2. Load the value from that address
+        emit("lw r" + std::to_string(reg1) + "," + std::to_string(leftOffset) + "(r14)");
+        emit("lw r" + std::to_string(reg1) + ",0(r" + std::to_string(reg1) + ")");
     } else {
-        leftOffset = std::stoi(leftExpr->getMetadata("offset"));
+        // For simple variables or temporary values
+        emit("lw r" + std::to_string(reg1) + "," + std::to_string(leftOffset) + "(r14)");
     }
-    
-    // Handle right operand
-    if (rightExpr->getNodeEnum() == NodeType::IDENTIFIER) {
-        rightOffset = getSymbolOffset(rightExpr->getNodeValue());
+
+    // Load right operand into register with special handling for complex types
+    if (rightExpr->getNodeEnum() == NodeType::ARRAY_ACCESS || 
+        rightExpr->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+        // For array/member access, do a double load
+        emit("lw r" + std::to_string(reg2) + "," + std::to_string(rightOffset) + "(r14)");
+        emit("lw r" + std::to_string(reg2) + ",0(r" + std::to_string(reg2) + ")");
     } else {
-        rightOffset = std::stoi(rightExpr->getMetadata("offset"));
+        // For simple variables or temporary values
+        emit("lw r" + std::to_string(reg2) + "," + std::to_string(rightOffset) + "(r14)");
     }
-    
-    // Load operands into registers
-    emit("lw r" + std::to_string(reg1) + "," + std::to_string(leftOffset) + "(r14)");
-    emit("lw r" + std::to_string(reg2) + "," + std::to_string(rightOffset) + "(r14)");
     
     // Get the relational operator
     std::string op = node->getNodeValue();
     
-    // Use Moon's comparison instructions instead of branch instructions
+    // Use Moon's comparison instructions
     if (op == ">") {
         emit("cgt r" + std::to_string(resultReg) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
     } else if (op == ">=") {
@@ -1353,8 +1386,27 @@ void CodeGenVisitor::visitRelOp(ASTNode* node) {
         emit("cne r" + std::to_string(resultReg) + ",r" + std::to_string(reg1) + ",r" + std::to_string(reg2));
     }
     
-    // Store the result - result is already 1 (true) or 0 (false)
-    int resultOffset = std::stoi(node->getMetadata("offset"));
+    // Store the result using the proper offset from symbol table
+    int resultOffset;
+    std::string resultVarName = node->getMetadata("moonVarName");
+    if (!resultVarName.empty()) {
+        auto symbol = currentTable->lookupSymbol(resultVarName);
+        if (symbol && !symbol->getMetadata("offset").empty()) {
+            resultOffset = std::stoi(symbol->getMetadata("offset"));
+        } else if (!node->getMetadata("offset").empty()) {
+            resultOffset = std::stoi(node->getMetadata("offset"));
+            emitComment("Warning: Symbol for " + resultVarName + " not found, using node metadata offset");
+        } else {
+            resultOffset = -8;
+            emitComment("Warning: No offset found for comparison result, using default");
+        }
+    } else if (!node->getMetadata("offset").empty()) {
+        resultOffset = std::stoi(node->getMetadata("offset"));
+    } else {
+        resultOffset = -8;
+        emitComment("Warning: No offset found for comparison result, using default");
+    }
+    
     emit("sw " + std::to_string(resultOffset) + "(r14),r" + std::to_string(resultReg));
     node->setMetadata("reg", std::to_string(resultReg));
     
@@ -1578,4 +1630,34 @@ void CodeGenVisitor::visitReturnStatement(ASTNode* node) {
     // Restore return address and return
     emit("lw r15," + std::to_string(linkOffset) + "(r14)");
     emit("jr r15");
+}
+
+// Add this to your CodeGenVisitor class
+
+int CodeGenVisitor::getNodeOffset(ASTNode* node) {
+    // First try to get moonVarName and look it up in the symbol table
+    if (!node->getMetadata("moonVarName").empty()) {
+        std::string varName = node->getMetadata("moonVarName");
+        auto symbol = currentTable->lookupSymbol(varName);
+        if (symbol && !symbol->getMetadata("offset").empty()) {
+            return std::stoi(symbol->getMetadata("offset"));
+        } else {
+            emitComment("Warning: Symbol not found for " + varName);
+        }
+    }
+    
+    // For direct identifiers, look up in the symbol table
+    if (node->getNodeEnum() == NodeType::IDENTIFIER) {
+        return getSymbolOffset(node->getNodeValue());
+    }
+    
+    // Fall back to direct offset metadata if available
+    if (!node->getMetadata("offset").empty()) {
+        emitComment("Warning: Using direct offset metadata");
+        return std::stoi(node->getMetadata("offset"));
+    }
+    
+    // Last resort
+    emitComment("Error: Could not determine offset for node");
+    return -8; // Default temporary location
 }

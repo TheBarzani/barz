@@ -164,6 +164,8 @@ private:
     // SymbolTable metadata helpers
     int getScopeOffset(std::shared_ptr<SymbolTable> table);
     void setScopeOffset(std::shared_ptr<SymbolTable> table, int offset);
+
+    int getNodeOffset(ASTNode* node);
 };
 
 #endif // CODE_GEN_VISITOR_H

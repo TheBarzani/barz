@@ -4,8 +4,8 @@
           % Entering function scope: main
 main      entry
           addi r14,r0,topaddr
-          % processing: t1 := 77
-          addi r1,r0,77
+          % processing: t1 := 400
+          addi r1,r0,400
           sw -112(r14),r1
           lw r1,-112(r14)
           % processing:: c := t1
@@ -93,7 +93,7 @@ main      entry
           % processing: write(b)
           lw r1,-12(r14)
           % put value on stack
-          addi r14,r14,-180
+          addi r14,r14,-188
           sw -8(r14),r1
           % link buffer to stack
           addi r1,r0,buf
@@ -104,7 +104,7 @@ main      entry
           % output to console
           jl r15,putstr
           jl r15,putnl
-          subi r14,r14,-180
+          subi r14,r14,-188
           % Processing array access
           subi r3,r14,108
           % Calculating array byte offset
@@ -131,22 +131,31 @@ main      entry
           sub r5,r3,r1
           sw -180(r14),r5
           % Array access address stored in -180(r14)
-          lw r1,-180(r14)
-          lw r5,0(r1)
-          % processing: write()
+          % processing: t19 := 2
+          addi r5,r0,2
+          sw -184(r14),r5
+          % Warning: Using direct offset metadata
+          lw r5,-180(r14)
+          lw r5,0(r5)
+          lw r3,-184(r14)
+          % processing: t20 :=  * t19
+          mul r1,r5,r3
+          sw -188(r14),r1
+          % processing: write(t20)
+          lw r3,-188(r14)
           % put value on stack
-          addi r14,r14,-180
-          sw -8(r14),r5
+          addi r14,r14,-188
+          sw -8(r14),r3
           % link buffer to stack
-          addi r5,r0,buf
-          sw -12(r14),r5
+          addi r3,r0,buf
+          sw -12(r14),r3
           % convert int to string for output
           jl r15,intstr
           sw -8(r14),r13
           % output to console
           jl r15,putstr
           jl r15,putnl
-          subi r14,r14,-180
+          subi r14,r14,-188
           % End of program
           hlt
 
