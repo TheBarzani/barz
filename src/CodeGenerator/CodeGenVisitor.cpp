@@ -1679,6 +1679,7 @@ void CodeGenVisitor::visitReadStatement(ASTNode *node)
     std::string varName = (varNode->getNodeEnum() == NodeType::IDENTIFIER) ? varNode->getNodeValue() : varNode->getMetadata("moonVarName");
 
     emitComment("Processing: read(" + varName + ")");
+    emit("addi r14,r14," + std::to_string(scopeOffset));
 
     // Allocate buffer space (could be in data section)
     emitComment("Allocate buffer space for input");
@@ -1687,16 +1688,13 @@ void CodeGenVisitor::visitReadStatement(ASTNode *node)
 
     // Read string from stdin
     emitComment("Read string from console");
-    emit("addi r14,r14," + std::to_string(scopeOffset));
     emit("jl r15,getstr");
-    emit("subi r14,r14," + std::to_string(scopeOffset));
 
     // Convert string to integer
     emitComment("Convert string to integer");
     emit("addi r" + std::to_string(reg1) + ",r0,buf");
     emit("sw -8(r14),r" + std::to_string(reg1));
 
-    emit("addi r14,r14," + std::to_string(scopeOffset));
     emit("jl r15,strint");
     emit("subi r14,r14," + std::to_string(scopeOffset));
 
