@@ -392,7 +392,7 @@ void CodeGenVisitor::visitAddOp(ASTNode *node)
         leftOffset = getSymbolOffset(leftChild->getNodeValue());
     }
     else if (leftChild->getNodeEnum() == NodeType::ARRAY_ACCESS ||
-             leftChild->getNodeEnum() == NodeType::DOT_IDENTIFIER)
+             leftChild->getNodeEnum() == NodeType::DOT_ACCESS)
     {
         // For array access and dot identifier, get from metadata first
         if (!leftChild->getMetadata("offset").empty())
@@ -439,7 +439,7 @@ void CodeGenVisitor::visitAddOp(ASTNode *node)
         rightOffset = getSymbolOffset(rightChild->getNodeValue());
     }
     else if (rightChild->getNodeEnum() == NodeType::ARRAY_ACCESS ||
-             rightChild->getNodeEnum() == NodeType::DOT_IDENTIFIER)
+             rightChild->getNodeEnum() == NodeType::DOT_ACCESS)
     {
         // For array access and dot identifier, get from metadata first
         if (!rightChild->getMetadata("offset").empty())
@@ -522,7 +522,7 @@ void CodeGenVisitor::visitAddOp(ASTNode *node)
     // Load values into registers
     // Get left operand value into register
     if (leftChild->getNodeEnum() == NodeType::ARRAY_ACCESS ||
-        leftChild->getNodeEnum() == NodeType::DOT_IDENTIFIER)
+        leftChild->getNodeEnum() == NodeType::DOT_ACCESS)
     {
         // For array/member access, we need to do a double load:
         // 1. Load the address from the offset
@@ -538,7 +538,7 @@ void CodeGenVisitor::visitAddOp(ASTNode *node)
 
     // Get right operand value into register
     if (rightChild->getNodeEnum() == NodeType::ARRAY_ACCESS ||
-        rightChild->getNodeEnum() == NodeType::DOT_IDENTIFIER)
+        rightChild->getNodeEnum() == NodeType::DOT_ACCESS)
     {
         // For array/member access, do a double load
         emit("lw r" + std::to_string(reg2) + "," + std::to_string(rightOffset) + "(r14)");
@@ -608,7 +608,7 @@ void CodeGenVisitor::visitMultOp(ASTNode *node)
 
     // Load left operand into register with special handling for complex types
     if (leftChild->getNodeEnum() == NodeType::ARRAY_ACCESS ||
-        leftChild->getNodeEnum() == NodeType::DOT_IDENTIFIER)
+        leftChild->getNodeEnum() == NodeType::DOT_ACCESS)
     {
         // For array/member access, we need to do a double load:
         // 1. Load the address from the offset
@@ -624,7 +624,7 @@ void CodeGenVisitor::visitMultOp(ASTNode *node)
 
     // Load right operand into register with special handling for complex types
     if (rightChild->getNodeEnum() == NodeType::ARRAY_ACCESS ||
-        rightChild->getNodeEnum() == NodeType::DOT_IDENTIFIER)
+        rightChild->getNodeEnum() == NodeType::DOT_ACCESS)
     {
         // For array/member access, do a double load
         emit("lw r" + std::to_string(reg2) + "," + std::to_string(rightOffset) + "(r14)");
@@ -874,18 +874,61 @@ void CodeGenVisitor::visitArrayAccess(ASTNode *node)
         int arrayMemOffset = getSymbolOffset(arrayName);
         emit("subi r" + std::to_string(baseAddrReg) + ",r14," + std::to_string(arrayMemOffset * -1));
     }
-    else if (arrayBaseNode->getNodeEnum() == NodeType::DOT_IDENTIFIER)
-    {
+    else if (arrayBaseNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
         // Array base address calculation for class members
-        arrayBaseNode->accept(this);
-        std::string memberAddrLocStr = arrayBaseNode->getMetadata("address_location");
-        if (memberAddrLocStr.empty())
-        {
-            emitComment("Error: Dot identifier did not provide address location");
+        // Get the object node (parent of the DOT_IDENTIFIER)
+        ASTNode* objectNode = node->getLeftMostChild();
+        std::string className;
+        
+        // Extract class name from the object node
+        if (objectNode && objectNode->getNodeEnum() == NodeType::IDENTIFIER) {
+            auto objSymbol = currentTable->lookupSymbol(objectNode->getNodeValue());
+            if (objSymbol) {
+                className = objSymbol->getType();
+            }
+        } else if (objectNode && objectNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+            className = objectNode->getMetadata("type");
+            node->setNodeValue(objectNode->getNodeValue());
+        }
+        
+        if (className.empty()) {
+            emitComment("Error: Cannot determine class type for member array access");
             freeRegister(baseAddrReg);
             return;
         }
-        emit("lw r" + std::to_string(baseAddrReg) + "," + memberAddrLocStr + "(r14)");
+        
+        // Look up the class table to find the member
+        auto classTable = symbolTable->getNestedTable(className);
+        if (!classTable) {
+            emitComment("Error: Class table not found for: " + className);
+            freeRegister(baseAddrReg);
+            return;
+        }
+        
+        // Get the member name and its symbol
+        std::string memberName = arrayBaseNode->getNodeValue();
+        auto memberSymbol = classTable->lookupSymbol(memberName);
+        
+        if (!memberSymbol || memberSymbol->getMetadata("offset").empty()) {
+            emitComment("Error: Member not found or missing offset: " + memberName);
+            freeRegister(baseAddrReg);
+            return;
+        }
+        
+        // Process the object to get its address
+        arrayBaseNode->accept(this);
+        
+        // Get member offset from the symbol
+        int memberOffset = std::stoi(memberSymbol->getMetadata("offset"));
+        
+        // Load the object's address from where DOT_IDENTIFIER stored it
+        int memberAddrOffset = getNodeOffset(arrayBaseNode);
+        memberAddrOffset += std::stoi(memberSymbol->getMetadata("size"));
+        //emit("subi r" + arrayBaseNode->getMetadata("objAddressReg") + ",r" + arrayBaseNode->getMetadata("objAddressReg") + "," + std::to_string(memberAddrOffset));
+        emit("add r" + std::to_string(baseAddrReg) + ",r0,r"+  arrayBaseNode->getMetadata("objAddressReg"));
+        
+        // Add the member's offset to get the array's base address
+        // emit("addi r" + std::to_string(baseAddrReg) + ",r" + std::to_string(baseAddrReg) + "," + std::to_string(memberOffset));
     }
     else
     {
@@ -1000,13 +1043,82 @@ void CodeGenVisitor::visitIndexList(ASTNode *node)
             return;
         }
     }
+    else if (arrayBaseNode->getNodeEnum() == NodeType::DOT_IDENTIFIER)
+    {
+        // Handle DOT_IDENTIFIER for class member arrays
+        if (arrayBaseNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+            // Get the object node (parent of DOT_IDENTIFIER's parent)
+            ASTNode* dotAccessNode = arrayBaseNode->getParent();
+            ASTNode* objectNode = dotAccessNode ? dotAccessNode->getLeftMostChild() : nullptr;
+            
+            if (!objectNode) {
+                emitComment("Error: Cannot find object for DOT_IDENTIFIER array access");
+                return;
+            }
+            
+            // Get the class type of the object
+            std::string className;
+            if (objectNode->getNodeEnum() == NodeType::IDENTIFIER) {
+                auto objSymbol = currentTable->lookupSymbol(objectNode->getNodeValue());
+                if (objSymbol) {
+                    className = objSymbol->getType();
+                }
+            } else if (!objectNode->getMetadata("type").empty()) {
+                className = objectNode->getMetadata("type");
+            }
+            
+            if (className.empty()) {
+                emitComment("Error: Cannot determine class type for member array access");
+                return;
+            }
+            
+            // Look up the member in the class table
+            auto classTable = symbolTable->getNestedTable(className);
+            if (!classTable) {
+                emitComment("Error: Class table not found for: " + className);
+                return;
+            }
+            
+            // Get the array member information
+            std::string memberName = arrayBaseNode->getNodeValue();
+            auto memberSymbol = classTable->lookupSymbol(memberName);
+            
+            if (!memberSymbol) {
+                emitComment("Error: Member not found: " + memberName);
+                return;
+            }
+            
+            // Set array dimensions and element size from the member symbol
+            dimensions = memberSymbol->getArrayDimensions();
+            
+            // Determine element size based on the base type
+            std::string baseType = memberSymbol->getType();
+            size_t bracketPos = baseType.find('[');
+            if (bracketPos != std::string::npos) {
+                baseType = baseType.substr(0, bracketPos);
+            }
+            
+            if (baseType == "int") {
+                elementSize = 4;
+            } else if (baseType == "float") {
+                elementSize = 4;
+            } else {
+                // Assume pointer for complex types
+                elementSize = 4;
+                emitComment("Note: Using pointer size for element of type: " + baseType);
+            }
+            
+            emitComment("Using dimensions from class member array: " + memberName);
+        }
+        else {
+            // Other complex expressions - fall back to default assumptions
+            emitComment("Warning: Assuming int array for complex base expression");
+            elementSize = 4;
+        }
+    }
     else
     {
-        // TODO: Handle DOT_IDENTIFIER or other complex base expressions
-        // Need a way to get type info (dimensions, element size) propagated
-        // For now, assume int[?]... with size 4
         emitComment("Warning: Assuming int array for non-identifier base");
-        // We might need dimensions from type checking phase metadata if symbol isn't directly available
     }
 
     if (dimensions.empty())
@@ -1181,7 +1293,7 @@ DEFAULT_VISITOR_METHOD(ArrayDimension)
 DEFAULT_VISITOR_METHOD(Param)
 // DEFAULT_VISITOR_METHOD(FunctionCall)
 // DEFAULT_VISITOR_METHOD(ArrayAccess)
-//DEFAULT_VISITOR_METHOD(DotIdentifier)
+DEFAULT_VISITOR_METHOD(DotIdentifier)
 //DEFAULT_VISITOR_METHOD(DotAccess)
 DEFAULT_VISITOR_METHOD(Factor)
 DEFAULT_VISITOR_METHOD(Term)
@@ -1582,7 +1694,7 @@ void CodeGenVisitor::visitRelOp(ASTNode *node)
 
     // Load left operand into register with special handling for complex types
     if (leftExpr->getNodeEnum() == NodeType::ARRAY_ACCESS ||
-        leftExpr->getNodeEnum() == NodeType::DOT_IDENTIFIER)
+        leftExpr->getNodeEnum() == NodeType::DOT_ACCESS)
     {
         // For array/member access, we need to do a double load:
         // 1. Load the address from the offset
@@ -1598,7 +1710,7 @@ void CodeGenVisitor::visitRelOp(ASTNode *node)
 
     // Load right operand into register with special handling for complex types
     if (rightExpr->getNodeEnum() == NodeType::ARRAY_ACCESS ||
-        rightExpr->getNodeEnum() == NodeType::DOT_IDENTIFIER)
+        rightExpr->getNodeEnum() == NodeType::DOT_ACCESS)
     {
         // For array/member access, do a double load
         emit("lw r" + std::to_string(reg2) + "," + std::to_string(rightOffset) + "(r14)");
@@ -1843,7 +1955,7 @@ void CodeGenVisitor::visitFunctionCall(ASTNode *node) {
         
         // Load parameter value with special handling for complex types
         if (param->getNodeEnum() == NodeType::ARRAY_ACCESS || 
-            param->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+            param->getNodeEnum() == NodeType::DOT_ACCESS) {
             emit("lw r" + std::to_string(paramReg) + "," + std::to_string(offset) + "(r14)");
             emit("lw r" + std::to_string(paramReg) + ",0(r" + std::to_string(paramReg) + ")");
         } else {
@@ -1904,7 +2016,7 @@ void CodeGenVisitor::visitReturnStatement(ASTNode *node)
 
         // Handle different types of return expressions with special handling for complex types
         if (exprNode->getNodeEnum() == NodeType::ARRAY_ACCESS ||
-            exprNode->getNodeEnum() == NodeType::DOT_IDENTIFIER)
+            exprNode->getNodeEnum() == NodeType::DOT_ACCESS)
         {
             // For array/member access, we need to do a double load:
             // 1. Load the address from the offset
@@ -1965,6 +2077,37 @@ int CodeGenVisitor::getNodeOffset(ASTNode *node)
     {
         return getSymbolOffset(node->getNodeValue());
     }
+    else if (node->getNodeEnum() == NodeType::DOT_IDENTIFIER)
+    {
+        std::string className;
+        if (!node->getMetadata("type").empty()) {
+            // For complex expressions, get type from metadata
+            className = node->getMetadata("type");
+        }
+        
+        if (className.empty()) {
+            emitComment("Error: Cannot determine class type for member: " + node->getNodeValue());
+            return -8;
+        }
+        
+        // Look up the class table
+        auto classTable = symbolTable->getNestedTable(className);
+        if (!classTable) {
+            emitComment("Error: Class table not found for type: " + className);
+            return -8;
+        }
+        
+        // Look up the member in the class table
+        std::string memberName = node->getNodeValue();
+        auto memberSymbol = classTable->lookupSymbol(memberName);
+        if (!memberSymbol || memberSymbol->getMetadata("offset").empty()) {
+            emitComment("Error: Member not found or missing offset: " + memberName);
+            return -8;
+        }
+        
+        // Return the offset of the member within the class
+        return std::stoi(memberSymbol->getMetadata("offset"));
+    }
 
     // Fall back to direct offset metadata if available
     if (!node->getMetadata("offset").empty())
@@ -1978,95 +2121,6 @@ int CodeGenVisitor::getNodeOffset(ASTNode *node)
     return -8; // Default temporary location
 }
 
-void CodeGenVisitor::visitDotIdentifier(ASTNode* node) {
-    emitComment("Processing member access");
-
-    // Get object and member identifier
-    ASTNode* objectNode = node->getLeftMostChild();
-    ASTNode* memberNode = objectNode ? objectNode->getRightSibling() : nullptr;
-
-    if (!objectNode || !memberNode) {
-        emitComment("Error: Invalid DotIdentifier structure");
-        return;
-    }
-
-    // Process the object expression first to get its address
-    objectNode->accept(this);
-
-    // Get object address
-    int objectAddrReg = allocateRegister();
-    int objectOffset;
-
-    // Get object address - could be from symbol table or a temporary if complex expression
-    if (objectNode->getNodeEnum() == NodeType::IDENTIFIER) {
-        std::string objectName = objectNode->getNodeValue();
-        auto objectSymbol = currentTable->lookupSymbol(objectName);
-        if (!objectSymbol) {
-            emitComment("Error: Object symbol not found: " + objectName);
-            freeRegister(objectAddrReg);
-            return;
-        }
-        objectOffset = getSymbolOffset(objectName);
-        // Load object address from memory
-        emit("addi r" + std::to_string(objectAddrReg) + ",r14," + std::to_string(objectOffset));
-    }
-    else if (!objectNode->getMetadata("offset").empty()) {
-        // For expressions that calculate an object reference
-        objectOffset = std::stoi(objectNode->getMetadata("offset"));
-        emit("lw r" + std::to_string(objectAddrReg) + "," + std::to_string(objectOffset) + "(r14)");
-    }
-    else {
-        emitComment("Error: Cannot determine object address");
-        freeRegister(objectAddrReg);
-        return;
-    }
-
-    // Get the member name
-    std::string memberName = memberNode->getNodeValue();
-    
-    // Find the member's type and offset within the class
-    // This requires class type information from the object's symbol
-    auto objectSymbol = currentTable->lookupSymbol(objectNode->getNodeValue());
-    std::string className;
-    int memberOffset = -1;
-    
-    if (objectSymbol) {
-        className = objectSymbol->getType(); 
-        
-        // Look up the class symbol table to find member offset
-        auto classTable = symbolTable->getNestedTable(className);
-        if (classTable) {
-            auto memberSymbol = classTable->lookupSymbol(memberName);
-            if (memberSymbol && !memberSymbol->getMetadata("offset").empty()) {
-                memberOffset = std::stoi(memberSymbol->getMetadata("offset"));
-            }
-        }
-    }
-    
-    if (memberOffset == -1) {
-        emitComment("Error: Could not determine member offset for " + memberName);
-        freeRegister(objectAddrReg);
-        return;
-    }
-
-    // Calculate the final address of the member
-    int memberAddrReg = allocateRegister();
-    emit("addi r" + std::to_string(memberAddrReg) + ",r" + std::to_string(objectAddrReg) + "," + std::to_string(memberOffset));
-
-    // Store the member address in a temporary variable
-    int addrTempLoc = getScopeOffset(currentTable);
-    emit("sw " + std::to_string(addrTempLoc) + "(r14),r" + std::to_string(memberAddrReg));
-    
-    // Store metadata for the parent node to use
-    node->setMetadata("offset", std::to_string(addrTempLoc));
-    
-    emitComment("Member " + memberName + " address stored in " + std::to_string(addrTempLoc) + "(r14)");
-
-    // Free registers
-    freeRegister(objectAddrReg);
-    freeRegister(memberAddrReg);
-}
-
 void CodeGenVisitor::visitDotAccess(ASTNode* node) {
     emitComment("Processing dot access expression");
 
@@ -2074,7 +2128,7 @@ void CodeGenVisitor::visitDotAccess(ASTNode* node) {
     ASTNode* objExpr = node->getLeftMostChild();
     ASTNode* memberNode = objExpr ? objExpr->getRightSibling() : nullptr;
 
-    if (!objExpr || !memberNode || memberNode->getNodeEnum() != NodeType::DOT_IDENTIFIER) {
+    if (!objExpr || !memberNode || memberNode->getNodeEnum() != NodeType::DOT_IDENTIFIER && memberNode->getNodeEnum() != NodeType::ARRAY_ACCESS) {
         emitComment("Error: Invalid DOT_ACCESS structure");
         return;
     }
@@ -2090,9 +2144,6 @@ void CodeGenVisitor::visitDotAccess(ASTNode* node) {
     objOffset = getNodeOffset(objExpr);
     emit("addi r" + std::to_string(objAddressReg) + ",r14,"+ std::to_string(objOffset));
 
-
-    // Get the member name
-    std::string memberName = memberNode->getNodeValue();
     
     // Find the object's class type
     std::string objTypeName;
@@ -2104,6 +2155,17 @@ void CodeGenVisitor::visitDotAccess(ASTNode* node) {
     } else if (objExpr->getNodeEnum() == NodeType::DOT_ACCESS) {
         objTypeName = objExpr->getMetadata("type");
     }
+
+    // Get the member name
+    if (memberNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+        memberNode->accept(this);
+    } else if (memberNode->getNodeEnum() == NodeType::ARRAY_ACCESS) {
+        // Handle array access
+        memberNode->getLeftMostChild()->setMetadata("type", objTypeName);
+        memberNode->getLeftMostChild()->setMetadata("objAddressReg", std::to_string(objAddressReg));
+        memberNode->accept(this);
+    }
+    std::string memberName = memberNode->getNodeValue();
     
     if (objTypeName.empty()) {
         emitComment("Error: Cannot determine object type");

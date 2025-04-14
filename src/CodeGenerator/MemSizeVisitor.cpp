@@ -1306,7 +1306,7 @@ void MemSizeVisitor::visitDotAccess(ASTNode* node) {
         std::string objName = objExpr->getNodeValue();
         auto objSymbol = currentTable->lookupSymbol(objName);
         
-        if (objSymbol && memberNode && memberNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+        if (objSymbol && memberNode) {
             std::string className = objSymbol->getType();
             std::string memberName = memberNode->getNodeValue();
             
