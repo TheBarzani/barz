@@ -50,6 +50,17 @@ add_executable(codegendriver
     src/CodeGenDriver.cpp         # Driver code
 )
 
+add_executable(compilerdriver
+    src/Scanner/Scanner.cpp         # Scanner implementation
+    src/Parser/Parser.cpp           # Parser implementation
+    src/ASTGenerator/AST.cpp        # AST generation code
+    src/ASTGenerator/ASTNode.cpp    # AST node code
+    src/Semantics/SymbolTableVisitor.cpp # Symbol Table Generation code
+    src/Semantics/SemanticCheckingVisitor.cpp # Semantics Checking code
+    src/CodeGenerator/MemSizeVisitor.cpp # Memory size calculation code
+    src/CodeGenerator/CodeGenVisitor.cpp # Code generation code
+    src/CompilerDriver.cpp         # Driver code
+)
 
 # Include source directories 
 target_include_directories(lexdriver PRIVATE
@@ -69,6 +80,10 @@ target_include_directories(semanticanalyzerdriver PRIVATE
 )
 
 target_include_directories(codegendriver PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+target_include_directories(compilerdriver PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 # Include CSV file

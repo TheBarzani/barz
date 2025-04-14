@@ -42,9 +42,17 @@ class Parser {
      * @brief Initializes the Parser with the given parsing table and input file.
      * @param parsingTable Path to the file containing the parsing table.
      * @param inputFile Path to the source code file to be parsed.
+     * @param scanner Scanner object for tokenizing the input.
      */
-    Parser(const std::string& parsingTable, const std::string& inputFile);
+    Parser(const std::string& parsingTable, const std::string& inputFile, const Scanner& scanner);
     
+    /**
+     * @brief Initializes the Parser with the given parsing table and input file.
+     * @param inputFile Path to the source code file to be parsed.
+     * @param parsingTable Path to the file containing the parsing table.
+     */
+    Parser(const std::string& inputFile, const std::string& parsingTable);
+
     /**
      * @brief Cleans up any resources used by the Parser.
      */

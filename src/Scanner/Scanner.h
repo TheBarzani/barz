@@ -62,6 +62,12 @@ public:
     Scanner(const std::string& in, const std::string& out);
 
     /**
+     * @brief Copy constructor that creates a scanner as a copy of another scanner.
+     * @param other The scanner to copy.
+     */
+    Scanner(const Scanner& other);
+
+    /**
      * @brief Destructor for the Scanner class.
      */
     ~Scanner();

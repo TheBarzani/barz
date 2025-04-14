@@ -39,9 +39,10 @@ AST::AST() : root(nullptr) {
     // Initialize empty AST
 }
 
+
+
 AST::~AST() {
     // Clean up the tree by deleting the root node (which will recursively delete children)
-    delete root;
     ASTStack.clear();
 }
 
@@ -129,9 +130,6 @@ ASTNode* AST::getRoot() {
 }
 
 void AST::performAction(std::string action, std::string value, int line) {
-    DD("===========================================================");
-    std::cout << "Action: " << action << " Value: " << value << std::endl;
-    printVector(ASTStack);
 
     // Program Structure Actions
     if (action == "_createRoot") {
@@ -610,7 +608,4 @@ void AST::performAction(std::string action, std::string value, int line) {
         } else;
     }
 
-    // Debug output
-    printVector(ASTStack);
-    std::cout << "Stack size after action: " << ASTStack.size() << std::endl;
 }

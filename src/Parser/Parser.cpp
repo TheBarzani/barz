@@ -5,14 +5,14 @@
 #include <sstream>
 #include <vector>
 
-Parser::Parser(const std::string& inputFile, const std::string& parsingTable)
-    : table(ParsingTable(parsingTable)), scanner(Scanner(inputFile)) {
-    scanner.processFile();
-    tokens = scanner.getTokens();
-    scanner.writeOutputsToFile();
+Parser::Parser(const std::string& inputFile, const std::string& parsingTable, const Scanner& scanner)
+    : table(ParsingTable(parsingTable)), scanner(scanner), currentDerivation("START") {
+    tokens = this->scanner.getTokens();
     filename = inputFile.substr(0, inputFile.size() - 4);
-    // Initialize the current derivation to the start symbol.
-    currentDerivation = "START";
+}
+
+Parser::Parser(const std::string& inputFile, const std::string& parsingTable)
+    : Parser(inputFile, parsingTable, Scanner(inputFile)) {
 }
 
 Parser::~Parser() {
@@ -42,11 +42,6 @@ Parser::~Parser() {
 bool Parser::parse() {
     parseStack.push("$");
     parseStack.push("START");
-
-    // Debug output for productions (unchanged)
-    std::cout << "Initial parsing table state:\n";
-    table.printProductions("START");
-    table.printProductions("CLASSDECL");
 
     lookahead = nextToken();
     std::string currentLexeme;
@@ -162,11 +157,6 @@ void Parser::inverseRHSMultiplePush(const std::string& production) {
     // Push symbols in reverse order onto the parse stack.
     for (auto it = symbols.rbegin(); it != symbols.rend(); ++it) {
         parseStack.push(*it);
-        // if (table.isTerminal(*it)) {
-        //     std::cout << "Pushed terminal: " << *it << std::endl;
-        // } else {
-        //     std::cout << "Pushed non-terminal: " << *it << std::endl;
-        // }
     }
 }
 
