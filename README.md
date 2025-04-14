@@ -33,6 +33,7 @@ The compiler supports a rich set of features across different compilation phases
 | Object parameters | ❌ |
 | Returning objects/arrays | ❌ |
 | Member function calls | ✅ |
+| Function Overloading | ❌ |
 | **Statements** |  |
 | Assignment statements | ✅ |
 | Conditional statements | ✅ |
@@ -48,6 +49,7 @@ The compiler supports a rich set of features across different compilation phases
 | Logical operations (and, or) | ✅ |
 | Array expressions | ✅ |
 | Object member expressions | ✅ |
+| Object assignment | ❌ |
 | **Inheritance** |  |
 | Parent member access | ❌ |
 | Child-parent interactions | ❌ |

@@ -1,0 +1,18 @@
+function count(a: int, b: int) => int
+{ 
+  if (a==b) 
+  then
+  {
+    return(b);
+  }
+  else
+  {
+     write(a);
+  };
+  return(count(a+1, b));
+}
+
+function main() => void
+{
+  write(count(0,10));
+}

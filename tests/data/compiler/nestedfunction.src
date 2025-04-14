@@ -1,0 +1,20 @@
+function plus(a: int, b: int) => int
+ {
+    write(a);
+    return(a+b);
+ }
+ 
+ function double(a: int) => int
+ {
+    local x: int;
+    write(a);
+    x := plus(a,a);
+    write(x);
+    return (x);
+ }
+ 
+ function main() => void
+ {
+   local x: int;
+   x := double(11);
+ }

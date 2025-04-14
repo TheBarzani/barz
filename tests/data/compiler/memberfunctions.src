@@ -1,0 +1,26 @@
+
+class A {
+  public attribute c: float;
+  public attribute a: int;
+  public attribute d: int[5][4];
+  public function print(a: int) => void;
+};
+
+implementation A{
+  function print(a: int) => void
+  {
+    write(a);
+    write(self.a);
+  }
+}
+
+function main() => void
+{
+  local a: A;
+  a.d[1][2] := 699;
+  write(a.d[1][2] +100);
+
+  a.a := 89;
+  write(a.a+1);
+  a.print(96);
+}
