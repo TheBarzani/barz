@@ -2142,7 +2142,7 @@ void CodeGenVisitor::visitDotAccess(ASTNode* node) {
     
     // Other complex expressions
     objOffset = getNodeOffset(objExpr);
-    emit("addi r" + std::to_string(objAddressReg) + ",r14,"+ std::to_string(objOffset));
+    
 
     
     // Find the object's class type
@@ -2152,8 +2152,10 @@ void CodeGenVisitor::visitDotAccess(ASTNode* node) {
         if (objSymbol) {
             objTypeName = objSymbol->getType();
         }
+        emit("addi r" + std::to_string(objAddressReg) + ",r14,"+ std::to_string(objOffset));
     } else if (objExpr->getNodeEnum() == NodeType::DOT_ACCESS) {
         objTypeName = objExpr->getMetadata("type");
+        emit("lw r" + std::to_string(objAddressReg) + ","+std::to_string(objOffset)+  "(r14)");
     }
 
     // Get the member name

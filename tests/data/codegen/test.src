@@ -57,8 +57,8 @@ function main() => void
 */
 
 class B {
-  public attribute c: int;
   public attribute x: float;
+  public attribute c: int;
 };
 class A {
   public attribute b: B;
@@ -79,14 +79,14 @@ implementation A{
 function main() => void
 {
   local a: A;
-  //a.d[1][2] := 699;
-  //write(a.d[1][2]);
+  a.d[1][2] := 699;
+  write(a.d[1][2] +100);
 
-  a.b.c := 9;
+  a.b.c := 100;
   write(a.b.c);
 
-  //a.a := 69;
-  //write(a.a+1);
+  a.a := 69;
+  write(a.a+1);
   //a.print(96);
   /*
   local x: int[1];
