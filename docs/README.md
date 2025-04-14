@@ -215,3 +215,106 @@ NOTE:
 2. Multiple phases needed, maybe one for symbol table and another for semantic checking
 3. Semantic actions have to be grouped into traversal passes/phases, AND still be mapped to
 specific nodes. 
+
+# code gen specs
+Files:
+
+1. assigment statement
+
+   assignment5.COMP442-6421.paquet.2025.4.pdf
+
+2. example programs: sample programs that demonstrate how your test cases should be documented. 
+   Note that these are not to be considered as complete in terms of test case coverage.  
+
+   example-bubblesort.src 
+   example-polynomial.src
+   example-simplemain.src
+
+3. moon virtual processor: implementation code, documentation and sample code
+
+   moon/
+   
+NOTE: 
+1. Use a phase to determine the memory allocation requirements (updates the symbol table)
+- Allocate memory for primitive types and then allocate for objects
+2. Use another phase for code generation
+- Do global/free functions before member functions
+- Implement the green ones first
+- Look into multi-dimensional arrays
+- Check semantic errors when out of bound indexes are used
+- Use temporary results memory allocation using a unique label generator
+- Use register pool allocation strategy 
+- Go back into the lexical specifications for making sure that everything is implemented.
+
+## Code generation: suggested sequence
+**Suggested sequence:** ​
+
+- variable declarations (integers first)​
+- assignment statement​
+- read and write statements​
+- expressions (one operator at a time)​
+- conditional statement​
+- loop statement​
+
+**Tricky parts:** ​
+
+- function calls​
+- expressions involving arrays and classes (offset calculation)​
+- floating point numbers (non-native in Moon)​
+- function call stack​
+- expressions involving access to object members (offset calculations)​
+- calls to member functions (access to object’s data members) 
+
+## Table of features
+
+- [x] 1.1.1. Allocate memory for integers.
+- [x] 1.1.2. Allocate memory for floats.
+- [x] 1.2. Allocate memory for arrays of basic types.
+- [x] 1.3. Allocate memory for objects.
+- [x] 1.4. Allocate memory for arrays of objects.
+- [x] 2.1. Branch to a function’s code block, execute the code block, branch back to the calling function.
+- [x] 2.2. Pass parameters as local values to the function’s code block.
+- [x] 2.3. Upon execution of a return statement, pass the return value back to the calling function.
+- [x] 2.4. Call to member functions that can use their object’s data members.
+- [x] 3.1. Assignment statement: assignment of the resulting value of an expression to a variable, independently of what is the expression to the right of the assignment operator.
+- [x] 3.2. Conditional statement: implementation of a branching mechanism.
+- [x] 3.3. Loop statement: implementation of a branching mechanism.
+- [x] 3.4. Input/output statement: Moon machine keyboard input/console output.
+- [x] 4.1. For arrays of basic types (integer and float), access to an array’s elements.
+- [x] 4.2. For arrays of objects, access to an array’s element’s data members.
+- [x] 4.3. For objects, access to members of basic types.
+- [x] 4.4. For objects, access to members of array or object types.
+- [x] 5.1.1. Computing expressions with plus (+) operator.
+- [x] 5.1.2. Computing expressions with minus (-) operator.
+- [x] 5.1.3. Computing expressions with or operator.
+- [x] 5.1.4. Computing expressions with multiplication (*) operator.
+- [x] 5.1.5. Computing expressions with division (/) operator.
+- [x] 5.1.6. Computing expressions with and operator.
+- [x] 5.2. Expression involving an array factor whose indexes are themselves expressions.
+- [x] 5.3. Expression involving an object factor referring to object members.
+
+
+
+### Assignment 5 coverage:
+| Section | IMP |  P  |
+|---------|:---:|:---:|
+| 1.1.1   |  X  | 0.5 |
+| 1.1.2   |  X  | 0.5 |
+| 1.2     |  X  | 0.5 |
+| 1.3     |  X  | 0.5 |
+| 1.4     |  X  | 0.5 |
+| 2.1     |     | 1.0 |
+| 2.2     |     | 1.0 |
+| 2.3     |     | 1.0 |
+| 2.4     |     | 1.0 |
+| 3.1     |  X  | 1.5 |
+| 3.2     |     | 1.0 |
+| 3.3     |     | 1.0 |
+| 3.4     |  X  | 2.0 |
+| 4.1     |     | 1.0 |
+| 4.2     |     | 1.0 |
+| 4.3     |     | 1.0 |
+| 4.4     |     | 1.0 |
+| 5.1     | 0.6 | 2.0 |
+| 5.2     |     | 1.0 |
+| 5.3     |     | 1.0 |

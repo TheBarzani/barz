@@ -138,6 +138,9 @@ std::string ASTNode::getNodeType()
         case NodeType::IMPLEMENTATION_FUNCTION_LIST: return "IMPLEMENTATION_FUNCTION_LIST";
         case NodeType::CONDITION:           return "CONDITION";
         case NodeType::ARRAY_TYPE:          return "ARRAY_TYPE";
+        case NodeType::DOT_ACCESS:          return "DOT_ACCESS";
+        case NodeType::INDEX_LIST:          return "INDEX_LIST";
+        case NodeType::DIM_LIST:            return "DIM_LIST";
         default:
             // TODO: throw an exception when this happens
             return "UNKNOWN";
@@ -223,4 +226,20 @@ int ASTNode::getLineNumber() const {
 
 void ASTNode::setLineNumber(int line) {
     lineNumber = line;
+}
+
+void ASTNode::setMetadata(const std::string& key, const std::string& value) {
+    metadata[key] = value;
+}
+
+std::string ASTNode::getMetadata(const std::string& key) const {
+    auto it = metadata.find(key);
+    if (it != metadata.end()) {
+        return it->second;
+    }
+    return "";
+}
+
+bool ASTNode::hasMetadata(const std::string& key) const {
+    return metadata.find(key) != metadata.end();
 }

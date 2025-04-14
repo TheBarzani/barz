@@ -46,19 +46,8 @@ const std::unordered_map<std::string, std::string> Scanner::reservedWords = {
     {"or", "or"}, {"and", "and"}, {"not", "not"}
 };
 
-/**
- * @brief Constructor with input file only.
- * 
- * @param in The input file name.
- */
 Scanner::Scanner(const std::string& in) : Scanner(in,""){};
 
-/**
- * @brief Constructor with input and output files.
- * 
- * @param in The input file name.
- * @param out The output file name.
- */
 Scanner::Scanner(const std::string& in, const std::string& out) : 
     filename(in), currentLine(1), currentColumn(0) {
     input.open(filename);
@@ -70,18 +59,37 @@ Scanner::Scanner(const std::string& in, const std::string& out) :
     getNextChar();
 }
 
-/**
- * @brief Destructor to close file streams.
- */
+Scanner::Scanner(const Scanner& other) : 
+    filename(other.filename),
+    currentLine(other.currentLine),
+    currentColumn(other.currentColumn),
+    currentChar(other.currentChar),
+    currentLineText(other.currentLineText),
+    tokens(other.tokens)
+{
+    // Reopen the input file at the same position
+    if (!other.filename.empty()) {
+        input.open(filename);
+        
+        // If the original file was successfully opened, set position
+        if (other.input.is_open() && input.is_open()) {
+            // Get the current position in the original stream
+            std::streampos inputPos = const_cast<std::ifstream&>(other.input).tellg();
+            
+            // Set the same position in the new stream
+            if (inputPos >= 0) {
+                input.seekg(inputPos);
+            }
+        }
+    }
+}
+
 Scanner::~Scanner() {
     if (input.is_open()) input.close();
     if (tokenOutput.is_open()) tokenOutput.close();
     if (errorOutput.is_open()) errorOutput.close();
 }
 
-/**
- * @brief Get the next character from the input stream.
- */
 void Scanner::getNextChar() {
     currentChar = input.get();
     if (currentChar == '\n') {

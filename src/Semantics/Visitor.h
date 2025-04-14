@@ -57,6 +57,7 @@ public:
     virtual void visitFunctionCall(ASTNode* node) = 0;
     virtual void visitArrayAccess(ASTNode* node) = 0;
     virtual void visitDotIdentifier(ASTNode* node) = 0;
+    virtual void visitDotAccess(ASTNode* node) = 0; // Add new method for DOT_ACCESS
     virtual void visitFactor(ASTNode* node) = 0;
     virtual void visitTerm(ASTNode* node) = 0;
     virtual void visitArithExpr(ASTNode* node) = 0;
@@ -71,6 +72,8 @@ public:
     virtual void visitImplementationFunctionList(ASTNode* node) = 0;
     virtual void visitCondition(ASTNode* node) = 0;
     virtual void visitArrayType(ASTNode* node) = 0;
+    virtual void visitIndexList(ASTNode* node) = 0;
+    virtual void visitDimList(ASTNode* node) = 0;
 
     // Generic visit method to dispatch based on node type
     virtual void visit(ASTNode* node) {
@@ -119,6 +122,7 @@ public:
             case NodeType::FUNCTION_CALL: visitFunctionCall(node); break;
             case NodeType::ARRAY_ACCESS: visitArrayAccess(node); break;
             case NodeType::DOT_IDENTIFIER: visitDotIdentifier(node); break;
+            case NodeType::DOT_ACCESS: visitDotAccess(node); break; 
             case NodeType::FACTOR: visitFactor(node); break;
             case NodeType::TERM: visitTerm(node); break;
             case NodeType::ARITH_EXPR: visitArithExpr(node); break;
@@ -133,6 +137,11 @@ public:
             case NodeType::IMPLEMENTATION_FUNCTION_LIST: visitImplementationFunctionList(node); break;
             case NodeType::CONDITION: visitCondition(node); break;
             case NodeType::ARRAY_TYPE: visitArrayType(node); break;
+            case NodeType::INDEX_LIST: visitIndexList(node); break;
+            case NodeType::DIM_LIST: visitDimList(node); break;
+            default:
+                std::cerr << "Unknown node type: " << node->getNodeType() << std::endl;
+                break;
         }
     }
 };

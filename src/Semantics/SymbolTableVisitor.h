@@ -56,7 +56,8 @@ namespace std {
 class Symbol {
 public:
     Symbol(const std::string& name, const std::string& type, SymbolKind kind);
-    
+    // Copy constructor
+    Symbol(const Symbol& other);
     // Getters and setters
     std::string getName() const { return name; }
     std::string getType() const { return type; }
@@ -95,6 +96,9 @@ public:
     bool isArray() const { return !arrayDimensions.empty(); }
     void addArrayDimension(int dim) { arrayDimensions.push_back(dim); }
     const std::vector<int>& getArrayDimensions() const { return arrayDimensions; }
+    void clearArrayDimensions() {
+        arrayDimensions.clear();
+    }
 
     void setDeclarationLine(int line) { declarationLine = line; }
     void setDefinitionLine(int line) { definitionLine = line; }
@@ -123,6 +127,20 @@ public:
         }
     }
 
+    // Set a metadata value
+    void setMetadata(const std::string& key, const std::string& value) {
+        metadata[key] = value;
+    }
+    
+    // Get a metadata value
+    std::string getMetadata(const std::string& key) const {
+        auto it = metadata.find(key);
+        if (it != metadata.end()) {
+            return it->second;
+        }
+        return ""; // Return empty string if key not found
+    }
+
 private:
     std::string name;
     std::string type;
@@ -141,16 +159,24 @@ private:
 
     int declarationLine = 0;
     int definitionLine = 0;
+
+    std::unordered_map<std::string, std::string> metadata;
 };
 
 // Symbol Table class to represent a single scope's symbols
 class SymbolTable {
 public:
     SymbolTable(const std::string& scopeName, SymbolTable* parent = nullptr);
-    
+
+    // Deep copy constructor
+    SymbolTable(const SymbolTable& other);
+
     // Add a symbol to this table
     bool addSymbol(std::shared_ptr<Symbol> symbol);
     
+    // Remove a symbol from this table
+    bool removeSymbol(const std::string& name);
+
     // Lookup a symbol in this table (or parent tables if not found)
     std::shared_ptr<Symbol> lookupSymbol(const std::string& name, bool localOnly = false);
     
@@ -184,6 +210,38 @@ public:
     void setFunctionSymbol(std::shared_ptr<Symbol> symbol) { functionSymbol = symbol; }
     std::shared_ptr<Symbol> getFunctionSymbol() const { return functionSymbol; }
 
+    // Set a metadata value
+    void setMetadata(const std::string& key, const std::string& value) {
+        metadata[key] = value;
+    }
+    
+    // Get a metadata value
+    std::string getMetadata(const std::string& key) const {
+        auto it = metadata.find(key);
+        if (it != metadata.end()) {
+            return it->second;
+        }
+        return ""; // Return empty string if key not found
+    }
+
+    std::vector<std::pair<std::string, std::shared_ptr<Symbol>>> getSymbolsInOrder() const {
+        std::vector<std::pair<std::string, std::shared_ptr<Symbol>>> orderedSymbols;
+        for (const auto& name : symbolInsertionOrder) {
+            auto it = symbols.find(name);
+            if (it != symbols.end()) {
+                orderedSymbols.push_back(*it);
+            }
+        }
+        return orderedSymbols;
+    }
+
+    const std::vector<std::string>& getSymbolInsertionOrder() const {
+        return symbolInsertionOrder;
+    }
+    const std::vector<std::string>& getNestedTableInsertionOrder() const {
+        return nestedTableInsertionOrder;
+    }
+
 private:
     std::string scopeName;
     SymbolTable* parent;
@@ -191,6 +249,9 @@ private:
     std::unordered_map<std::string, std::shared_ptr<SymbolTable>> nestedTables;
     std::unordered_map<FunctionSignature, std::shared_ptr<Symbol>> functions;
     std::shared_ptr<Symbol> functionSymbol = nullptr;  // For function tables
+    std::unordered_map<std::string, std::string> metadata;
+    std::vector<std::string> symbolInsertionOrder; // To maintain insertion order
+    std::vector<std::string> nestedTableInsertionOrder; // For nested tables
 };
 
 // Symbol Table Visitor implementation
@@ -202,8 +263,10 @@ public:
     // Output the symbol table to a file
     void outputSymbolTable(const std::string& filename);
     
-    // Get the generated global symbol table
-    std::shared_ptr<SymbolTable> getGlobalTable() const { return globalTable; }
+    // Get the generated global symbol table (returns a deep copy)
+    std::shared_ptr<SymbolTable> getGlobalTable() const { 
+        return std::make_shared<SymbolTable>(*globalTable); 
+    }
 
     // Implementation of all visitor methods
     void visitEmpty(ASTNode* node) override;
@@ -250,6 +313,7 @@ public:
     void visitFunctionCall(ASTNode* node) override;
     void visitArrayAccess(ASTNode* node) override;
     void visitDotIdentifier(ASTNode* node) override;
+    void visitDotAccess(ASTNode* node) override; // Add new method for DOT_ACCESS
     void visitFactor(ASTNode* node) override;
     void visitTerm(ASTNode* node) override;
     void visitArithExpr(ASTNode* node) override;
@@ -264,6 +328,8 @@ public:
     void visitImplementationFunctionList(ASTNode* node) override;
     void visitCondition(ASTNode* node) override;
     void visitArrayType(ASTNode* node) override;
+    void visitIndexList(ASTNode* node) override;
+    void visitDimList(ASTNode* node) override;
 
     /**
      * @brief Gets all errors reported during symbol table generation

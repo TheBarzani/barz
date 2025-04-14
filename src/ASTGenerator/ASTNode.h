@@ -7,6 +7,7 @@
 #define ASTNODE_H
 
 #include <string>
+#include <unordered_map>
 
 /**
  * @enum NodeType
@@ -71,7 +72,10 @@ enum class NodeType
     STATEMENTS_LIST,
     IMPLEMENTATION_FUNCTION_LIST,
     CONDITION,
-    ARRAY_TYPE
+    ARRAY_TYPE,
+    DOT_ACCESS,
+    INDEX_LIST,
+    DIM_LIST,
 };
 
 /**
@@ -98,6 +102,7 @@ private:
     int nodeNumber;           ///< Unique number assigned to this node.
     static int nodeCount;     ///< Counter for generating unique node numbers.
     int lineNumber = 0;       ///< Line number in the source code
+    std::unordered_map<std::string, std::string> metadata;
 
 public:
     /**
@@ -230,6 +235,27 @@ public:
      * @param line Line number in source code.
      */
     void setLineNumber(int line);
+
+    /**
+     * @brief Sets metadata for the node.
+     * @param key The metadata key.
+     * @param value The metadata value.
+     */
+    void setMetadata(const std::string& key, const std::string& value);
+
+    /**
+     * @brief Gets metadata from the node.
+     * @param key The metadata key.
+     * @return The metadata value or empty string if not found.
+     */
+    std::string getMetadata(const std::string& key) const;
+    
+    /**
+     * @brief Checks if metadata exists.
+     * @param key The metadata key.
+     * @return True if the metadata exists.
+     */
+    bool hasMetadata(const std::string& key) const;
 };
 
 #endif // ASTNODE_H

@@ -22,6 +22,7 @@ struct TypeInfo {
     std::string type;
     std::vector<int> dimensions;
     bool isClassType = false;
+    int indexCount = 0;
 };
 
 class SemanticCheckingVisitor : public Visitor {
@@ -74,6 +75,7 @@ public:
     void visitFunctionCall(ASTNode* node) override;
     void visitArrayAccess(ASTNode* node) override;
     void visitDotIdentifier(ASTNode* node) override;
+    void visitDotAccess(ASTNode* node) override;
     void visitFactor(ASTNode* node) override;
     void visitTerm(ASTNode* node) override;
     void visitArithExpr(ASTNode* node) override;
@@ -88,6 +90,8 @@ public:
     void visitImplementationFunctionList(ASTNode* node) override;
     void visitCondition(ASTNode* node) override;
     void visitArrayType(ASTNode* node) override;
+    void visitIndexList(ASTNode* node) override;
+    void visitDimList(ASTNode* node) override;
 
     // Helper methods for semantic checking
     void reportError(const std::string& message, ASTNode* node);

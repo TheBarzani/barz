@@ -325,49 +325,51 @@ void SemanticCheckingVisitor::visitIdentifier(ASTNode* node) {
 
 // Array access visitor - for checking array access
 void SemanticCheckingVisitor::visitArrayAccess(ASTNode* node) {
-    // Process array identifier
+    // Get array variable (left child) - either an identifier or dot_access
     ASTNode* arrayNode = node->getLeftMostChild();
-    if (arrayNode) {
-        arrayNode->accept(this);
-        TypeInfo arrayType = currentExprType;
+    if (!arrayNode) {
+        reportError("Missing array variable in array access", node);
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Process the array variable to get its type
+    arrayNode->accept(this);
+    TypeInfo arrayType = currentExprType;
+    
+    // Check if this is actually an array
+    if (arrayType.dimensions.empty()) {
+        reportError("Array index used on non-array type: " + arrayType.type, node);
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Process the index list (right child)
+    ASTNode* indexListNode = arrayNode->getRightSibling();
+    if (indexListNode) {
+        // Process index list - this will check individual indices
+        indexListNode->accept(this);
         
-        // Check if this is actually an array
-        if (arrayType.dimensions.empty()) {
-            reportError("Array index used on non-array type: " + arrayType.type, node);
-            currentExprType.type = "error";
-            return;
-        }
+        // Get the count of indices from the processing
+        int indexCount = currentExprType.indexCount;
         
-        // Count how many indices are applied
-        int indexCount = 0;
-        ASTNode* indexNode = arrayNode->getRightSibling();
-        while (indexNode) {
-            indexCount++;
-            indexNode->accept(this);
-            TypeInfo indexType = currentExprType;
-            
-            // Index must be an integer
-            if (indexType.type != "int") {
-                reportError("Array index must be of integer type, got: " + indexType.type, node);
-            }
-            
-            indexNode = indexNode->getRightSibling();
-        }
-        
-        // Check if correct number of dimensions are used
+        // Check if number of indices matches dimensions
         if (indexCount > arrayType.dimensions.size()) {
-            reportError("Too many indices for array of dimension " + 
-                       std::to_string(arrayType.dimensions.size()), node);
-        } else if (indexCount < arrayType.dimensions.size()) {
-            reportError("Use of array with wrong number of dimensions. Expected " + 
-                       std::to_string(arrayType.dimensions.size()) + ", got " + 
-                       std::to_string(indexCount), node);
+            reportError("Too many array indices. Expected at most " + 
+                        std::to_string(arrayType.dimensions.size()) + ", got " + 
+                        std::to_string(indexCount), node);
         }
         
-        // Reduce array dimensions by index count
+        // After processing all indices, update the result type
+        // Remove the used dimensions based on how many indices were processed
         currentExprType = arrayType;
-        for (int i = 0; i < indexCount && !currentExprType.dimensions.empty(); i++) {
-            currentExprType.dimensions.erase(currentExprType.dimensions.begin());
+        
+        // Remove dimensions based on indices used
+        if (indexCount <= currentExprType.dimensions.size()) {
+            currentExprType.dimensions.erase(
+                currentExprType.dimensions.begin(), 
+                currentExprType.dimensions.begin() + indexCount
+            );
         }
     }
 }
@@ -410,8 +412,14 @@ void SemanticCheckingVisitor::visitDotIdentifier(ASTNode* node) {
     // Process object (if not direct member access)
     ASTNode* objNode = node->getLeftMostChild();
     if (!objNode) {
-        // If we reached here, we couldn't handle it as a direct member
-        // and there's no left child, so it's an error
+        // This might be a standalone identifier in a dot access chain
+        // (like the "y" in "cc.clas.y")
+        // If we have a node value, it's likely a valid member name to look up
+        if (!node->getNodeValue().empty()) {
+            // This is handled by the parent DOT_ACCESS node
+            return;
+        }
+        
         reportError("Missing object in dot expression", node);
         currentExprType.type = "error";
         return;
@@ -477,6 +485,165 @@ void SemanticCheckingVisitor::visitDotIdentifier(ASTNode* node) {
         currentExprType.type = memberSymbol->getType();
         currentExprType.dimensions = memberSymbol->getArrayDimensions();
         currentExprType.isClassType = globalTable->lookupSymbol(currentExprType.type) != nullptr;
+    }
+}
+
+void SemanticCheckingVisitor::visitDotAccess(ASTNode* node) {
+    // Get the left part (object) and right part (member/method)
+    ASTNode* objNode = node->getLeftMostChild();
+    ASTNode* memberOrMethodNode = objNode ? objNode->getRightSibling() : nullptr;
+    
+    if (!objNode || !memberOrMethodNode) {
+        reportError("Invalid dot access expression", node);
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Process object to get its type
+    objNode->accept(this);
+    TypeInfo objType = currentExprType;
+    
+    // Check if this is a class type
+    if (!objType.isClassType) {
+        reportError("Dot operator used on non-class type: " + objType.type, node);
+        currentExprType.type = "error";
+        return;
+    }
+    
+    // Different handling based on member node type
+    if (memberOrMethodNode->getNodeEnum() == NodeType::FUNCTION_CALL) {
+        // Method call: object.method() - directly use our method handling logic
+        handleMethodCall(objType, memberOrMethodNode);
+    } 
+    else if (memberOrMethodNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+        // Get member name
+        std::string memberName = memberOrMethodNode->getNodeValue();
+        
+        // Look up class for this object
+        auto classTable = globalTable->getNestedTable(objType.type);
+        if (!classTable) {
+            reportError("Class not found: " + objType.type, node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Look up member in class
+        auto memberSymbol = classTable->lookupSymbol(memberName);
+        if (!memberSymbol) {
+            reportError("Undeclared member: " + memberName + " in class " + objType.type, node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Check visibility
+        if (memberSymbol->getVisibility() == Visibility::PRIVATE && currentClassName != objType.type) {
+            reportError("Cannot access private member: " + memberName + " in class " + objType.type, node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Set the correct type for this member
+        currentExprType.type = memberSymbol->getType();
+        currentExprType.dimensions = memberSymbol->getArrayDimensions();
+        currentExprType.isClassType = globalTable->lookupSymbol(currentExprType.type) != nullptr;
+        
+        // Now recursively process any remaining parts of the chain through standard visitor pattern
+        memberOrMethodNode->accept(this);
+    }
+    else if (memberOrMethodNode->getNodeEnum() == NodeType::ARRAY_ACCESS) {
+        // Handle array access on a class member: object.member[index]
+        
+        // Get the array base (should be the left child of the ARRAY_ACCESS node)
+        ASTNode* arrayBaseNode = memberOrMethodNode->getLeftMostChild();
+        if (!arrayBaseNode) {
+            reportError("Invalid array access in member expression", node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Get the member name
+        std::string memberName = "";
+        if (arrayBaseNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
+            memberName = arrayBaseNode->getNodeValue();
+        }
+        
+        // Look up class
+        auto classTable = globalTable->getNestedTable(objType.type);
+        if (!classTable) {
+            reportError("Class not found: " + objType.type, node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Look up member
+        auto memberSymbol = classTable->lookupSymbol(memberName);
+        if (!memberSymbol) {
+            reportError("Undeclared member: " + memberName + " in class " + objType.type, node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Check visibility
+        if (memberSymbol->getVisibility() == Visibility::PRIVATE && currentClassName != objType.type) {
+            reportError("Cannot access private member: " + memberName + " in class " + objType.type, node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Check if member is an array
+        if (memberSymbol->getArrayDimensions().empty()) {
+            reportError("Array index used on non-array member: " + memberName, node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Process the array access with correct context
+        // This will check indices and compute resulting type
+        TypeInfo tempType = currentExprType; // Save current expression type
+        
+        // Set up context for array access - establish correct base type
+        currentExprType.type = memberSymbol->getType();
+        currentExprType.dimensions = memberSymbol->getArrayDimensions();
+        currentExprType.isClassType = globalTable->lookupSymbol(currentExprType.type) != nullptr;
+        
+        // Process the array access node
+        memberOrMethodNode->accept(this);
+    }
+    else if (memberOrMethodNode->getNodeEnum() == NodeType::IDENTIFIER) {
+        // Simple member access: object.member
+        std::string memberName = memberOrMethodNode->getNodeValue();
+        
+        // Look up class
+        auto classTable = globalTable->getNestedTable(objType.type);
+        if (!classTable) {
+            reportError("Class not found: " + objType.type, node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Look up member
+        auto memberSymbol = classTable->lookupSymbol(memberName);
+        if (!memberSymbol) {
+            reportError("Undeclared member: " + memberName + " in class " + objType.type, node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Check visibility
+        if (memberSymbol->getVisibility() == Visibility::PRIVATE && currentClassName != objType.type) {
+            reportError("Cannot access private member: " + memberName + " in class " + objType.type, node);
+            currentExprType.type = "error";
+            return;
+        }
+        
+        // Set type information
+        currentExprType.type = memberSymbol->getType();
+        currentExprType.dimensions = memberSymbol->getArrayDimensions();
+        currentExprType.isClassType = globalTable->lookupSymbol(currentExprType.type) != nullptr;
+    }
+    else {
+        reportError("Invalid member expression in dot access", node);
+        currentExprType.type = "error";
     }
 }
 
@@ -953,17 +1120,28 @@ void SemanticCheckingVisitor::visitVariable(ASTNode* node) {
         reportError("Variable declaration missing identifier.", node);
         return;
     }
-    
     std::string varName = varIdNode->getNodeValue();
-    
+
     // Process type
     ASTNode* typeNode = varIdNode->getRightSibling();
     if (!typeNode) {
         reportError("Variable declaration missing type.", node);
         return;
     }
-    
-    typeNode->accept(this);
+    typeNode->accept(this); // Sets currentType
+
+    // Process Dimension List (third child, optional)
+    ASTNode* dimListNode = typeNode->getRightSibling();
+    if (dimListNode && dimListNode->getNodeEnum() == NodeType::DIM_LIST) {
+        // Visit dimensions if they exist
+        if (dimListNode->getLeftMostChild()) {
+             dimListNode->accept(this); // Collects dimensions temporarily if needed, though not strictly used here
+        }
+    }
+
+    // Type checking for variable declarations primarily happens during symbol table creation
+    // and later when the variable is used (via visitIdentifier).
+    // We mainly ensure the structure is visited correctly here.
 }
 
 void SemanticCheckingVisitor::visitFunctionId(ASTNode* node) {
@@ -1349,15 +1527,26 @@ void SemanticCheckingVisitor::visitParam(ASTNode* node) {
         reportError("Parameter missing identifier.", node);
         return;
     }
-    
+
     // Process parameter type
     ASTNode* typeNode = paramIdNode->getRightSibling();
     if (!typeNode) {
         reportError("Parameter missing type.", node);
         return;
     }
-    
-    typeNode->accept(this);
+    typeNode->accept(this); // Sets currentType
+
+    // Process Dimension List (third child, optional)
+    ASTNode* dimListNode = typeNode->getRightSibling();
+    if (dimListNode && dimListNode->getNodeEnum() == NodeType::DIM_LIST) {
+        // Visit dimensions if they exist
+        if (dimListNode->getLeftMostChild()) {
+             dimListNode->accept(this); // Collects dimensions temporarily
+        }
+    }
+
+    // Type checking for parameters happens during function call checks (visitFunctionCall)
+    // by comparing argument types with the parameter types stored in the function symbol.
 }
 
 void SemanticCheckingVisitor::visitFactor(ASTNode* node) {
@@ -1613,9 +1802,6 @@ bool SemanticCheckingVisitor::hasErrors() const {
 
 // New method to output errors to a file
 void SemanticCheckingVisitor::outputErrors(const std::string& originalFilename) {
-    if (semanticErrors.empty()) {
-        return;  // No errors to report
-    }
     
     // Sort errors by line number and then column number for synchronized order
     std::sort(semanticErrors.begin(), semanticErrors.end(), 
@@ -1809,4 +1995,50 @@ void SemanticCheckingVisitor::reportWarning(const std::string& message, int line
     
     std::cerr << "Warning" << (line > 0 ? " at line " + std::to_string(line) : "") 
               << ": " << message << std::endl;
+}
+
+void SemanticCheckingVisitor::visitDimList(ASTNode* node) {
+    // Clear any existing array dimensions before processing
+    currentArrayDimensions.clear();
+    
+    // Process each dimension node in the list
+    ASTNode* dimNode = node->getLeftMostChild();
+    while (dimNode) {
+        // Process this dimension
+        dimNode->accept(this);
+        // Each dimension's visit will add to the currentArrayDimensions vector
+        
+        // Move to next dimension
+        dimNode = dimNode->getRightSibling();
+    }
+}
+
+void SemanticCheckingVisitor::visitIndexList(ASTNode* node) {
+    // Count the number of index expressions in the list
+    int indexCount = 0;
+    ASTNode* indexNode = node->getLeftMostChild();
+
+    // Process each index expression and count them
+    while (indexNode) {
+        // Process this index expression
+        indexNode->accept(this);
+
+        // Check that the index expression evaluates to an integer
+        if (currentExprType.type != "int") {
+            reportError("Array index must be of integer type, found: " + formatTypeInfo(currentExprType), indexNode);
+        }
+
+        indexCount++;
+        indexNode = indexNode->getRightSibling();
+    }
+
+    // The array access parent node already has the correct array type information
+    // We don't need to re-evaluate the array variable here, as that would lose
+    // the proper context established by visitDotAccess or visitArrayAccess
+    
+    // Simply report the index count back to the parent through currentExprType metadata
+    // The parent ARRAY_ACCESS node will handle dimensions checking
+    
+    // Add a metadata field to currentExprType to pass the index count back
+    currentExprType.indexCount = indexCount;
 }

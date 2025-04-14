@@ -248,12 +248,6 @@ public:
         terminals = splitCSVLine(header);
         // First column is empty (row headers), so remove it
         terminals.erase(terminals.begin());
-        // Print the terminals for debugging.
-        std::cout << "Terminals: ";
-        for (const auto& terminal : terminals) {
-            std::cout << terminal << " ";
-        }
-        std::cout << std::endl;
 
         // Read each production line.
         std::string line;
