@@ -281,7 +281,7 @@ NOTE:
 - [x] 3.3. Loop statement: implementation of a branching mechanism.
 - [x] 3.4. Input/output statement: Moon machine keyboard input/console output.
 - [x] 4.1. For arrays of basic types (integer and float), access to an array’s elements.
-- [ ] 4.2. For arrays of objects, access to an array’s element’s data members.
+- [x] 4.2. For arrays of objects, access to an array’s element’s data members.
 - [x] 4.3. For objects, access to members of basic types.
 - [x] 4.4. For objects, access to members of array or object types.
 - [x] 5.1.1. Computing expressions with plus (+) operator.

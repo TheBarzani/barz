@@ -872,6 +872,7 @@ void CodeGenVisitor::visitArrayAccess(ASTNode *node)
             return;
         }
         int arrayMemOffset = getSymbolOffset(arrayName);
+        node->setMetadata("type", arraySymbol->getType());
         emit("subi r" + std::to_string(baseAddrReg) + ",r14," + std::to_string(arrayMemOffset * -1));
     }
     else if (arrayBaseNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
@@ -2156,6 +2157,14 @@ void CodeGenVisitor::visitDotAccess(ASTNode* node) {
     } else if (objExpr->getNodeEnum() == NodeType::DOT_ACCESS) {
         objTypeName = objExpr->getMetadata("type");
         emit("lw r" + std::to_string(objAddressReg) + ","+std::to_string(objOffset)+  "(r14)");
+    }
+    else if (objExpr->getNodeEnum() == NodeType::ARRAY_ACCESS) {
+        objTypeName = objExpr->getMetadata("type");
+        emit("lw r" + std::to_string(objAddressReg) + ","+std::to_string(objOffset)+  "(r14)");
+    } else {
+        emitComment("Error: Unsupported object type for dot access");
+        freeRegister(objAddressReg);
+        return;
     }
 
     // Get the member name

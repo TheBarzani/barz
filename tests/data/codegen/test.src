@@ -55,7 +55,7 @@ function main() => void
   write(count(0,10));
 }
 */
-
+/*
 class B {
   public attribute x: float;
   public attribute c: int;
@@ -93,4 +93,26 @@ function main() => void
   x[0] := 25;
   write(x[0]);
   */
+}
+*/
+
+class A {
+  public attribute a: int;
+  // public function print(a: int) => void;
+};
+/*
+implementation A{
+  function print(a: int) => void
+  {
+    write(a);
+    write(self.a);
+  }
+}*/
+
+function main() => void
+{
+  local a: A[2];
+  a[1].a := 6999;
+  write(a[1].a);
+  //a.print(96);
 }
