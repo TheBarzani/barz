@@ -1802,9 +1802,6 @@ bool SemanticCheckingVisitor::hasErrors() const {
 
 // New method to output errors to a file
 void SemanticCheckingVisitor::outputErrors(const std::string& originalFilename) {
-    if (semanticErrors.empty()) {
-        return;  // No errors to report
-    }
     
     // Sort errors by line number and then column number for synchronized order
     std::sort(semanticErrors.begin(), semanticErrors.end(), 

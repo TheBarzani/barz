@@ -1,0 +1,124 @@
+/*
+// ====== main ====== //
+function main() => void                                            
+{
+  local c: int; 
+  local b: int;  
+  local brr: int[2][3][4];
+  c := 400;
+  //write (c);
+                                         
+  brr[1+1][2][3] := c;
+  b := brr[2][2][3]+3;
+  write(b);
+  write (brr[2][2][3]*2);
+}
+*/
+/*
+function main() => void  
+{
+  local x: int;                                    // 1.1
+  local y: int;                                    // 1.1
+  local z: int;                                    // 1.1
+  y := 1 + 2 * 3;
+  write(y);                                       // 3.1, 5.1
+  read(x);                                         // 3.4
+  if (x > y + 10)                                  // 3.2, 5.1   
+  then	
+    {write(x+10);}                                   // 3.4, 5.1 
+  else
+    {write(x+1);}
+  ;                                    // 3.4, 5.1
+  z := 0;                                           // 3.1
+  while(z<=10) {                                   // 3.3, 5.1
+    write(z);                                      // 3.4
+    z := z + 1;                                     // 3.1
+  }; 
+}*/
+/*
+function count(a: int, b: int) => int
+{ 
+  if (a==b) 
+  then
+  {
+    return(b);
+  }
+  else
+  {
+     write(a);
+  };
+  return(count(a+1, b));
+}
+
+function main() => void
+{
+  write(count(0,10));
+}
+*/
+/*
+class B {
+  public attribute x: float;
+  public attribute c: int;
+};
+class A {
+  public attribute b: B;
+  public attribute c: float;
+  public attribute a: int;
+  public attribute d: int[5][4];
+  // public function print(a: int) => void;
+};
+/*
+implementation A{
+  function print(a: int) => void
+  {
+    write(a);
+    write(self.a);
+  }
+}*/
+
+function main() => void
+{
+  local a: A;
+  a.d[1][2] := 699;
+  write(a.d[1][2] +100);
+
+  a.b.c := 100;
+  write(a.b.c);
+
+  a.a := 69;
+  write(a.a+1);
+  //a.print(96);
+  /*
+  local x: int[1];
+  x[0] := 25;
+  write(x[0]);
+  */
+}
+*/
+
+class A {
+  public attribute a: int;
+  public function print(a: int) => void;
+  public function printi(a: int) => int;
+};
+
+implementation A{
+  function print(a: int) => void
+  {
+    write(a);
+    write(self.a);
+  }
+  function printi(a: int) => int
+  {
+    return(a);
+  }
+}
+
+function main() => void
+{
+  local a: A;
+  //a[1].a := 6999;
+  //write(a[1].a);
+  a.a :=111;
+  a.print(999);
+}

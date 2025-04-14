@@ -33,16 +33,16 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
 # Add the test executable and include the Scanner source files
-add_executable(TestScanner
-    TestScanner.cpp
+add_executable(TestDriver
+    TestDriver.cpp
     ../src/Scanner/Scanner.cpp  # Add the Scanner implementation file(s)
 )
 
 # Link the test executable against gtest_main
-target_link_libraries(TestScanner gtest_main)
+target_link_libraries(TestDriver gtest_main)
 
 # Add a test to CTest
-add_test(NAME TestScanner COMMAND TestScanner)
+add_test(NAME TestDriver COMMAND TestDriver)
 
 # Disable maybe-uninitialized warning for Google Test
 set_target_properties(gtest PROPERTIES COMPILE_FLAGS "-Wno-maybe-uninitialized")

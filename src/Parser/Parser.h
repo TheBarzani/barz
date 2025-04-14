@@ -101,6 +101,13 @@ class Parser {
      * @return The Abstract Syntax Tree.
      */
     AST& getAST();
+
+     /**
+     * @brief Writes all parser output files to the specified directory
+     * @param outputPath The directory path where files should be written
+     * @return true if files were written successfully, false otherwise
+     */
+    bool writeOutputFiles(const std::string& outputPath = "");
 };
 
 #endif // PARSER_H

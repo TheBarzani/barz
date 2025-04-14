@@ -82,19 +82,6 @@ Scanner::Scanner(const Scanner& other) :
             }
         }
     }
-    
-    // Reopen output files if they were open in the original scanner
-    if (other.tokenOutput.is_open()) {
-        // Extract the filename from the other stream
-        std::string tokenOutputFilename = filename + ".outlexemes";
-        tokenOutput.open(tokenOutputFilename, std::ios::app);
-    }
-    
-    if (other.errorOutput.is_open()) {
-        // Extract the filename from the other stream
-        std::string errorOutputFilename = filename + ".outerrors";
-        errorOutput.open(errorOutputFilename, std::ios::app);
-    }
 }
 
 Scanner::~Scanner() {

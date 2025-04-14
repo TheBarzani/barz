@@ -55,18 +55,65 @@ void printUsage(const std::string& programName) {
 // Phase 1: Lexical Analysis
 Scanner runScannerPhase(const std::string& inputFile) {
     std::cout << "\n=========Phase 1: Lexical Analysis=========" << std::endl;
-    Scanner scanner(inputFile);
+    
+    // Extract directory and filename
+    fs::path inputPath(inputFile);
+    fs::path directory = inputPath.parent_path();
+    fs::path scannerOutDir;
+    
+    if (directory.empty()) {
+        // If no directory specified, use current directory
+        scannerOutDir = "scanner_out";
+    } else {
+        // Use the same directory as input file
+        scannerOutDir = directory / "scanner_out";
+    }
+    
+    // Create scanner_out directory if it doesn't exist
+    if (!fs::exists(scannerOutDir)) {
+        std::cout << "Creating scanner output directory: " << scannerOutDir << std::endl;
+        fs::create_directories(scannerOutDir);
+    }
+    
+    // Create output path for scanner files
+    fs::path outputBase = scannerOutDir / inputPath.stem();
+    std::string outputPath = outputBase.string();
+    
+    Scanner scanner(inputFile, outputPath);
     scanner.processFile();
     scanner.writeOutputsToFile();
     std::cout << "Lexical analysis completed" << std::endl;
+    std::cout << "Scanner output files written to: " << scannerOutDir << std::endl;
     return scanner;
 }
 
 // Phase 2: Syntax Analysis and AST Construction
-// Change this function to return by value, not by reference
 AST runParserPhase(const std::string& inputFile, const std::string& tableFile, Scanner& scanner) {
     std::cout << "\n=========Phase 2: Syntax Analysis=========" << std::endl;
     std::cout << "Parsing file: " << inputFile << " with table: " << tableFile << std::endl;
+    
+    // Extract directory and filename
+    fs::path inputPath(inputFile);
+    fs::path directory = inputPath.parent_path();
+    fs::path parserOutDir;
+    
+    if (directory.empty()) {
+        // If no directory specified, use current directory
+        parserOutDir = "parser_out";
+    } else {
+        // Use the same directory as input file
+        parserOutDir = directory / "parser_out";
+    }
+    
+    // Create parser_out directory if it doesn't exist
+    if (!fs::exists(parserOutDir)) {
+        std::cout << "Creating parser output directory: " << parserOutDir << std::endl;
+        fs::create_directories(parserOutDir);
+    }
+    
+    // Create output path for parser files
+    fs::path outputBase = parserOutDir / inputPath.stem();
+    std::string outputPath = outputBase.string();
     
     Parser parser(inputFile, tableFile, scanner);
     bool parseSuccess = parser.parse();
@@ -76,9 +123,14 @@ AST runParserPhase(const std::string& inputFile, const std::string& tableFile, S
         return AST(); // Return empty AST on failure
     }
     
+    // Write parser output files to the parser_out directory
+    parser.writeOutputFiles(outputPath);
+    
     // Create a copy of the parser's AST
     AST ast = parser.getAST();
+    
     std::cout << "Parse successful, AST constructed" << std::endl;
+    std::cout << "Parser output files written to: " << parserOutDir << std::endl;
     return ast;
 }
 
@@ -86,29 +138,73 @@ AST runParserPhase(const std::string& inputFile, const std::string& tableFile, S
 void runSymbolTablePhase(AST& ast, const std::string& inputFile, SymbolTableVisitor& symbolTableVisitor) {
     std::cout << "\n=========Phase 3: Symbol Table Generation=========" << std::endl;
     
-    ASTNode *root= ast.getRoot();
+    // Extract directory and filename
+    fs::path inputPath(inputFile);
+    fs::path directory = inputPath.parent_path();
+    fs::path symtabOutDir;
+    
+    if (directory.empty()) {
+        // If no directory specified, use current directory
+        symtabOutDir = "symtab_out";
+    } else {
+        // Use the same directory as input file
+        symtabOutDir = directory / "symtab_out";
+    }
+    
+    // Create symtab_out directory if it doesn't exist
+    if (!fs::exists(symtabOutDir)) {
+        std::cout << "Creating symbol table output directory: " << symtabOutDir << std::endl;
+        fs::create_directories(symtabOutDir);
+    }
+    
+    // Create output path for symbol table files
+    fs::path outputBase = symtabOutDir / inputPath.stem();
+    std::string outputPath = outputBase.string() + ".outsymboltables";
+    
+    ASTNode *root = ast.getRoot();
     root->accept(&symbolTableVisitor);
     
     // Output the symbol table to file
-    std::string symbolTableFile = inputFile + ".outsymboltables";
-    symbolTableVisitor.outputSymbolTable(symbolTableFile);
-    std::cout << "Symbol table generated: " << symbolTableFile << std::endl;
+    symbolTableVisitor.outputSymbolTable(outputPath);
+    std::cout << "Symbol table generated: " << outputPath << std::endl;
 }
 
 // Phase 4: Semantic Analysis
 bool runSemanticPhase(AST& ast, SymbolTableVisitor& symbolTableVisitor, const std::string& inputFile) {
     std::cout << "\n=========Phase 4: Semantic Analysis=========" << std::endl;
     
+    // Extract directory and filename
+    fs::path inputPath(inputFile);
+    fs::path directory = inputPath.parent_path();
+    fs::path semanticsOutDir;
+    
+    if (directory.empty()) {
+        // If no directory specified, use current directory
+        semanticsOutDir = "semantics_out";
+    } else {
+        // Use the same directory as input file
+        semanticsOutDir = directory / "semantics_out";
+    }
+    
+    // Create semantics_out directory if it doesn't exist
+    if (!fs::exists(semanticsOutDir)) {
+        std::cout << "Creating semantics output directory: " << semanticsOutDir << std::endl;
+        fs::create_directories(semanticsOutDir);
+    }
+    
+    // Create output path for semantic errors file
+    fs::path outputBase = semanticsOutDir / inputPath.stem();
+    std::string outputPath = outputBase.string();
+    
     SemanticCheckingVisitor semanticChecker(symbolTableVisitor.getGlobalTable());
     semanticChecker.importSymbolTableErrors(symbolTableVisitor);
     ast.getRoot()->accept(&semanticChecker);
     
     // Output semantic errors to file
-    std::string semanticErrorsFile = inputFile;
-    semanticChecker.outputErrors(semanticErrorsFile);
+    semanticChecker.outputErrors(outputPath);
     
     if (semanticChecker.hasErrors()) {
-        std::cout << "Semantic errors found. See " << semanticErrorsFile << " for details." << std::endl;
+        std::cout << "Semantic errors found. See " << outputPath << ".outsemanticerrors for details." << std::endl;
         return false;
     }
     
@@ -120,24 +216,68 @@ bool runSemanticPhase(AST& ast, SymbolTableVisitor& symbolTableVisitor, const st
 void runMemoryPhase(AST& ast, const std::string& inputFile, MemSizeVisitor& memSizeVisitor) {
     std::cout << "\n=========Phase 5: Memory Size Allocation=========" << std::endl;
     
+    // Extract directory and filename
+    fs::path inputPath(inputFile);
+    fs::path directory = inputPath.parent_path();
+    fs::path memsizeOutDir;
+    
+    if (directory.empty()) {
+        // If no directory specified, use current directory
+        memsizeOutDir = "memsize_out";
+    } else {
+        // Use the same directory as input file
+        memsizeOutDir = directory / "memsize_out";
+    }
+    
+    // Create memsize_out directory if it doesn't exist
+    if (!fs::exists(memsizeOutDir)) {
+        std::cout << "Creating memory size output directory: " << memsizeOutDir << std::endl;
+        fs::create_directories(memsizeOutDir);
+    }
+    
+    // Create output path for memory size files
+    fs::path outputBase = memsizeOutDir / inputPath.stem();
+    std::string outputPath = outputBase.string() + ".sizesymboltable";
+    
     memSizeVisitor.processAST(ast.getRoot());
     memSizeVisitor.calculateMemorySizes();
     
     // Output the updated symbol table with memory sizes
-    std::string sizeSymbolTableFile = inputFile + ".sizesymboltable";
-    memSizeVisitor.outputSymbolTable(sizeSymbolTableFile);
-    std::cout << "Memory-sized symbol table generated: " << sizeSymbolTableFile << std::endl;
+    memSizeVisitor.outputSymbolTable(outputPath);
+    std::cout << "Memory-sized symbol table generated: " << outputPath << std::endl;
 }
 
 // Phase 6: Code Generation
 bool runCodeGenPhase(AST ast, std::shared_ptr<SymbolTable> symbolTable, const std::string& inputFile) {
     std::cout << "\n=========Phase 6: Code Generation=========" << std::endl;
     
+    // Extract directory and filename
+    fs::path inputPath(inputFile);
+    fs::path directory = inputPath.parent_path();
+    fs::path codegenOutDir;
+    
+    if (directory.empty()) {
+        // If no directory specified, use current directory
+        codegenOutDir = "codegen_out";
+    } else {
+        // Use the same directory as input file
+        codegenOutDir = directory / "codegen_out";
+    }
+    
+    // Create codegen_out directory if it doesn't exist
+    if (!fs::exists(codegenOutDir)) {
+        std::cout << "Creating code generation output directory: " << codegenOutDir << std::endl;
+        fs::create_directories(codegenOutDir);
+    }
+    
+    // Create output path for MOON code file
+    fs::path outputBase = codegenOutDir / inputPath.stem();
+    std::string moonCodeFile = outputBase.string() + ".m";
+    
     CodeGenVisitor codeGenVisitor(symbolTable);
     codeGenVisitor.processAST(ast.getRoot());
     
     // Output MOON code to file
-    std::string moonCodeFile = inputFile + ".m";
     codeGenVisitor.generateOutputFile(moonCodeFile);
     std::cout << "MOON machine code generated: " << moonCodeFile << std::endl;
     
@@ -262,10 +402,10 @@ int main(int argc, char* argv[]) {
     }
 
     // Continue only if semantic analysis succeeded
-    if (!semanticSuccess) {
-        std::cout << "Stopping due to semantic errors." << std::endl;
-        return 1;
-    }
+    // if (!semanticSuccess) {
+    //     std::cout << "Stopping due to semantic errors." << std::endl;
+    //     return 1;
+    // }
 
     // Phase 5: Memory Size Allocation
     MemSizeVisitor memSizeVisitor(symbolTableVisitor.getGlobalTable());

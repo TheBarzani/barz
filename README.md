@@ -7,12 +7,10 @@ Broken Automated Reliable Zipper (BARZ): A bare-bone compiler written in CPP.
 - [x] Fix the code for the semantic analysis where the line number and the error messages are correctly outputted
 - [ ] Remove unnecessary semantic actions from the attribute grammer
 - [x] Optimize the AST tree and eliminate unnecessary nodes with fixes to the node output.
-- [ ] Fix the output directory of the generated files during each phase and the date versioning or overwrite options. Also bring the the outputting function calls to the drivers
+- [x] Fix the output directory of the generated files during each phase and the date versioning or overwrite options. Also bring the the outputting function calls to the drivers
 - [ ] Fix the error outputing format of the syntax analysis
 - [ ] Add unit tests for each phase using the gTest framework and fix the testing files structure
 - [ ] Use regex expressions for the lexical analysis part where the regex library is used
-- [ ] Generate a DFA systematically for the lexical analyzer
-- [ ] Fix the driver code to process multiple files
 
 
 ### Optional
