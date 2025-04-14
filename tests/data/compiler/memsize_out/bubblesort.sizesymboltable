@@ -1,0 +1,87 @@
+========================================================
+| table: global                | scope offset: 0       |
+========================================================
+    ========================================================
+    | table: ::bubbleSort          | scope offset: -152    |
+    ========================================================
+    | var       | arr          | int[]     | 4     | -8    |
+    | var       | size         | int       | 4     | -12   |
+    | var       | n            | int       | 4     | -16   |
+    | var       | i            | int       | 4     | -20   |
+    | var       | j            | int       | 4     | -24   |
+    | var       | tem          | int       | 4     | -28   |
+    | litval    | t1           | int       | 4     | -32   |
+    | litval    | t2           | int       | 4     | -36   |
+    | litval    | t3           | int       | 4     | -40   |
+    | litval    | t4           | int       | 4     | -44   |
+    | tempvar   | t5           | int       | 4     | -48   |
+    | tempvar   | t6           | int       | 4     | -52   |
+    | litval    | t7           | int       | 4     | -56   |
+    | tempvar   | t8           | int       | 4     | -60   |
+    | litval    | t9           | int       | 4     | -64   |
+    | tempvar   | t10          | int       | 4     | -68   |
+    | tempvar   | t11          | int       | 4     | -72   |
+    | addrvar   | t12          | int       | 4     | -76   |
+    | litval    | t13          | int       | 4     | -80   |
+    | tempvar   | t14          | int       | 4     | -84   |
+    | tempvar   | t15          | int       | 4     | -88   |
+    | addrvar   | t16          | int       | 4     | -92   |
+    | tempvar   | t17          | int       | 4     | -96   |
+    | addrvar   | t18          | int       | 4     | -100  |
+    | litval    | t19          | int       | 4     | -104  |
+    | tempvar   | t20          | int       | 4     | -108  |
+    | tempvar   | t21          | int       | 4     | -112  |
+    | addrvar   | t22          | int       | 4     | -116  |
+    | addrvar   | t23          | int       | 4     | -120  |
+    | litval    | t24          | int       | 4     | -124  |
+    | tempvar   | t25          | int       | 4     | -128  |
+    | tempvar   | t26          | int       | 4     | -132  |
+    | addrvar   | t27          | int       | 4     | -136  |
+    | litval    | t28          | int       | 4     | -140  |
+    | tempvar   | t29          | int       | 4     | -144  |
+    | litval    | t30          | int       | 4     | -148  |
+    | tempvar   | t31          | int       | 4     | -152  |
+    ========================================================
+    ========================================================
+    | table: ::printArray          | scope offset: -40     |
+    ========================================================
+    | var       | arr          | int[]     | 4     | -8    |
+    | var       | size         | int       | 4     | -12   |
+    | var       | n            | int       | 4     | -16   |
+    | var       | i            | int       | 4     | -20   |
+    | litval    | t32          | int       | 4     | -24   |
+    | tempvar   | t33          | int       | 4     | -28   |
+    | addrvar   | t34          | int       | 4     | -32   |
+    | litval    | t35          | int       | 4     | -36   |
+    | tempvar   | t36          | int       | 4     | -40   |
+    ========================================================
+    ========================================================
+    | table: ::main                | scope offset: -128    |
+    ========================================================
+    | var       | arr          | int       | 28    | -32   |
+    | litval    | t37          | int       | 4     | -36   |
+    | litval    | t38          | int       | 4     | -40   |
+    | addrvar   | t39          | int       | 4     | -44   |
+    | litval    | t40          | int       | 4     | -48   |
+    | litval    | t41          | int       | 4     | -52   |
+    | addrvar   | t42          | int       | 4     | -56   |
+    | litval    | t43          | int       | 4     | -60   |
+    | litval    | t44          | int       | 4     | -64   |
+    | addrvar   | t45          | int       | 4     | -68   |
+    | litval    | t46          | int       | 4     | -72   |
+    | litval    | t47          | int       | 4     | -76   |
+    | addrvar   | t48          | int       | 4     | -80   |
+    | litval    | t49          | int       | 4     | -84   |
+    | litval    | t50          | int       | 4     | -88   |
+    | addrvar   | t51          | int       | 4     | -92   |
+    | litval    | t52          | int       | 4     | -96   |
+    | litval    | t53          | int       | 4     | -100  |
+    | addrvar   | t54          | int       | 4     | -104  |
+    | litval    | t55          | int       | 4     | -108  |
+    | litval    | t56          | int       | 4     | -112  |
+    | addrvar   | t57          | int       | 4     | -116  |
+    | litval    | t58          | int       | 4     | -120  |
+    | litval    | t59          | int       | 4     | -124  |
+    | litval    | t60          | int       | 4     | -128  |
+    ========================================================
+========================================================

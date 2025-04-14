@@ -5,6 +5,7 @@
 #include <sstream>
 #include <set>
 #include <iomanip>
+#include <regex>
 
 // Since we need to extend Symbol and SymbolTable with additional properties,
 // we'll use custom metadata fields to store size and offset information
@@ -89,7 +90,9 @@ std::string MemSizeVisitor::getSymbolTempVarKind(std::shared_ptr<Symbol> symbol)
         // 1. Regular variables (x, y, z) should be "var"
         // 2. Temporary variables (t1, t2...) should be properly classified
         if (symbol->getKind() == SymbolKind::PARAMETER || 
-            (symbol->getKind() == SymbolKind::VARIABLE && symbol->getName().find("t") != 0)) {
+            (symbol->getKind() == SymbolKind::VARIABLE && 
+             // Check for compiler-generated temp vars that match pattern "t" followed by digits
+             !std::regex_match(symbol->getName(), std::regex("t[0-9]+")))) {
             return "var";
         } else {
             // For temporary variables without explicit kind, default to "tempvar"
@@ -505,13 +508,43 @@ void MemSizeVisitor::visitFunction(ASTNode* node) {
             
             if (typeNode) {
                 std::string paramType = typeNode->getNodeValue();
-                // Convert to simplified type for table key
-                if (paramType == "int" || paramType == "float") {
-                    paramTypes.push_back(paramType);
-                } else {
-                    // Custom types are typically treated as "class" in the table key
-                    paramTypes.push_back("class");
+                
+                // Check for dimension list as the rightmost child (array type)
+                ASTNode* dimListNode = typeNode->getRightSibling();
+                bool isArray = false;
+                
+                if (dimListNode && dimListNode->getNodeEnum() == NodeType::DIM_LIST) {
+                    // Check if the dimension list has any children
+                    if (dimListNode->getLeftMostChild() && dimListNode->getLeftMostChild()->getNodeValue() == "dynamic") {
+                        isArray = true;
+                        // Mark this as an array type for the function key
+                        paramType += "[]";
+                    }
+                    else if(dimListNode->getLeftMostChild()){
+                        isArray = true;
+                        // Check if the dimension list has a fixed size
+                        ASTNode* dimNode = dimListNode->getLeftMostChild();
+                        while (dimNode) {  
+                            paramType += "[";
+                            paramType += dimNode->getNodeValue();
+                            paramType += "]";
+                            dimNode = dimNode->getRightSibling();
+                        }
+
+                    }
                 }
+                paramTypes.push_back(paramType);
+                // // Convert to simplified type for table key
+                // if (paramType == "int" || paramType == "float" || 
+                //     paramType == "int[]" || paramType == "float[]") {
+                //     paramTypes.push_back(paramType);
+                // } else if (isArray) {
+                //     // Custom array types
+                //     paramTypes.push_back("class[]");
+                // } else {
+                //     // Custom types are typically treated as "class" in the table key
+                //     paramTypes.push_back("class");
+                // }
             }
             
             paramNode = paramNode->getRightSibling();

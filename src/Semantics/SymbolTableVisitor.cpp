@@ -1731,9 +1731,6 @@ std::string SymbolTableVisitor::formatParamTypesForTableName(const std::vector<s
         if (i > 0) result += "_";
         // Replace special characters to make a valid table name
         std::string cleaned = paramTypes[i];
-        for (char& c : cleaned) {
-            if (!isalnum(c)) c = '_';
-        }
         result += cleaned;
     }
     return result;

@@ -583,7 +583,7 @@ void CodeGenVisitor::visitAddOp(ASTNode *node)
     // Free registers
     freeRegister(reg1);
     freeRegister(reg2);
-    // Don't free reg3 as parent will use it
+    freeRegister(reg3); // Free reg3 as it is used for storing the result
 }
 
 void CodeGenVisitor::visitMultOp(ASTNode *node)
@@ -710,7 +710,7 @@ void CodeGenVisitor::visitMultOp(ASTNode *node)
     // Free registers
     freeRegister(reg1);
     freeRegister(reg2);
-    // Don't free reg3 as parent will use it
+    freeRegister(reg3); // Free reg3 as it is used for storing the result
 }
 
 // Implementation for assignment
@@ -803,7 +803,8 @@ void CodeGenVisitor::visitAssignment(ASTNode *node)
 
         // Get the address of the array element
         int addressReg = allocateRegister();
-        int addrOffset = std::stoi(varNode->getMetadata("offset"));
+        std::string byteOffsetVar = varNode->getMetadata("byteOffsetVar");
+        int addrOffset = getSymbolOffset(byteOffsetVar);
 
         // Store the value to the calculated address
         emitComment("Storing value into array element");
@@ -873,7 +874,32 @@ void CodeGenVisitor::visitArrayAccess(ASTNode *node)
         }
         int arrayMemOffset = getSymbolOffset(arrayName);
         node->setMetadata("type", arraySymbol->getType());
-        emit("subi r" + std::to_string(baseAddrReg) + ",r14," + std::to_string(arrayMemOffset * -1));
+        
+        // Check if this is a dynamic array
+        bool isDynamic = false;
+        std::string isDynamicStr = arraySymbol->getMetadata("is_dynamic");
+        if (!isDynamicStr.empty() && isDynamicStr == "true") {
+            isDynamic = true;
+        } else {
+            // Also check if any dimension is marked as dynamic (-1 or negative value)
+            auto dimensions = arraySymbol->getArrayDimensions();
+            for (int dim : dimensions) {
+                if (dim <= 0) {
+                    isDynamic = true;
+                    break;
+                }
+            }
+        }
+        
+        if (isDynamic) {
+            // For dynamic arrays, load the pointer to the array from memory
+            emitComment("Dynamic array - loading array address from memory");
+            emit("lw r" + std::to_string(baseAddrReg) + "," + std::to_string(arrayMemOffset) + "(r14)");
+        } else {
+            // For static arrays, calculate the address relative to the frame pointer
+            emitComment("Static array - calculating address from frame pointer");
+            emit("subi r" + std::to_string(baseAddrReg) + ",r14," + std::to_string(arrayMemOffset * -1));
+        }
     }
     else if (arrayBaseNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
         // Array base address calculation for class members
@@ -1355,7 +1381,7 @@ void CodeGenVisitor::visitFunction(ASTNode *node)
     std::shared_ptr<SymbolTable> nestedTable = nullptr;
     
     // For class methods, try the mangled name format first
-if (isClassMethod) {
+    if (isClassMethod) {
     // First get the class table
     auto classTable = symbolTable->getNestedTable(className);
     
@@ -1452,9 +1478,6 @@ if (isClassMethod) {
                 for (size_t i = 0; i < paramTypes.size(); ++i) {
                     // Replace any special characters that might cause issues in table names
                     std::string cleanType = paramTypes[i];
-                    std::replace(cleanType.begin(), cleanType.end(), '[', '_');
-                    std::replace(cleanType.begin(), cleanType.end(), ']', '_');
-                    std::replace(cleanType.begin(), cleanType.end(), ' ', '_');
 
                     uniqueKey += cleanType;
                     if (i < paramTypes.size() - 1) {
@@ -1889,6 +1912,7 @@ void CodeGenVisitor::visitRelOp(ASTNode *node)
     // Free registers for operands
     freeRegister(reg1);
     freeRegister(reg2);
+    freeRegister(resultReg);
 }
 
 void CodeGenVisitor::visitWhileStatement(ASTNode *node)
@@ -2058,10 +2082,6 @@ void CodeGenVisitor::visitFunctionCall(ASTNode *node) {
                 uniqueKey += "_";
                 for (size_t i = 0; i < paramTypes.size(); ++i) {
                     std::string cleanType = paramTypes[i];
-                    std::replace(cleanType.begin(), cleanType.end(), '[', '_');
-                    std::replace(cleanType.begin(), cleanType.end(), ']', '_');
-                    std::replace(cleanType.begin(), cleanType.end(), ' ', '_');
-
                     uniqueKey += cleanType;
                     if (i < paramTypes.size() - 1) {
                         uniqueKey += "_";
@@ -2139,11 +2159,30 @@ void CodeGenVisitor::visitFunctionCall(ASTNode *node) {
             paramPosition += paramOffset;
         }
         
-        // Load and store parameter value
         int paramReg = allocateRegister();
         int offset = getNodeOffset(param);
         
-        // Handle complex types
+        // Special handling for arrays passed as parameters
+        if (param->getNodeEnum() == NodeType::IDENTIFIER) {
+            // Check if it's an array by examining its type
+            auto symbol = currentTable->lookupSymbol(param->getNodeValue());
+            
+            if (symbol && !symbol->getArrayDimensions().empty()) {
+                // This is an array - pass its address instead of a value
+                emitComment("Passing array address for parameter: " + param->getNodeValue());
+                
+                // Calculate the array's base address (similar to visitArrayAccess)
+                emit("subi r" + std::to_string(paramReg) + ",r14," + 
+                    std::to_string(offset * -1));
+                    
+                // Store the array's address as parameter
+                emit("sw " + std::to_string(paramPosition) + "(r14),r" + std::to_string(paramReg));
+                freeRegister(paramReg);
+                continue; // Skip the regular parameter handling code below
+            }
+        }
+        
+        // Handle other parameter types
         if (param->getNodeEnum() == NodeType::ARRAY_ACCESS || 
             param->getNodeEnum() == NodeType::DOT_ACCESS) {
             emit("lw r" + std::to_string(paramReg) + "," + std::to_string(offset) + "(r14)");
