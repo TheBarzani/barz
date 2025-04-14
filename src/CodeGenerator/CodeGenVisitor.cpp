@@ -1325,73 +1325,175 @@ void CodeGenVisitor::visitFunction(ASTNode *node)
     std::string functionName = functionId->getNodeValue();
     currentFunction = functionName;
 
+
+
+    // Check if this is a class member function
+    bool isClassMethod = false;
+    std::string className = "";
+    
+    // Check parent nodes to determine if this is a class method
+    ASTNode* parentNode = node->getParent();
+    if (parentNode && parentNode->getNodeEnum() == NodeType::IMPLEMENTATION_FUNCTION_LIST) {
+        ASTNode* implNode = parentNode->getParent();
+        if (implNode && implNode->getNodeEnum() == NodeType::IMPLEMENTATION) {
+            ASTNode* classIdNode = implNode->getLeftMostChild();
+            if (classIdNode && classIdNode->getNodeEnum() == NodeType::IMPLEMENTATION_ID) {
+                className = classIdNode->getNodeValue();
+                isClassMethod = true;
+                emitComment("Processing class method: " + className + "::" + functionName);
+            }
+        }
+    }
+
     codeSection += "\n";
-    emitComment("Processing function: " + functionName);
+    emitComment("Processing function: " + (isClassMethod ? className + "::" : "") + functionName);
 
     // Save previous table before changing scope
     std::shared_ptr<SymbolTable> previousTable = currentTable;
 
     // Find and set the function's symbol table as current
-    // Fix the table lookup to use the correct naming convention with parameter types
-    auto funcSymbols = symbolTable->lookupFunctions(functionName);
     std::shared_ptr<SymbolTable> nestedTable = nullptr;
+    
+    // For class methods, try the mangled name format first
+if (isClassMethod) {
+    // First get the class table
+    auto classTable = symbolTable->getNestedTable(className);
+    
+    if (classTable) {
+        // Get the function symbols from the class table to extract parameter types
+        auto methodSymbols = classTable->lookupFunctions(functionName);
+        
+            if (!methodSymbols.empty()) {
+                // Format the function name with parameter types
+                std::string formattedMethodName = functionName;
+                const auto &paramTypes = methodSymbols[0]->getParams();
+                
+                if (!paramTypes.empty()) {
+                    formattedMethodName += "_";
+                    for (size_t i = 0; i < paramTypes.size(); ++i) {
+                        // Replace any special characters that might cause issues in table names
+                        std::string cleanType = paramTypes[i];
+                        std::replace(cleanType.begin(), cleanType.end(), '[', '_');
+                        std::replace(cleanType.begin(), cleanType.end(), ']', '_');
+                        std::replace(cleanType.begin(), cleanType.end(), ' ', '_');
+                        
+                        formattedMethodName += cleanType;
+                        if (i < paramTypes.size() - 1) {
+                            formattedMethodName += "_";
+                        }
+                    }
+                }
+                
+                // Try to get the table with the fully qualified name including parameters
+                nestedTable = classTable->getNestedTable(formattedMethodName);
+                
+                // If not found, try alternate formats
+                if (!nestedTable) {
+                    // Try with just class and function name without parameters
+                    std::string mangledName = className + "_" + functionName;
+                    nestedTable = classTable->getNestedTable(mangledName);
+                    
+                    if (!nestedTable) {
+                        // Try alternate formats
+                        std::vector<std::string> possibleKeys = {
+                            functionName,                      // Just the method name
+                            className + "::" + functionName,   // Class::method format
+                            functionName + "_" + className     // method_Class format
+                        };
+                        
+                        for (const auto& key : possibleKeys) {
+                            nestedTable = classTable->getNestedTable(key);
+                            if (nestedTable) {
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                emitComment("Using table for method " + formattedMethodName);
+                } else {
+                    // Try without parameter info if no function symbols found
+                    std::string mangledName = className + "_" + functionName;
+                    nestedTable = classTable->getNestedTable(mangledName);
+                    
+                    if (!nestedTable) {
+                        // Try alternate formats as before
+                        std::vector<std::string> possibleKeys = {
+                            functionName,                      // Just the method name
+                            className + "::" + functionName,   // Class::method format
+                            functionName + "_" + className     // method_Class format
+                        };
+                        
+                        for (const auto& key : possibleKeys) {
+                            nestedTable = classTable->getNestedTable(key);
+                            if (nestedTable) {
+                                break;
+                            }
+                        }
+                    }
+                }
+        } else {
+            // If class table not found, try fall back to global
+            emitComment("Warning: Class symbol table not found for " + className);
+        }
+    }
+    
+    // If not a class method or class method lookup failed, try standard function lookup
+    if (!nestedTable) {
+        auto funcSymbols = symbolTable->lookupFunctions(functionName);
+        
+        if (!funcSymbols.empty()) {
+            // Format the unique key using the same convention as in SymbolTableVisitor
+            std::string uniqueKey = functionName;
+            const auto &paramTypes = funcSymbols[0]->getParams();
 
-    if (!funcSymbols.empty())
-    {
-        // Format the unique key using the same convention as in SymbolTableVisitor
-        std::string uniqueKey = functionName;
-        const auto &paramTypes = funcSymbols[0]->getParams();
+            if (!paramTypes.empty()) {
+                uniqueKey += "_";
+                for (size_t i = 0; i < paramTypes.size(); ++i) {
+                    // Replace any special characters that might cause issues in table names
+                    std::string cleanType = paramTypes[i];
+                    std::replace(cleanType.begin(), cleanType.end(), '[', '_');
+                    std::replace(cleanType.begin(), cleanType.end(), ']', '_');
+                    std::replace(cleanType.begin(), cleanType.end(), ' ', '_');
 
-        if (!paramTypes.empty())
-        {
-            uniqueKey += "_";
-            for (size_t i = 0; i < paramTypes.size(); ++i)
-            {
-                // Replace any special characters that might cause issues in table names
-                std::string cleanType = paramTypes[i];
-                std::replace(cleanType.begin(), cleanType.end(), '[', '_');
-                std::replace(cleanType.begin(), cleanType.end(), ']', '_');
-                std::replace(cleanType.begin(), cleanType.end(), ' ', '_');
-
-                uniqueKey += cleanType;
-                if (i < paramTypes.size() - 1)
-                {
-                    uniqueKey += "_";
+                    uniqueKey += cleanType;
+                    if (i < paramTypes.size() - 1) {
+                        uniqueKey += "_";
+                    }
                 }
             }
-        }
 
-        // Now try to get the table with the formatted key
-        nestedTable = symbolTable->getNestedTable(uniqueKey);
+            // Now try to get the table with the formatted key
+            nestedTable = symbolTable->getNestedTable(uniqueKey);
 
-        if (!nestedTable)
-        {
-            // Fallback: try with just the function name (for simple cases)
+            if (!nestedTable) {
+                // Fallback: try with just the function name (for simple cases)
+                nestedTable = symbolTable->getNestedTable(functionName);
+            }
+        } else {
+            // Fallback to just the function name if no symbols found
             nestedTable = symbolTable->getNestedTable(functionName);
         }
     }
-    else
-    {
-        // Fallback to just the function name if no symbols found
-        nestedTable = symbolTable->getNestedTable(functionName);
+
+    if (nestedTable) {
+        currentTable = nestedTable;
+        emitComment("Entering function scope: " + (isClassMethod ? className + "_" + functionName : functionName));
+    } else {
+        emitComment("Warning: Could not find symbol table for function: " + 
+                    (isClassMethod ? className + "_" + functionName : functionName));
     }
 
-    if (nestedTable)
-    {
-        currentTable = nestedTable;
-        emitComment("Entering function scope: " + functionName);
-    }
+    // Generate function label - use mangled name for class methods
+    std::string fullFunctionName = isClassMethod ? className + "_" + functionName : functionName;
 
     // Special handling for main function (entry point)
-    if (functionName == "main")
-    {
+    if (functionName == "main") {
         emitLabel(functionName + "      entry");
         emit("addi r14,r0,topaddr");
-    }
-    else
-    {
-        // For non-main functions, generate prologue
-        generateFunctionPrologue(functionName);
+    } else {
+        // For non-main functions, generate prologue with proper name
+        generateFunctionPrologue(fullFunctionName);
     }
 
     // Process function signature (parameters, etc.)
@@ -1399,14 +1501,12 @@ void CodeGenVisitor::visitFunction(ASTNode *node)
 
     // Process function body (right sibling of signature)
     ASTNode *functionBody = functionSignature->getRightSibling();
-    if (functionBody)
-    {
+    if (functionBody) {
         functionBody->accept(this);
     }
 
     // Generate function epilogue for non-main functions
-    if (functionName != "main")
-    {
+    if (functionName != "main") {
         generateFunctionEpilogue();
     }
 
@@ -1855,49 +1955,166 @@ void CodeGenVisitor::visitFunctionCall(ASTNode *node) {
     if (!idNode)
         return;
 
-    std::string functionName = idNode->getNodeValue();
+    // Check if this is a member function call via dot access
+    bool isMemberFunction = false;
+    std::string objTypeName = "";
+    int objectRegister = -1;
+    ASTNode* parentNode = node->getParent();
+    
+    if (parentNode && parentNode->getNodeEnum() == NodeType::DOT_ACCESS) {
+        isMemberFunction = true;
+        // Get object type from metadata passed by visitDotAccess
+        objTypeName = idNode->getMetadata("type");
+        
+        // Get the object register if available
+        if (!idNode->getMetadata("objAddressReg").empty()) {
+            objectRegister = std::stoi(idNode->getMetadata("objAddressReg"));
+        }
+        
+        emitComment("Member function call on object type: " + objTypeName);
+    }
 
-    // Generate comment for function call
-    emitComment("Function call: " + functionName);
+    std::string functionName = idNode->getNodeValue();
+    emitComment("Function call: " + (isMemberFunction ? objTypeName + "::" : "") + functionName);
 
     // Save current scope offset for restoring later
     int currentScopeOffset = getScopeOffset(currentTable);
 
     // Look up the function symbol and its nested table
-    auto funcSymbols = symbolTable->lookupFunctions(functionName);
     std::shared_ptr<SymbolTable> functionTable = nullptr;
+    std::vector<std::shared_ptr<Symbol>> funcSymbols;
     
-    if (!funcSymbols.empty()) {
-        // Format the unique key using the same convention as in SymbolTableVisitor
-        std::string uniqueKey = functionName;
-        const auto &paramTypes = funcSymbols[0]->getParams();
-
-        if (!paramTypes.empty()) {
-            uniqueKey += "_";
-            for (size_t i = 0; i < paramTypes.size(); ++i) {
-                // Replace any special characters that might cause issues in table names
-                std::string cleanType = paramTypes[i];
-                std::replace(cleanType.begin(), cleanType.end(), '[', '_');
-                std::replace(cleanType.begin(), cleanType.end(), ']', '_');
-                std::replace(cleanType.begin(), cleanType.end(), ' ', '_');
-
-                uniqueKey += cleanType;
-                if (i < paramTypes.size() - 1) {
-                    uniqueKey += "_";
+    if (isMemberFunction) {
+        // For member functions, look in the class table first
+        auto classTable = symbolTable->getNestedTable(objTypeName);
+        if (classTable) {
+            // Get parameter types from the call
+            std::vector<std::string> paramTypes;
+            if (paramListNode) {
+                ASTNode* paramNode = paramListNode->getLeftMostChild();
+                while (paramNode) {
+                    // Try to determine parameter type
+                    std::string paramType = "int"; // Default
+                    if (paramNode->getNodeEnum() == NodeType::IDENTIFIER) {
+                        auto paramSymbol = currentTable->lookupSymbol(paramNode->getNodeValue());
+                        if (paramSymbol) {
+                            paramType = paramSymbol->getType();
+                        }
+                    } else if (!paramNode->getMetadata("type").empty()) {
+                        paramType = paramNode->getMetadata("type");
+                    }
+                    paramTypes.push_back(paramType);
+                    paramNode = paramNode->getRightSibling();
                 }
             }
+            
+            // Format the fully qualified function name with class and parameters
+            std::string mangledName = functionName;
+            if (!paramTypes.empty()) {
+                for (const auto& type : paramTypes) {
+                    std::string cleanType = type;
+                    std::replace(cleanType.begin(), cleanType.end(), '[', '_');
+                    std::replace(cleanType.begin(), cleanType.end(), ']', '_');
+                    std::replace(cleanType.begin(), cleanType.end(), ' ', '_');
+                    mangledName += "_" + cleanType;
+                }
+            }
+            
+            // First try the fully mangled name
+            functionTable = classTable->getNestedTable(mangledName);
+            
+            // If not found, try alternate formats in order of preference
+            if (!functionTable) {
+                std::vector<std::string> possibleKeys = {
+                    objTypeName + "_" + functionName,      // Class_method format (without params)
+                    objTypeName + "::" + functionName,     // Class::method format
+                    functionName + "_" + objTypeName,      // method_Class format
+                    functionName                           // Just method name within class
+                };
+                
+                for (const auto& key : possibleKeys) {
+                    functionTable = classTable->getNestedTable(key);
+                    if (functionTable) {
+                        break;
+                    }
+                }
+            }
+            
+            // Get function symbols once we found the right table
+            if (functionTable) {
+                funcSymbols = classTable->lookupFunctions(functionName);
+            }
         }
+    } else {
+        // For regular functions, use the standard lookup
+        funcSymbols = symbolTable->lookupFunctions(functionName);
+        
+        if (!funcSymbols.empty()) {
+            // Format the key as before...
+            std::string uniqueKey = functionName;
+            const auto &paramTypes = funcSymbols[0]->getParams();
 
-        // Try to get the table with the formatted key
-        functionTable = symbolTable->getNestedTable(uniqueKey);
+            if (!paramTypes.empty()) {
+                uniqueKey += "_";
+                for (size_t i = 0; i < paramTypes.size(); ++i) {
+                    std::string cleanType = paramTypes[i];
+                    std::replace(cleanType.begin(), cleanType.end(), '[', '_');
+                    std::replace(cleanType.begin(), cleanType.end(), ']', '_');
+                    std::replace(cleanType.begin(), cleanType.end(), ' ', '_');
 
-        if (!functionTable) {
-            // Fallback: try with just the function name (for simple cases)
-            functionTable = symbolTable->getNestedTable(functionName);
+                    uniqueKey += cleanType;
+                    if (i < paramTypes.size() - 1) {
+                        uniqueKey += "_";
+                    }
+                }
+            }
+
+            // Try to get the table with the formatted key
+            functionTable = symbolTable->getNestedTable(uniqueKey);
+
+            if (!functionTable) {
+                // Fallback: try with just the function name
+                functionTable = symbolTable->getNestedTable(functionName);
+            }
         }
     }
 
-    // Step 1: Process parameters in reverse order (right to left)
+    // Get parameter names from function for proper offset lookup
+    std::vector<std::string> paramNames;
+    if (!funcSymbols.empty() && functionTable) {
+        // Extract parameters as before...
+        std::unordered_map<std::string, std::shared_ptr<Symbol>> symbols = functionTable->getSymbols();
+        for (const auto& pair : symbols) {
+            std::shared_ptr<Symbol> symbolPtr = pair.second;
+            if (symbolPtr->getKind() == SymbolKind::PARAMETER) {
+                paramNames.push_back(symbolPtr->getName());
+            }
+        }
+        
+        // Sort parameters by offset as before...
+        std::sort(paramNames.begin(), paramNames.end(), 
+            [&functionTable](const std::string& a, const std::string& b) {
+                auto symbolA = functionTable->lookupSymbol(a);
+                auto symbolB = functionTable->lookupSymbol(b);
+                int offsetA = std::stoi(symbolA->getMetadata("offset"));
+                int offsetB = std::stoi(symbolB->getMetadata("offset"));
+                return offsetA < offsetB; 
+            });
+    }
+
+    // For member functions, the first parameter should be the 'self' object address
+    if (isMemberFunction && objectRegister >= 0) {
+        // Push the object address as first parameter (implicit 'self')
+        int selfParamPosition = getScopeOffset(currentTable);
+        int selfOffset =  std::stoi(functionTable->getMetadata("scope_offset"));
+        selfParamPosition += selfOffset;
+        
+        emitComment("Pushing 'self' object address as first parameter");
+        emit("sw " + std::to_string(selfParamPosition) + "(r14),r" + std::to_string(objectRegister));
+        
+    }
+
+    // Process parameters in reverse order as before...
     std::vector<ASTNode *> params;
     if (paramListNode) {
         ASTNode *paramNode = paramListNode->getLeftMostChild();
@@ -1906,55 +2123,27 @@ void CodeGenVisitor::visitFunctionCall(ASTNode *node) {
             paramNode = paramNode->getRightSibling();
         }
     }
-    // Get parameter names from function symbol for proper offset lookup
-    std::vector<std::string> paramNames;
-    if (funcSymbols.size() > 0 && functionTable) {
-        // Go through all symbols in the function table
-        std::unordered_map<std::string, std::shared_ptr<Symbol>> symbols = functionTable->getSymbols();
-        for (const auto& pair : symbols) {
-            // Each element in the map is a key-value pair where:
-            // pair.first is the string key (name)
-            // pair.second is the shared_ptr<Symbol>
-            std::shared_ptr<Symbol> symbolPtr = pair.second;
-            
-            // Check if the symbol is a parameter
-            if (symbolPtr->getKind() == SymbolKind::PARAMETER) {
-                paramNames.push_back(symbolPtr->getName());
-            }
-        }
-        
-        // Sort parameters by their offsets to ensure correct order
-        std::sort(paramNames.begin(), paramNames.end(), 
-            [&functionTable](const std::string& a, const std::string& b) {
-                auto symbolA = functionTable->lookupSymbol(a);
-                auto symbolB = functionTable->lookupSymbol(b);
-                int offsetA = std::stoi(symbolA->getMetadata("offset"));
-                int offsetB = std::stoi(symbolB->getMetadata("offset"));
-                return offsetA < offsetB; // Sort by ascending offset
-            });
-            
-        emitComment("Found " + std::to_string(paramNames.size()) + " parameters for function " + functionName);
-    }
-    // Step 2: Evaluate parameters and push them onto the stack
+
+    // Push parameters onto stack
     emitComment("Pushing parameters onto stack");
-    int paramPosition = 0;
-    // Process parameters in reverse order
     for (size_t i = 0; i < params.size(); ++i) {
         ASTNode* param = params[params.size() - 1 - i];  // Reverse order
-        paramPosition = getScopeOffset(currentTable);
-        // Visit the parameter to evaluate it
+        int paramPosition = getScopeOffset(currentTable);
+        
+        // Process the parameter
         param->accept(this);
         
-        // Get the parameter offset
-        int paramOffset = std::stoi(functionTable->lookupSymbol(paramNames[i])->getMetadata("offset"));
-        // Restore the scope offset after parameter evaluation
-        //setScopeOffset(currentTable, paramScopeOffset);
-        paramPosition += paramOffset; 
-        // Get parameter value
+        // Get parameter offset from corresponding parameter name
+        if (i < paramNames.size()) {
+            int paramOffset = std::stoi(functionTable->lookupSymbol(paramNames[i])->getMetadata("offset"));
+            paramPosition += paramOffset;
+        }
+        
+        // Load and store parameter value
         int paramReg = allocateRegister();
         int offset = getNodeOffset(param);
         
-        // Load parameter value with special handling for complex types
+        // Handle complex types
         if (param->getNodeEnum() == NodeType::ARRAY_ACCESS || 
             param->getNodeEnum() == NodeType::DOT_ACCESS) {
             emit("lw r" + std::to_string(paramReg) + "," + std::to_string(offset) + "(r14)");
@@ -1963,28 +2152,33 @@ void CodeGenVisitor::visitFunctionCall(ASTNode *node) {
             emit("lw r" + std::to_string(paramReg) + "," + std::to_string(offset) + "(r14)");
         }
         
-        
-        // Push parameter onto the stack at the correct position
         emit("sw " + std::to_string(paramPosition) + "(r14),r" + std::to_string(paramReg));
-        
         freeRegister(paramReg);
     }
 
-    // Rest of the function call handling remains the same
+    // Function call setup and execution
     int frameAdjustment = currentScopeOffset;
-    
-    // Adjust frame pointer for function call
     emitComment("Setting up activation record for function call");
     emit("addi r14,r14," + std::to_string(frameAdjustment));
 
+    // For member functions, use the full qualified name if available
+    std::string callName = functionName;
+    if (isMemberFunction) {
+        // Try to use class-qualified name first if the function exists
+        std::string qualifiedName = objTypeName + "_" + functionName;
+        // Test if the qualified function exists by trying to emit a comment
+        emit("% Calling member function: " + qualifiedName);
+        callName = qualifiedName;
+    }
+
     // Jump to function with link
-    emit("jl r15," + functionName);
+    emit("jl r15," + callName);
 
     // Restore stack frame after function returns
-    emitComment("Function " + functionName + " returned, restoring stack");
+    emitComment("Function returned, restoring stack");
     emit("subi r14,r14," + std::to_string(frameAdjustment));
 
-    // Make sure the scope offset is properly restored
+    // Restore scope offset
     setScopeOffset(currentTable, currentScopeOffset);
 }
 
@@ -2129,7 +2323,7 @@ void CodeGenVisitor::visitDotAccess(ASTNode* node) {
     ASTNode* objExpr = node->getLeftMostChild();
     ASTNode* memberNode = objExpr ? objExpr->getRightSibling() : nullptr;
 
-    if (!objExpr || !memberNode || memberNode->getNodeEnum() != NodeType::DOT_IDENTIFIER && memberNode->getNodeEnum() != NodeType::ARRAY_ACCESS) {
+    if (!objExpr || !memberNode || memberNode->getNodeEnum() != NodeType::DOT_IDENTIFIER && memberNode->getNodeEnum() != NodeType::ARRAY_ACCESS && memberNode->getNodeEnum() != NodeType::FUNCTION_CALL) {
         emitComment("Error: Invalid DOT_ACCESS structure");
         return;
     }
@@ -2154,29 +2348,75 @@ void CodeGenVisitor::visitDotAccess(ASTNode* node) {
             objTypeName = objSymbol->getType();
         }
         emit("addi r" + std::to_string(objAddressReg) + ",r14,"+ std::to_string(objOffset));
+        //objVar = objExpr->getNodeValue();
     } else if (objExpr->getNodeEnum() == NodeType::DOT_ACCESS) {
         objTypeName = objExpr->getMetadata("type");
         emit("lw r" + std::to_string(objAddressReg) + ","+std::to_string(objOffset)+  "(r14)");
+        //objVar = objExpr->getNodeValue();
     }
     else if (objExpr->getNodeEnum() == NodeType::ARRAY_ACCESS) {
         objTypeName = objExpr->getMetadata("type");
         emit("lw r" + std::to_string(objAddressReg) + ","+std::to_string(objOffset)+  "(r14)");
-    } else {
+        //objVar = objExpr->getMetadata("byteOffsetVar");
+    } 
+    else if (objExpr->getNodeEnum() == NodeType::SELF_IDENTIFIER) {
+        // Get the class type from the current function's scope
+        auto funcTable = currentTable;
+        auto parentTable = funcTable->getParent();
+        
+        // Find the class name from the function table's name (format: ClassName::methodName or ClassName_methodName)
+        std::string funcTableName = funcTable->getScopeName();
+        std::string className = parentTable->getScopeName();
+        
+        if (className.empty()) {
+            emitComment("Error: Cannot determine class from self reference");
+            freeRegister(objAddressReg);
+            return;
+        }
+        
+        objTypeName = className;
+        
+        // In a method, 'self' is the first parameter at a fixed offset (param offset + link register)
+        // Get the first parameter (self) which is at fixed offset from link register
+        emitComment("Loading 'self' object address");
+        
+        // First parameter is always at the top of the activation record
+        emit("lw r" + std::to_string(objAddressReg) + ","+funcTable->getMetadata("scope_offset")+"(r14)");
+        
+        emitComment("Using 'self' object of class " + className);
+    }
+    else {
         emitComment("Error: Unsupported object type for dot access");
         freeRegister(objAddressReg);
         return;
     }
 
     // Get the member name
+    std::string memberName;
     if (memberNode->getNodeEnum() == NodeType::DOT_IDENTIFIER) {
         memberNode->accept(this);
+        memberName = memberNode->getNodeValue();
     } else if (memberNode->getNodeEnum() == NodeType::ARRAY_ACCESS) {
         // Handle array access
         memberNode->getLeftMostChild()->setMetadata("type", objTypeName);
         memberNode->getLeftMostChild()->setMetadata("objAddressReg", std::to_string(objAddressReg));
         memberNode->accept(this);
+        memberName = memberNode->getNodeValue();
     }
-    std::string memberName = memberNode->getNodeValue();
+    else if (memberNode->getNodeEnum() == NodeType::FUNCTION_CALL) {
+        // Handle function call
+        memberNode->getLeftMostChild()->setMetadata("type", objTypeName);
+        memberNode->getLeftMostChild()->setMetadata("objAddressReg", std::to_string(objAddressReg));
+        memberNode->accept(this);
+        memberName = memberNode->getLeftMostChild()->getNodeValue();
+    }
+    else {
+        emitComment("Error: Unsupported member access type");
+        freeRegister(objAddressReg);
+        return;
+
+    }
+    
     
     if (objTypeName.empty()) {
         emitComment("Error: Cannot determine object type");

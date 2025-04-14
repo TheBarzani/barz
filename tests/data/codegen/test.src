@@ -98,21 +98,27 @@ function main() => void
 
 class A {
   public attribute a: int;
-  // public function print(a: int) => void;
+  public function print(a: int) => void;
+  public function printi(a: int) => int;
 };
-/*
+
 implementation A{
   function print(a: int) => void
   {
     write(a);
     write(self.a);
   }
-}*/
+  function printi(a: int) => int
+  {
+    return(a);
+  }
+}
 
 function main() => void
 {
-  local a: A[2];
-  a[1].a := 6999;
-  write(a[1].a);
-  //a.print(96);
+  local a: A;
+  //a[1].a := 6999;
+  //write(a[1].a);
+  a.a :=111;
+  a.print(999);
 }

@@ -554,6 +554,7 @@ void MemSizeVisitor::visitFunction(ASTNode* node) {
             
             if (funcTable) {
                 currentTable = funcTable;
+                createTempVar("int", "addrvar", funcIdNode); // Create a temp var for the return value
             } else {
                 // Could not find method table - error case
                 std::cerr << "Could not find symbol table for method " << funcName 
