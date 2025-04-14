@@ -79,10 +79,11 @@ implementation A{
 function main() => void
 {
   local a: A;
-  a.d[1][2] := 699;
-  write(a.d[1][2]);
+  //a.d[1][2] := 699;
+  //write(a.d[1][2]);
 
-  // a.b.c := 9;
+  a.b.c := 9;
+  write(a.b.c);
 
   //a.a := 69;
   //write(a.a+1);

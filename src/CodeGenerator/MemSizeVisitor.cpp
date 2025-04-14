@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <sstream>
 #include <set>
-#include <iomanip> // Required for std::setw
+#include <iomanip>
 
 // Since we need to extend Symbol and SymbolTable with additional properties,
 // we'll use custom metadata fields to store size and offset information
@@ -1322,7 +1322,7 @@ void MemSizeVisitor::visitDotAccess(ASTNode* node) {
     }
     
     // Create a temporary variable to store the address of the member
-    createTempVar(memberType, "addrvar", node);
+    createTempVar("int", "addrvar", node);
 
     // Track the type for parent nodes
     node->setMetadata("type", memberType);
