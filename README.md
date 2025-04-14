@@ -1,54 +1,82 @@
 # BARZ
-Broken Automated Reliable Zipper (BARZ): A bare-bone compiler written in CPP.
+Broken Automated Reliable Zipper (BARZ): A bare-bone compiler written in C++.
 
-# TODO
+## 📋 Overview
 
-### Necessary
-- [x] Fix the code for the semantic analysis where the line number and the error messages are correctly outputted
-- [ ] Remove unnecessary semantic actions from the attribute grammer
-- [x] Optimize the AST tree and eliminate unnecessary nodes with fixes to the node output.
-- [x] Fix the output directory of the generated files during each phase and the date versioning or overwrite options. Also bring the the outputting function calls to the drivers
-- [ ] Fix the error outputing format of the syntax analysis
-- [ ] Add unit tests for each phase using the gTest framework and fix the testing files structure
-- [ ] Use regex expressions for the lexical analysis part where the regex library is used
+BARZ is a comprehensive compiler implementation that includes lexical analysis, syntax analysis, abstract syntax tree generation, semantic analysis, and code generation targeting the Moon virtual machine. This project was developed as part of COMP6421 Compiler Design.
 
+## ✨ Features
 
-### Optional
-- [ ] Add and fix comments for Doxygen documentation generation
-- [ ] Transform the Cmake configuration by adding a cmakelist to each package
-- [ ] Json-formatted derivation style for the syntax analysis step
-- [ ] Nicer formatted symbol table output
-- [ ] Implement Travis CI for CI/CD
-- [ ] Fix and format the readMe files
-- [ ] Look into package management
-- [ ] Check if package management/manager is needed
+The compiler supports a rich set of features across different compilation phases:
 
+### Compilation Phases
+- **Lexical Analysis**: Tokenization using finite state automata
+- **Syntax Analysis**: LL(1) parsing with error recovery
+- **AST Generation**: Building abstract syntax trees
+- **Semantic Analysis**: Symbol table generation and type checking
+- **Memory Allocation**: Size calculation for variables and data structures
+- **Code Generation**: Generating Moon assembly code
 
-# Project Technology Stack
+### Language Features Status
+
+| Feature | Status |
+|---------|:------:|
+| **Memory Allocation** |  |
+| Integers and floats | ✅ |
+| Arrays of basic types | ✅ |
+| Objects | ✅ |
+| Arrays of objects | ✅ |
+| **Function Handling** |  |
+| Function execution and return | ✅ |
+| Parameter passing | ✅ |
+| Returning values | ✅ |
+| Object parameters | ❌ |
+| Returning objects/arrays | ❌ |
+| Member function calls | ✅ |
+| **Statements** |  |
+| Assignment statements | ✅ |
+| Conditional statements | ✅ |
+| Loop statements | ✅ |
+| I/O statements | ✅ |
+| **Data Access** |  |
+| Array element access | ✅ |
+| Object member access | ✅ |
+| Object array element access | ✅ |
+| Nested object access | ✅ |
+| **Expressions** |  |
+| Arithmetic operations (+, -, *, /) | ✅ |
+| Logical operations (and, or) | ✅ |
+| Array expressions | ✅ |
+| Object member expressions | ✅ |
+| **Inheritance** |  |
+| Parent member access | ❌ |
+| Child-parent interactions | ❌ |
+| **Composition** |  |
+| Object aggregation | ✅ |
+| **Other** |  |
+| Floating point operations | ❌ |
+
+## 🛠️ Technology Stack
+
 - **Programming Language:** C++
 - **Build System:** CMake
-- **Package Manager:** Conan
-- **Testing Framework:** Gtest
-- **Code Documentation:** Doxygen
-- **Continuous Integration:** Travis CI
+- **Testing Framework:** Google Test (Gtest)
+- **Target Platform:** Moon Virtual Machine
 
-# Project Structure
-```
+## 📁 Project Structure
+
+The project follows a well-organized structure:
+
+```bash
 barz/@main
-├── bin
-│   ├── astdriver
-│   ├── attribute_grammar_parsing_table.csv
-│   ├── lexdriver
-│   ├── LL1_parsing_table.csv
-│   ├── parsedriver
-│   └── semanticanalyzerdriver
 ├── CMakeLists.txt
+├── README.md
 ├── data
 │   ├── ast_generation
+│   │   ├── LL1_grammar_alternative.grm
+│   │   ├── attribute_grammar.ucalgary.grm
 │   │   ├── attribute_grammar_alternative.grm
 │   │   ├── attribute_grammar_parsing_table.csv
-│   │   ├── attribute_grammar.ucalgary.grm
-│   │   ├── LL1_grammar_alternative.grm
 │   │   └── source_files
 │   │       ├── bubblesort.dot
 │   │       ├── bubblesort.outderivation
@@ -74,12 +102,12 @@ barz/@main
 │   │   └── lexpositivegrading.src
 │   └── syntactical_analysis
 │       ├── BNF_grammer.grm
-│       ├── first_and_follow_sets_new.csv
-│       ├── first_follow_sets_table.csv
-│       ├── first_follow_sets_table.html
 │       ├── LL1_grammar.ucalgary.grm
 │       ├── LL1_parsing_table.csv
 │       ├── LL1_parsing_table_mine.csv
+│       ├── first_and_follow_sets_new.csv
+│       ├── first_follow_sets_table.csv
+│       ├── first_follow_sets_table.html
 │       ├── others
 │       │   ├── COMP442.grammar.BNF.clean.manual.grm
 │       │   ├── COMP442.grammar.clean.atocc.grm
@@ -91,15 +119,17 @@ barz/@main
 │       │   └── COMP442.grammar.rm.rept0.grm
 │       └── parsing_table_ucalgary.html
 ├── docs
+│   ├── README.md
 │   ├── ast_generation_specifications.pdf
+│   ├── code_generation_specifications.pdf
 │   ├── compiler_design_A1_lexical_analysis_report.pdf
 │   ├── compiler_design_A2_syntax_analysis_report.pdf
 │   ├── compiler_design_A3_ast_generation_report.pdf
 │   ├── compiler_design_A4_semantic_analysis_report.pdf
+│   ├── compiler_design_A5_code_generation_report.pdf
 │   ├── diagram.png
 │   ├── lexer_fsa.mermaid
 │   ├── lexical_analyzer_specifications.pdf
-│   ├── README.md
 │   ├── symbol_table_and_semantic_analysis_specifications.pdf
 │   └── syntax_analyzer_specifications.pdf
 ├── examples
@@ -114,6 +144,10 @@ barz/@main
 │   │       ├── example3.ast.outast
 │   │       ├── example3.dot.outast
 │   │       └── example3.source
+│   ├── code_generation
+│   │   ├── example-bubblesort.src
+│   │   ├── example-polynomial.src
+│   │   └── example-simplemain.src
 │   ├── lexical_analysis
 │   │   ├── lexnegativegrading.outlexerrors
 │   │   ├── lexnegativegrading.outlextokens
@@ -122,11 +156,31 @@ barz/@main
 │   │   ├── lexpositivegrading.outlextokens
 │   │   └── lexpositivegrading.src
 │   ├── semantic_analysis
+│   │   ├── bubblesort.dot
+│   │   ├── bubblesort.outderivation
+│   │   ├── bubblesort.outlexerrors
+│   │   ├── bubblesort.outlextokens
 │   │   ├── bubblesort.outsymboltables
+│   │   ├── bubblesort.outsyntaxerrors
 │   │   ├── bubblesort.src
+│   │   ├── bubblesort.src.outsymboltables
+│   │   ├── polynomial.dot
+│   │   ├── polynomial.outderivation
+│   │   ├── polynomial.outlexerrors
+│   │   ├── polynomial.outlextokens
 │   │   ├── polynomial.outsymboltables
+│   │   ├── polynomial.outsyntaxerrors
+│   │   ├── polynomial.src
+│   │   ├── polynomial.src.outsemanticerrors
+│   │   ├── polynomial.src.outsymboltables
+│   │   ├── polynomialsemanticerrors.dot
+│   │   ├── polynomialsemanticerrors.outderivation
+│   │   ├── polynomialsemanticerrors.outlexerrors
+│   │   ├── polynomialsemanticerrors.outlextokens
+│   │   ├── polynomialsemanticerrors.outsyntaxerrors
 │   │   ├── polynomialsemanticerrors.src
-│   │   └── polynomial.src
+│   │   ├── polynomialsemanticerrors.src.outsemanticerrors
+│   │   └── polynomialsemanticerrors.src.outsymboltables
 │   └── syntactical_analysis
 │       ├── bubblesort.outderivation
 │       ├── bubblesort.outlexerrors
@@ -144,7 +198,25 @@ barz/@main
 │       ├── polynomial.outlextokens
 │       ├── polynomial.outsyntaxerrors
 │       └── polynomial.src
-├── README.md
+├── moon
+│   ├── doc
+│   │   ├── moondoc.pdf
+│   │   └── moondoc.tex
+│   ├── samples
+│   │   ├── README
+│   │   ├── arithmetics.m
+│   │   ├── countchars.m
+│   │   ├── factorials.m
+│   │   ├── fixedpoint.m
+│   │   ├── genrand.m
+│   │   ├── lib.m
+│   │   ├── newlib.m
+│   │   ├── sample.m
+│   │   ├── stringops.m
+│   │   └── util.m
+│   └── source
+│       └── moon.c
+├── shell.nix
 ├── src
 │   ├── ASTDriver.cpp
 │   ├── ASTGenerator
@@ -152,6 +224,13 @@ barz/@main
 │   │   ├── AST.h
 │   │   ├── ASTNode.cpp
 │   │   └── ASTNode.h
+│   ├── CodeGenDriver.cpp
+│   ├── CodeGenerator
+│   │   ├── CodeGenVisitor.cpp
+│   │   ├── CodeGenVisitor.h
+│   │   ├── MemSizeVisitor.cpp
+│   │   └── MemSizeVisitor.h
+│   ├── CompilerDriver.cpp
 │   ├── LexDriver.cpp
 │   ├── ParseDriver.cpp
 │   ├── Parser
@@ -171,151 +250,190 @@ barz/@main
 ├── tests
 │   ├── CMakeLists.txt
 │   ├── CMakeLists.txt.in
-│   ├── data
-│   │   ├── astgenerator
-│   │   │   ├── bubblesort.dot
-│   │   │   ├── bubblesort.src
-│   │   │   ├── helloworld.dot
-│   │   │   ├── helloworld.src
-│   │   │   ├── inheritance.dot
-│   │   │   ├── inheritance.src
-│   │   │   ├── nested.dot
-│   │   │   ├── nested.outderivation
-│   │   │   ├── nested.outlexerrors
-│   │   │   ├── nested.outlextokens
-│   │   │   ├── nested.outsyntaxerrors
-│   │   │   ├── nested.src
-│   │   │   ├── nested.src.dot
-│   │   │   ├── polynomial.dot
-│   │   │   ├── polynomial.src
-│   │   │   ├── simple_main.dot
-│   │   │   └── simple_main.src
-│   │   ├── parser
-│   │   │   ├── array.src
-│   │   │   ├── factorial.src
-│   │   │   ├── inheritance.dot
-│   │   │   ├── inheritance.outderivation
-│   │   │   ├── inheritance.outlexerrors
-│   │   │   ├── inheritance.outlextokens
-│   │   │   ├── inheritance.outsyntaxerrors
-│   │   │   ├── inheritance.src
-│   │   │   ├── nested.dot
-│   │   │   ├── nested.outderivation
-│   │   │   ├── nested.outlexerrors
-│   │   │   ├── nested.outlextokens
-│   │   │   ├── nested.outsyntaxerrors
-│   │   │   ├── nested.src
-│   │   │   ├── simple_class.src
-│   │   │   ├── simple_main.dot
-│   │   │   ├── simple_main.outderivation
-│   │   │   ├── simple_main.outlexerrors
-│   │   │   ├── simple_main.outlextokens
-│   │   │   ├── simple_main.outsyntaxerrors
-│   │   │   └── simple_main.src
-│   │   ├── scanner
-│   │   │   ├── invalidnums.src
-│   │   │   ├── invalidops.src
-│   │   │   ├── morecomments.src
-│   │   │   └── validcomments.src
-│   │   └── semantics
-│   │       ├── test1.dot
-│   │       ├── test1.outderivation
-│   │       ├── test1.outlexerrors
-│   │       ├── test1.outlextokens
-│   │       ├── test1.outsyntaxerrors
-│   │       ├── test1.src
-│   │       ├── test1.src.outsemanticerrors
-│   │       ├── test1.src.outsymboltables
-│   │       ├── test2.dot
-│   │       ├── test2.outderivation
-│   │       ├── test2.outlexerrors
-│   │       ├── test2.outlextokens
-│   │       ├── test2.outsyntaxerrors
-│   │       ├── test2.src
-│   │       ├── test2.src.outsemanticerrors
-│   │       ├── test2.src.outsymboltables
-│   │       ├── test.dot
-│   │       ├── test.outderivation
-│   │       ├── test.outlexerrors
-│   │       ├── test.outlextokens
-│   │       ├── test.outsyntaxerrors
-│   │       ├── test.src
-│   │       ├── test.src.outsemanticerrors
-│   │       └── test.src.outsymboltables
-│   └── TestScanner.cpp
+│   ├── TestDriver.cpp
+│   └── data
+│       ├── astgenerator/
+│       ├── codegen/
+│       ├── compiler
+│       │   ├── bubblesort.src
+│       │   ├── codegen_out
+│       │   │   ├── bubblesort.m
+│       │   │   ├── polynomial.m
+│       │   │   ├── simplemain.m
+│       │   │   └── test.m
+│       │   ├── memsize_out
+│       │   │   ├── bubblesort.sizesymboltable
+│       │   │   ├── polynomial.sizesymboltable
+│       │   │   ├── polynomialsemanticerrors.sizesymboltable
+│       │   │   ├── simplemain.sizesymboltable
+│       │   │   └── test.sizesymboltable
+│       │   ├── parser_out
+│       │   │   ├── bubblesort.dot
+│       │   │   ├── bubblesort.outderivation
+│       │   │   ├── bubblesort.outsyntaxerrors
+│       │   │   ├── polynomial.dot
+│       │   │   ├── polynomial.outderivation
+│       │   │   ├── polynomial.outsyntaxerrors
+│       │   │   ├── polynomialsemanticerrors.dot
+│       │   │   ├── polynomialsemanticerrors.outderivation
+│       │   │   ├── polynomialsemanticerrors.outsyntaxerrors
+│       │   │   ├── polynomialsyntaxerrors.dot
+│       │   │   ├── polynomialsyntaxerrors.outderivation
+│       │   │   ├── polynomialsyntaxerrors.outsyntaxerrors
+│       │   │   ├── simplemain.dot
+│       │   │   ├── simplemain.outderivation
+│       │   │   ├── simplemain.outsyntaxerrors
+│       │   │   ├── test.dot
+│       │   │   ├── test.outderivation
+│       │   │   └── test.outsyntaxerrors
+│       │   ├── polynomial.src
+│       │   ├── polynomialsemanticerrors.src
+│       │   ├── polynomialsyntaxerrors.src
+│       │   ├── scanner_out
+│       │   │   ├── bubblesort.outlexerrors
+│       │   │   ├── bubblesort.outlextokens
+│       │   │   ├── polynomial.outlexerrors
+│       │   │   ├── polynomial.outlextokens
+│       │   │   ├── polynomialsemanticerrors.outlexerrors
+│       │   │   ├── polynomialsemanticerrors.outlextokens
+│       │   │   ├── polynomialsyntacerrors.outlexerrors
+│       │   │   ├── polynomialsyntacerrors.outlextokens
+│       │   │   ├── polynomialsyntaxerrors.outlexerrors
+│       │   │   ├── polynomialsyntaxerrors.outlextokens
+│       │   │   ├── simplemain.outlexerrors
+│       │   │   ├── simplemain.outlextokens
+│       │   │   ├── test.outlexerrors
+│       │   │   └── test.outlextokens
+│       │   ├── semantics_out
+│       │   │   ├── bubblesort.outsemanticerrors
+│       │   │   ├── polynomial.outsemanticerrors
+│       │   │   ├── polynomialsemanticerrors.outsemanticerrors
+│       │   │   ├── simplemain.outsemanticerrors
+│       │   │   └── test.outsemanticerrors
+│       │   ├── simplemain.src
+│       │   ├── symtab_out
+│       │   │   ├── bubblesort.outsymboltables
+│       │   │   ├── polynomial.outsymboltables
+│       │   │   ├── polynomialsemanticerrors.outsymboltables
+│       │   │   ├── simplemain.outsymboltables
+│       │   │   └── test.outsymboltables
+│       │   └── test.src
+│       ├── parser/
+│       ├── scanner/
+│       └── semantics/
 └── tools
-    └── grammartool.jar
+    ├── grammartool.jar
+    ├── lib.m
+    ├── moom
+    └── moon
 
+40 directories, 297 files
 ```
 
+## 🚀 Building and Running
 
-## Building and Running the Project with CMake (For the Scanner now)
+### Prerequisites
 
-Follow these steps to build and run the `Driver` executable using CMake:
+- C++ compiler with C++17 support
+- CMake 3.10 or higher
 
-1. **Create a build directory**:
-   Open a terminal and navigate to your project directory. Then create a build directory.
+### Build Instructions
 
+1. Create a build directory:
    ```sh
    mkdir build
    cd build
    ```
 
-2. **Generate the build files**:
-   Run the `cmake` command to generate the build files.
-
+2. Generate build files:
    ```sh
    cmake ..
    ```
 
-3. **Build the project**:
-   Use the `cmake --build` command to build the project.
-
+3. Build the project:
    ```sh
    cmake --build .
    ```
 
-4. **Run the executable**:
-After the build is complete, you can run the executable by navigation to the bin or build folder.
+### Running the Compiler
 
-   ```sh
-   ./lexdriver <input_file> <output_filename>
-   ```
-   or 
+The project provides several executables for different phases of compilation:
 
-      ```bash
-      Usage: ./parsedriver [--table parsing_table.csv] file1 [file2 ...]
-      Options:
-         --table <csv_file>   Specify a custom parsing table CSV file. Default is 'parsing_table.csv'.
-         -h, --help           Show this help message.
-      ```
-   or 
+#### Lexical Analysis
+```sh
+./lexdriver <input_file> <output_filename>
+```
 
-      ```bash
-      Usage: ./astdriver [--table parsing_table.csv] file1 [file2 ...]
-      Options:
-         --table <csv_file>   Specify a custom parsing table CSV file. Default is 'attribute_grammar_parsing_table.csv'.
-         -h, --help           Show this help message.
-      ```
-   or
+#### Syntax Analysis
+```sh
+./parsedriver [--table parsing_table.csv] file1 [file2 ...]
+```
 
-      ```bash
-      Usage: ./semanticanalyzerdriver [options] file1 [file2 ...]
-      Options:
-         -t, --table <csv_file>   Specify a custom parsing table CSV file. Default is 'attribute_grammar_parsing_table.csv'.
-         -o, --output <dir>       Specify output directory for symbol tables. Default is current directory.
-         -h, --help               Show this help message.
-      ```
+#### AST Generation
+```sh
+./astdriver [--table attribute_grammar_parsing_table.csv] file1 [file2 ...]
+```
 
-5. **Run the tests**:
-   After the build is complete, you can run the tests.
+#### Semantic Analysis
+```sh
+./semanticanalyzerdriver [options] file1 [file2 ...]
+```
 
-   ```sh
-   tests/TestScanner
-   ```
+#### Full Compiler
+```sh
+./compilerdriver [options] file
 
-## Things not working:
+Options:
+  -t, --table <csv_file>   Specify parsing table (default: attribute_grammar_parsing_table.csv)
+  -o, --output <dir>       Specify output directory
+  -p, --phase <phase>      Compilation phase:
+                            scan (1): Lexical analysis only
+                            parse (2): Syntax analysis
+                            symbol (3): Symbol table generation
+                            semantic (4): Semantic analysis
+                            memory (5): Memory allocation
+                            codegen (6): Code generation (default)
+  -h, --help               Show help message
+```
 
-- Floats
-- Inheritance
-- 
+## 🔍 Grammar Details
+
+The BARZ language uses a context-free grammar that has been transformed into an LL(1) grammar to facilitate predictive parsing. Several modifications have been made to resolve ambiguities:
+
+- Left factorization of array size definitions
+- Elimination of expression ambiguities
+- Factorization of identifier nesting
+- Resolution of statement ambiguities
+
+## 📝 Development TODOs
+
+### In Progress
+- Remove unnecessary semantic actions from the attribute grammar
+- Fix error output format for syntax analysis
+- Add unit tests using gTest framework
+- Use regex for lexical analysis
+
+### Future Improvements
+- Add and fix comments for Doxygen documentation
+- Improve CMake configuration with package-level CMakeLists
+- Implement JSON-formatted derivation output
+- Improve symbol table output formatting
+- Implement CI/CD with Travis CI
+- Improve README and documentation
+- Evaluate package management needs
+
+## 📚 Documentation
+
+For more detailed information, see the documentation in the docs directory:
+
+- Lexical analyzer specifications
+- Syntax analyzer specifications
+- AST generation specifications
+- Symbol table and semantic analysis specifications
+- Code generation specifications
+
+## 📄 License
+
+MIT License
+
+---
