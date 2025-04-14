@@ -1,0 +1,97 @@
+[blockcmt, /*\n1.1  Allocate memory for basic types (integer, float).\n1.2  Allocate memory for arrays of basic types.\n1.3  Allocate memory for objects.\n1.4  Allocate memory for arrays of objects.\n2.1  Branch to a function’s code block, execute the code block, branch back to the calling function.\n2.2  Pass parameters as local values to the function’s code block.\n2.3  Upon execution of a return statement, pass the return value back to the calling function.\n2.4  Call to member functions that can use their object’s data members.\n3.1 Assignment statement: assignment of the resulting value of an expression to a variable, independently of what is the expression to the right of the assignment operator.\n3.2 Conditional statement: implementation of a branching mechanism.\n3.3 Loop statement: implementation of a branching mechanism.\n3.4 Input/output statement: Moon machine keyboard input/console output\n4.1. For arrays of basic types (integer and float), access to an array’s elements.\n4.2. For arrays of objects, access to an array’s element’s data members.\n4.3. For objects, access to members of basic types.\n4.4. For objects, access to members of array or object types.\n5.1. Computing the value of an entire complex expression.\n5.2. Expression involving an array factor whose indexes are themselves expressions.\n5.3. Expression involving an object factor referring to object members.\n*/, 1]
+[inlinecmt, // Assignment 5 coverage:, 23]
+[inlinecmt, //      -------------, 24]
+[inlinecmt, //      | YES | NO  |, 25]
+[inlinecmt, //      ------------- , 26]
+[inlinecmt, // 1.1: |  X  |     |, 27]
+[inlinecmt, // 1.2: |  X  |     |, 28]
+[inlinecmt, // 1.3: |  X  |     |, 29]
+[inlinecmt, // 1.4: |     |  X  |, 30]
+[inlinecmt, // 2.1: |  X  |     |, 31]
+[inlinecmt, // 2.2: |  X  |     |, 32]
+[inlinecmt, // 2.3: |  X  |     |, 33]
+[inlinecmt, // 2.4: |  X  |     |, 34]
+[inlinecmt, // 3.1: |  X  |     |, 35]
+[inlinecmt, // 3.2: |  X  |     |, 36]
+[inlinecmt, // 3.3: |  X  |     |, 37]
+[inlinecmt, // 3.4: |  X  |     |, 38]
+[inlinecmt, // 4.1: |     |  X  |, 39]
+[inlinecmt, // 4.2: |     |  X  |, 40]
+[inlinecmt, // 4.3: |  X  |     |, 41]
+[inlinecmt, // 4.4: |  X  |     |, 42]
+[inlinecmt, // 5.1: |  X  |     |, 43]
+[inlinecmt, // 5.2: |     |  X  |, 44]
+[inlinecmt, // 5.3: |  X  |     |, 45]
+[inlinecmt, //      -------------, 46]
+[inlinecmt, // ======================== struct declarations ============================== //, 48]
+[class, class, 49] [id, POLYNOMIAL, 49] [lcurbr, {, 49]
+[public, public, 50] [function, function, 50] [id, evaluate, 50] [lpar, (, 50] [id, x, 50] [colon, :, 50] [int, int, 50] [rpar, ), 50] [arrow, =>, 50] [int, int, 50] [semi, ;, 50]
+[rcurbr, }, 51] [semi, ;, 51]
+[class, class, 53] [id, LINEAR, 53] [isa, isa, 53] [id, POLYNOMIAL, 53] [lcurbr, {, 53]
+[public, public, 54] [attribute, attribute, 54] [id, a, 54] [colon, :, 54] [int, int, 54] [semi, ;, 54]
+[public, public, 55] [attribute, attribute, 55] [id, b, 55] [colon, :, 55] [int, int, 55] [semi, ;, 55]
+[public, public, 56] [function, function, 56] [id, build, 56] [lpar, (, 56] [id, A, 56] [colon, :, 56] [int, int, 56] [comma, ,, 56] [id, B, 56] [colon, :, 56] [int, int, 56] [rpar, ), 56] [arrow, =>, 56] [id, LINEAR, 56] [semi, ;, 56]
+[public, public, 57] [function, function, 57] [id, evaluate, 57] [lpar, (, 57] [id, x, 57] [colon, :, 57] [int, int, 57] [rpar, ), 57] [arrow, =>, 57] [int, int, 57] [semi, ;, 57]
+[rcurbr, }, 58] [semi, ;, 58]
+[class, class, 60] [id, QUADRATIC, 60] [isa, isa, 60] [id, POLYNOMIAL, 60] [lcurbr, {, 60]
+[private, private, 61] [attribute, attribute, 61] [id, a, 61] [colon, :, 61] [int, int, 61] [semi, ;, 61]
+[private, private, 62] [attribute, attribute, 62] [id, b, 62] [colon, :, 62] [int, int, 62] [semi, ;, 62]
+[private, private, 63] [attribute, attribute, 63] [id, c, 63] [colon, :, 63] [int, int, 63] [lsqbr, [, 63] [intlit, 2, 63] [rsqbr, ], 63] [lsqbr, [, 63] [intlit, 3, 63] [rsqbr, ], 63] [semi, ;, 63]
+[public, public, 64] [function, function, 64] [id, build, 64] [lpar, (, 64] [id, A, 64] [colon, :, 64] [int, int, 64] [comma, ,, 64] [id, B, 64] [colon, :, 64] [int, int, 64] [comma, ,, 64] [id, C, 64] [colon, :, 64] [int, int, 64] [rpar, ), 64] [arrow, =>, 64] [id, QUADRATIC, 64] [semi, ;, 64]
+[public, public, 65] [function, function, 65] [id, evaluate, 65] [lpar, (, 65] [id, x, 65] [colon, :, 65] [int, int, 65] [rpar, ), 65] [arrow, =>, 65] [int, int, 65] [semi, ;, 65]
+[rcurbr, }, 66] [semi, ;, 66]
+[inlinecmt, // ====== member function implementations ====== //  , 68]
+[implementation, implementation, 69] [id, POLYNOMIAL, 69] [lcurbr, {, 69]
+[function, function, 70] [id, evaluate, 70] [lpar, (, 70] [id, x, 70] [colon, :, 70] [int, int, 70] [rpar, ), 70] [arrow, =>, 70] [int, int, 70] [inlinecmt, // 2.1, 2.2, 70]
+[lcurbr, {, 71]
+[return, return, 72] [lpar, (, 72] [intlit, 0, 72] [rpar, ), 72] [semi, ;, 72] [inlinecmt, // 2.3, 72]
+[rcurbr, }, 73]
+[rcurbr, }, 74]
+[implementation, implementation, 76] [id, LINEAR, 76] [lcurbr, {, 76]
+[function, function, 77] [id, build, 77] [lpar, (, 77] [id, A, 77] [colon, :, 77] [int, int, 77] [comma, ,, 77] [id, B, 77] [colon, :, 77] [int, int, 77] [rpar, ), 77] [arrow, =>, 77] [id, LINEAR, 77] [inlinecmt, // 2.1, 2.2, 77]
+[lcurbr, {, 78]
+[local, local, 79] [id, c, 79] [colon, :, 79] [int, int, 79] [semi, ;, 79]
+[id, c, 80] [assign, :=, 80] [intlit, 1, 80] [plus, +, 80] [intlit, 1, 80] [semi, ;, 80]
+[local, local, 81] [id, new_function, 81] [colon, :, 81] [id, LINEAR, 81] [semi, ;, 81] [inlinecmt, // 1.1, 81]
+[id, new_function, 82] [dot, ., 82] [id, a, 82] [assign, :=, 82] [id, A, 82] [semi, ;, 82] [inlinecmt, // 3.1, 5.3, 82]
+[id, new_function, 83] [dot, ., 83] [id, b, 83] [assign, :=, 83] [id, B, 83] [semi, ;, 83] [inlinecmt, // 3.1, 5.3, 83]
+[id, a, 84] [assign, :=, 84] [id, A, 84] [semi, ;, 84]
+[return, return, 85] [lpar, (, 85] [id, new_function, 85] [rpar, ), 85] [semi, ;, 85]
+[rcurbr, }, 86]
+[function, function, 88] [id, evaluate, 88] [lpar, (, 88] [id, x, 88] [colon, :, 88] [int, int, 88] [rpar, ), 88] [arrow, =>, 88] [int, int, 88] [inlinecmt, // 2.1, 2.2, 88]
+[lcurbr, {, 89]
+[local, local, 90] [id, result, 90] [colon, :, 90] [int, int, 90] [semi, ;, 90] [inlinecmt, // 1.1, 90]
+[id, result, 91] [assign, :=, 91] [intlit, 0, 91] [semi, ;, 91] [inlinecmt, // 3.1, 91]
+[id, result, 92] [assign, :=, 92] [id, a, 92] [mult, *, 92] [id, x, 92] [plus, +, 92] [id, b, 92] [semi, ;, 92] [inlinecmt, // 3.1, 5.1, 92]
+[return, return, 93] [lpar, (, 93] [id, result, 93] [rpar, ), 93] [semi, ;, 93] [inlinecmt, // 2.3, 93]
+[rcurbr, }, 94]
+[rcurbr, }, 95]
+[implementation, implementation, 97] [id, QUADRATIC, 97] [lcurbr, {, 97]
+[function, function, 98] [id, evaluate, 98] [lpar, (, 98] [id, x, 98] [colon, :, 98] [int, int, 98] [rpar, ), 98] [arrow, =>, 98] [int, int, 98]
+[lcurbr, {, 99]
+[local, local, 100] [id, result, 100] [colon, :, 100] [int, int, 100] [semi, ;, 100] [inlinecmt, // 1.1, 100]
+[id, result, 101] [assign, :=, 101] [id, a, 101] [semi, ;, 101] [inlinecmt, // 3.1       , 101]
+[id, result, 102] [assign, :=, 102] [id, result, 102] [mult, *, 102] [id, x, 102] [plus, +, 102] [id, b, 102] [semi, ;, 102] [inlinecmt, // 3.1, 5.1, 102]
+[id, result, 103] [assign, :=, 103] [id, result, 103] [mult, *, 103] [id, x, 103] [plus, +, 103] [id, c, 103] [lsqbr, [, 103] [intlit, 1, 103] [rsqbr, ], 103] [lsqbr, [, 103] [intlit, 1, 103] [rsqbr, ], 103] [semi, ;, 103] [inlinecmt, // 3.1, 5.1, 103]
+[return, return, 104] [lpar, (, 104] [id, result, 104] [rpar, ), 104] [semi, ;, 104] [inlinecmt, // 2.3, 104]
+[rcurbr, }, 105]
+[function, function, 107] [id, build, 107] [lpar, (, 107] [id, A, 107] [colon, :, 107] [int, int, 107] [comma, ,, 107] [id, B, 107] [colon, :, 107] [int, int, 107] [comma, ,, 107] [id, C, 107] [colon, :, 107] [int, int, 107] [rpar, ), 107] [arrow, =>, 107] [id, QUADRATIC, 107] [inlinecmt, // 2.1, 2.2, 107]
+[lcurbr, {, 108]
+[local, local, 109] [id, new_function, 109] [colon, :, 109] [id, QUADRATIC, 109] [semi, ;, 109] [inlinecmt, // 1.1, 109]
+[id, new_function, 110] [dot, ., 110] [id, a, 110] [assign, :=, 110] [id, A, 110] [semi, ;, 110] [inlinecmt, // 3.1, 5.3, 110]
+[id, new_function, 111] [dot, ., 111] [id, b, 111] [assign, :=, 111] [id, B, 111] [semi, ;, 111] [inlinecmt, // 3.1, 5.3, 111]
+[id, new_function, 112] [dot, ., 112] [id, c, 112] [lsqbr, [, 112] [intlit, 1, 112] [rsqbr, ], 112] [lsqbr, [, 112] [intlit, 1, 112] [rsqbr, ], 112] [assign, :=, 112] [id, C, 112] [semi, ;, 112] [inlinecmt, // 3.1, 5.3, 112]
+[return, return, 113] [lpar, (, 113] [id, new_function, 113] [rpar, ), 113] [semi, ;, 113]
+[rcurbr, }, 114]
+[rcurbr, }, 115]
+[inlinecmt, // ====== main ====== //, 117]
+[function, function, 118] [id, main, 118] [lpar, (, 118] [rpar, ), 118] [arrow, =>, 118] [void, void, 118] [inlinecmt, // 2.1, 2.2, 118]
+[lcurbr, {, 119]
+[local, local, 120] [id, arr, 120] [colon, :, 120] [int, int, 120] [lsqbr, [, 120] [intlit, 2, 120] [rsqbr, ], 120] [lsqbr, [, 120] [intlit, 3, 120] [rsqbr, ], 120] [lsqbr, [, 120] [intlit, 5, 120] [rsqbr, ], 120] [semi, ;, 120]
+[local, local, 121] [id, f1, 121] [colon, :, 121] [id, LINEAR, 121] [semi, ;, 121] [inlinecmt, // 1.3, 2.1, 2.2, 2.4, 121]
+[local, local, 122] [id, f2, 122] [colon, :, 122] [id, QUADRATIC, 122] [semi, ;, 122] [inlinecmt, // 1.3, 2.1, 2.2, 2.4, 122]
+[local, local, 123] [id, counter, 123] [colon, :, 123] [int, int, 123] [semi, ;, 123] [inlinecmt, // 1.1, 123]
+[id, f1, 124] [dot, ., 124] [id, a, 124] [assign, :=, 124] [intlit, 2, 124] [semi, ;, 124]
+[id, f1, 125] [dot, ., 125] [id, b, 125] [assign, :=, 125] [intlit, 3, 125] [semi, ;, 125]
+[write, write, 126] [lpar, (, 126] [id, f1, 126] [dot, ., 126] [id, evaluate, 126] [lpar, (, 126] [intlit, 10, 126] [rpar, ), 126] [rpar, ), 126] [semi, ;, 126]
+[rcurbr, }, 127]

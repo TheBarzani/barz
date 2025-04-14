@@ -184,8 +184,32 @@ void Parser::inverseRHSMultiplePush(const std::string& production) {
 
 bool Parser::skipErrors() {
     std::string A = parseStack.top();
+    
+    // Determine the expected tokens
+    std::string expectedTokens = "";
+    if (table.isTerminal(A)) {
+        // If top of stack is terminal, we expected exactly that terminal
+        expectedTokens = A;
+    } else if (table.isNonTerminal(A)) {
+        // If top of stack is non-terminal, we expected any token in FIRST(A)
+        std::vector<std::string> firstSet = table.getFirstSet(A);
+        if (!firstSet.empty()) {
+            expectedTokens = "one of [";
+            for (size_t i = 0; i < firstSet.size(); i++) {
+                expectedTokens += firstSet[i];
+                if (i < firstSet.size() - 1) {
+                    expectedTokens += ", ";
+                }
+            }
+            expectedTokens += "]";
+        }
+    }
+    
+    // Build the error message with expected token information
     std::string errorMsg = "Syntax error at line " + std::to_string(lookahead.line) +
-                           ": Unexpected token '" + lookahead.type + "'";
+                         ": Unexpected token '" + lookahead.type + "', expected " + 
+                         (expectedTokens.empty() ? "different token" : expectedTokens);
+    
     std::cerr << errorMsg << std::endl;
     syntaxErrors.push_back(errorMsg);
 
@@ -207,10 +231,11 @@ bool Parser::skipErrors() {
            !table.isInFirst(A, lookahead.type) &&
            !(table.hasEpsilon(A) && table.isInFollow(A, lookahead.type))) {
         std::cout << "Skipping token: " << lookahead.type << std::endl;
+        syntaxErrors.push_back("Skipping token: " + lookahead.type);
         lookahead = nextToken();
         // Check immediately—if the new token is acceptable, break out.
-        if (!table.isInFirst(A, lookahead.type) ||
-           (table.hasEpsilon(A) && !table.isInFollow(A, lookahead.type))) {
+        if (table.isInFirst(A, lookahead.type) ||
+           (table.hasEpsilon(A) && table.isInFollow(A, lookahead.type))) {
             std::cout << "Found acceptable token: " << lookahead.type << std::endl;
             break;
         }

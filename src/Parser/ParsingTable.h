@@ -401,6 +401,20 @@ public:
         }
         return false;
     }
+
+    /**
+     * @brief Get first set
+     */
+    std::vector<std::string> getFirstSet(const std::string& nonTerminal) {
+        std::vector<std::string> result;
+        // Iterate through all terminals to find which ones are in FIRST(nonTerminal)
+        for (const auto& terminal : terminals) {
+            if (isInFirst(nonTerminal, terminal)) {
+                result.push_back(terminal);
+            }
+        }
+        return result;
+    }
 };
 
 #endif // PARSINGTABLE_H

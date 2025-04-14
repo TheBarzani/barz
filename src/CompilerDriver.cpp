@@ -117,14 +117,14 @@ AST runParserPhase(const std::string& inputFile, const std::string& tableFile, S
     
     Parser parser(inputFile, tableFile, scanner);
     bool parseSuccess = parser.parse();
+    // Write parser output files to the parser_out directory
+    parser.writeOutputFiles(outputPath);
     
     if (!parseSuccess) {
         std::cerr << "Error: Failed to parse " << inputFile << std::endl;
-        return AST(); // Return empty AST on failure
+        AST emptyAST;
+        return emptyAST; // Return empty AST on failure
     }
-    
-    // Write parser output files to the parser_out directory
-    parser.writeOutputFiles(outputPath);
     
     // Create a copy of the parser's AST
     AST ast = parser.getAST();
@@ -372,7 +372,7 @@ int main(int argc, char* argv[]) {
     // In main(), change to receive by value
     AST ast = runParserPhase(inputFile, tableFile, scanner);
     
-    if (ast.getRoot()->getNodeEnum() == NodeType::EMPTY) {
+    if (ast.getRoot()==nullptr) {
         return 1; // Error in parsing
     }
     

@@ -2413,8 +2413,6 @@ void CodeGenVisitor::visitDotAccess(ASTNode* node) {
         
         objTypeName = className;
         
-        // In a method, 'self' is the first parameter at a fixed offset (param offset + link register)
-        // Get the first parameter (self) which is at fixed offset from link register
         emitComment("Loading 'self' object address");
         
         // First parameter is always at the top of the activation record

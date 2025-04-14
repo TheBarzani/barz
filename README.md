@@ -313,3 +313,9 @@ After the build is complete, you can run the executable by navigation to the bin
    ```sh
    tests/TestScanner
    ```
+
+## Things not working:
+
+- Floats
+- Inheritance
+- 
