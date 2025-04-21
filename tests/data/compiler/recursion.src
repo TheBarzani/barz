@@ -14,5 +14,5 @@ function count(a: int, b: int) => int
 
 function main() => void
 {
-  write(count(0,10));
+  write(count(0,16));
 }

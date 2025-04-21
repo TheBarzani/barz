@@ -26,5 +26,4 @@
 [id, a, 30] [dot, ., 30] [id, a, 30] [assign, :=, 30] [intlit, 89, 30] [semi, ;, 30]
 [write, write, 31] [lpar, (, 31] [id, a, 31] [dot, ., 31] [id, a, 31] [plus, +, 31] [intlit, 1, 31] [rpar, ), 31] [semi, ;, 31]
 [id, a, 32] [dot, ., 32] [id, print, 32] [lpar, (, 32] [intlit, 96, 32] [rpar, ), 32] [semi, ;, 32]
-[blockcmt, /*\n  local x: int[1];\n  x[0] := 25;\n  write(x[0]);\n  */, 33]
-[rcurbr, }, 38]
+[rcurbr, }, 33]

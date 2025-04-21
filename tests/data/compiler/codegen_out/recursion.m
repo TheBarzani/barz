@@ -73,8 +73,8 @@ main      entry
           addi r14,r0,topaddr
           % Function call: count
           % Pushing parameters onto stack
-          % processing: t6 := 10
-          addi r1,r0,10
+          % processing: t6 := 16
+          addi r1,r0,16
           sw -12(r14),r1
           lw r1,-12(r14)
           sw -32(r14),r1

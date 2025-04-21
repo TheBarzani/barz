@@ -205,7 +205,7 @@ digraph AST {
   node225 [label="IDENTIFIER | arr "];
   node227 [label="INDEX_LIST | indexList "];
   node226 [label="INTEGER | 3 "];
-  node230 [label="INTEGER | 12 "];
+  node230 [label="INTEGER | 2 "];
   node238 [label="ASSIGNMENT |  "];
   node235 [label="ARRAY_ACCESS |  "];
   node232 [label="IDENTIFIER | arr "];
@@ -223,7 +223,7 @@ digraph AST {
   node246 [label="IDENTIFIER | arr "];
   node248 [label="INDEX_LIST | indexList "];
   node247 [label="INTEGER | 6 "];
-  node251 [label="INTEGER | 90 "];
+  node251 [label="INTEGER | 1 "];
   node257 [label="FUNCTION_CALL |  "];
   node253 [label="IDENTIFIER | printArray "];
   node254 [label="PARAM_LIST | paramList "];

@@ -13,5 +13,5 @@
 [rcurbr, }, 13]
 [function, function, 15] [id, main, 15] [lpar, (, 15] [rpar, ), 15] [arrow, =>, 15] [void, void, 15]
 [lcurbr, {, 16]
-[write, write, 17] [lpar, (, 17] [id, count, 17] [lpar, (, 17] [intlit, 0, 17] [comma, ,, 17] [intlit, 10, 17] [rpar, ), 17] [rpar, ), 17] [semi, ;, 17]
+[write, write, 17] [lpar, (, 17] [id, count, 17] [lpar, (, 17] [intlit, 0, 17] [comma, ,, 17] [intlit, 16, 17] [rpar, ), 17] [rpar, ), 17] [semi, ;, 17]
 [rcurbr, }, 18]

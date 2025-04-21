@@ -2,6 +2,7 @@
 class POLYNOMIAL {
 	public function evaluate(x: float) => float;
 	private function evaluate(y: int) => float;                     // 6.2 x
+  private function test() => void;
 };
 class POLYNOMIAL {                                                        // 8.1 x
 	public function evaluate(x: float) => float;                        
@@ -127,7 +128,7 @@ function main() => void
   c.b := 1;                                                                // 11.2 x
   counter := c.f();                                                        // 11.3 x
   undefined();                                                            // 11.4 x
-  counter := a;                                                            // 11.1 x
+  counter := x;                                                            // 11.1 x
   f(1,1,1);                                                               // 12.1 x
   f(1.2,1);                                                               // 12.2 
   i[2] := 1;                                                               // 13.1 x

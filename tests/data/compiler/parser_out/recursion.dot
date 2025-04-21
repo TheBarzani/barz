@@ -49,7 +49,7 @@ digraph AST {
   node44 [label="IDENTIFIER | count "];
   node45 [label="PARAM_LIST | paramList "];
   node46 [label="INTEGER | 0 "];
-  node47 [label="INTEGER | 10 "];
+  node47 [label="INTEGER | 16 "];
   node3 -> node0;
   node3 -> node1;
   node3 -> node2;

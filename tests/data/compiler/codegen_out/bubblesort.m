@@ -395,8 +395,8 @@ main      entry
           lw r4,-68(r14)
           sw 0(r4),r2
           % Assignment completed
-          % processing: t46 := 12
-          addi r2,r0,12
+          % processing: t46 := 2
+          addi r2,r0,2
           sw -72(r14),r2
           lw r2,-72(r14)
           % Processing array access
@@ -467,8 +467,8 @@ main      entry
           lw r1,-104(r14)
           sw 0(r1),r2
           % Assignment completed
-          % processing: t55 := 90
-          addi r2,r0,90
+          % processing: t55 := 1
+          addi r2,r0,1
           sw -108(r14),r2
           lw r2,-108(r14)
           % Processing array access
