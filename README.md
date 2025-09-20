@@ -3,7 +3,7 @@ Broken Automated Reliable Zipper (BARZ): A bare-bone compiler written in C++.
 
 ## 📋 Overview
 
-BARZ is a comprehensive compiler implementation that includes lexical analysis, syntax analysis, abstract syntax tree generation, semantic analysis, and code generation targeting the Moon virtual machine. This project was developed as part of COMP6421 Compiler Design.
+BARZ is a comprehensive compiler implementation that includes lexical analysis, syntax analysis, abstract syntax tree generation, semantic analysis, and code generation targeting the Moon virtual machine.
 
 ## ✨ Features
 

@@ -4,8 +4,6 @@ Files:
 
 1. Assigment Statement
 
-   `assignment2.COMP442-6421.paquet.2025.4.pdf`
-
 2. Grammar (same as stated in the assignment statement)
 
    `COMP442.grammar.BNF.grm`
@@ -168,8 +166,6 @@ STATEMENTSUFFIX0 -> assign EXPR semi  .
 Files:
 
 1. assigment statement
-
-   assignment3.COMP442-6421.paquet.2025.4.pdf
   
 2. example outast output
 
@@ -199,8 +195,6 @@ Files:
 Files:
 
 1. assigment statement
-
-   assignment4.COMP442-6421.paquet.2025.4.pdf
    
 3. example files
 
@@ -220,8 +214,6 @@ specific nodes.
 Files:
 
 1. assigment statement
-
-   assignment5.COMP442-6421.paquet.2025.4.pdf
 
 2. example programs: sample programs that demonstrate how your test cases should be documented. 
    Note that these are not to be considered as complete in terms of test case coverage.  
